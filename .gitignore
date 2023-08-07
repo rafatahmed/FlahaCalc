@@ -1,3 +1,7 @@
+
+.vs
+.git
+
 .vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json
@@ -10,3 +14,12 @@
 
 # Built Visual Studio Code Extensions
 *.vsix
+
+# mkdocs documentation
+/site
+/rcs
+/test
+/EVAPOTRAN/calc.html
+/EVAPOTRAN/script00.js
+/EVAPOTRAN/style00.css
+/EVAPOTRAN/test.html

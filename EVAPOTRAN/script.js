@@ -109,29 +109,34 @@ function calculateET() {
 
 	document.getElementById(
 		"result"
-	).innerText = `Reference ET: ${referenceET} mm/day`;
-
-	//	).innerText = `Reference ET: ${referenceET.toFixed(2)} mm/day`;
+		//).innerText = `Reference ET: ${referenceET} mm/day`;
+	).innerText = `Reference ET: ${referenceET.toFixed(2)} mm/day`;
 
 	document.getElementById(
 		"SlopVPC"
-	).innerText = `Slope Vapour Pressure Curve: ${slopeVaporPressureCurve} kPa/°C`;
+	).innerText = `Slope Vapour Pressure Curve: ${slopeVaporPressureCurve.toFixed(
+		2
+	)} kPa/°C`;
 
-	document.getElementById(
+	/* document.getElementById(
 		"WindSp"
-	).innerText = `Wind Speed: ${windSpeedAt2m} m/s`;
+	).innerText = `Wind Speed: ${windSpeedAt2m.toFixed(2)} m/s`; */
 
 	document.getElementById(
 		"PsychoC"
-	).innerText = `Psychrometric Constant: ${psychrometricConstant} kPa/°C`;
+	).innerText = `Psychrometric Constant: ${psychrometricConstant.toFixed(
+		2
+	)} kPa/°C`;
 
 	document.getElementById(
 		"SaturVD"
-	).innerText = `Saturation Vapour Pressure Deficit: ${saturationVaporPressureDeficit} kPa/°C`;
+	).innerText = `Saturation Vapour Pressure Deficit: ${saturationVaporPressureDeficit.toFixed(
+		2
+	)} kPa/°C`;
 
 	document.getElementById(
 		"NetRad"
-	).innerText = `Net Radiation: ${netRadiation} MJ/m²day`;
+	).innerText = `Net Radiation: ${netRadiation.toFixed(2)} MJ/m²day`;
 }
 
 function calculateInverseRelativeDistance(dayNumber) {
