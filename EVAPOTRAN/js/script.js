@@ -1,5 +1,26 @@
 /** @format */
 
+/* 
+### @Todo
+###		: Well lots, I'm still trying to completely understand this (and I don't).
+###     : A lot of this data really needs to be in a db schem
+###     : More error handling (I'm patching along the way and it shows)
+
+###########################################################################################################
+##                                   Credits                                                             ##
+###########################################################################################################
+## 																										 ##	
+## Evapotranspiration Calculation using Penman-Monteith Method											 ##
+## Author: Rafat Al Khashan																				 ##
+## Corp.: Flaha Agri Tech																				 ##
+## Date: August 8, 2023																					 ##
+##																										 ##
+###########################################################################################################
+
+# -[ Functions ]----------------------------------------------------------------
+
+# define safe functions for variable conversion, preventing errors with NaN and Null as string values*/
+
 function calculateET() {
 	// Perform the calculations based on the provided formulas
 	const inverseRelativeDistance = calculateInverseRelativeDistance(dayNumber());
