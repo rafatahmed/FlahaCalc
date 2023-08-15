@@ -12,7 +12,9 @@
 ## 																										 ##	
 ## Evapotranspiration Calculation using Penman-Monteith Method											 ##
 ## Author: Rafat Al Khashan																				 ##
+## Email: rafat.khashan82@gmail.com																		 ##
 ## Corp.: Flaha Agri Tech																				 ##
+## Corp.: info@flaha.org																				 ##
 ## Date: August 8, 2023																					 ##
 ##																										 ##
 ###########################################################################################################
@@ -158,6 +160,10 @@ function calculateET() {
 	document.getElementById(
 		"NetRad"
 	).innerText = `Net Radiation: ${netRadiation.toFixed(2)} MJ/m²day`;
+}
+
+function calculateETB() {
+	return;
 }
 
 function calculateInverseRelativeDistance(dayNumber) {
@@ -545,3 +551,5 @@ function calculateReferenceET(
 			psychrometricConstant * (1 + 0.34 * windSpeedAt2m))
 	);
 }
+
+//-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
