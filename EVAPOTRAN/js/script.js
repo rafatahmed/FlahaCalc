@@ -129,7 +129,7 @@ function calculateET() {
 		windSpeedAt2m,
 		netRadiation
 	);
-
+	// Result display on the page
 	document.getElementById(
 		"result"
 		//).innerText = `Reference ET: ${referenceET} mm/day`;
