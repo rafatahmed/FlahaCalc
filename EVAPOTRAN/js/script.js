@@ -272,7 +272,7 @@ function calculateActualVaporPressure2(
 			saturationVaporPressureAtTmax * minRelativeHumidity)
 	);
 }
-
+//actual vapor pressure 3
 function calculateActualVaporPressure3(
 	meanRelativeHumidity,
 	minTemperature,
@@ -297,7 +297,7 @@ function calculateActualVaporPressure3(
 		100
 	);
 }
-
+//Approximated dew point temperature
 function calculateApproximatedDewPointTemperature(
 	minTemperature,
 	maxTemperature
@@ -312,7 +312,7 @@ function calculateApproximatedDewPointTemperature(
 		2
 	);
 }
-
+//actual vapor pressure 4
 function calculateActualVaporPressure4(dewPointTemperature) {
 	if (dewPointTemperature === "nd") {
 		return "nd";
@@ -322,7 +322,7 @@ function calculateActualVaporPressure4(dewPointTemperature) {
 		Math.exp((17.27 * dewPointTemperature) / (237.3 + dewPointTemperature))
 	);
 }
-
+//Actual vapor pressure
 function calculateActualVaporPressure(
 	actualVaporPressure1,
 	actualVaporPressure2,
@@ -337,7 +337,7 @@ function calculateActualVaporPressure(
 		? actualVaporPressure3
 		: actualVaporPressure4;
 }
-
+//saturation vapor pressure deficit
 function calculateSaturationVaporPressureDeficit(
 	saturationVaporPressure,
 	actualVaporPressure
@@ -347,7 +347,7 @@ function calculateSaturationVaporPressureDeficit(
 	}
 	return saturationVaporPressure - actualVaporPressure;
 }
-
+//slope vapor pressure curve
 function calculateSlopeVaporPressureCurve(minTemperature, maxTemperature) {
 	if (
 		isNaN(minTemperature) ||
@@ -367,6 +367,7 @@ function calculateSlopeVaporPressureCurve(minTemperature, maxTemperature) {
 	);
 }
 
+//Psychrometric Constant
 function calculatePsychrometricConstant(elevation) {
 	if (isNaN(elevation)) {
 		return "nd";
