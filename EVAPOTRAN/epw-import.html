@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>EPW Weather File Import - Evapotranspiration Calculator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/epw-import.js" defer></script>
+</head>
+
+<body>
+    <div class="header">
+        <h1>Flaha Calc - EPW Weather File Import</h1>
+    </div>
+
+    <div class="container">
+        <div class="blocks" id="B1">
+            <h2>Import EPW Weather File</h2>
+            <p>Upload an EPW (EnergyPlus Weather) file to extract climate data for evapotranspiration calculations.</p>
+
+            <div id="SBlock1A">
+                <h3>File Upload</h3>
+                <div class="form-group">
+                    <label for="epwFile">Select EPW File:</label>
+                    <input type="file" id="epwFile" accept=".epw">
+                </div>
+
+                <div class="form-group">
+                    <label for="daySelect">Select Day:</label>
+                    <select id="daySelect" disabled>
+                        <option value="">-- Select a day after uploading file --</option>
+                    </select>
+                </div>
+            </div>
+
+            <button id="processEpwBtn" disabled>Process EPW File</button>
+            
+            <div id="locationInfo" class="info-box" style="display: none;">
+                <h3>Location Information</h3>
+                <p id="locationName">Location: --</p>
+                <p id="locationLat">Latitude: -- degrees</p>
+                <p id="locationLon">Longitude: -- degrees</p>
+                <p id="locationElev">Elevation: -- m</p>
+                <p id="locationTimeZone">Time Zone: -- hours</p>
+            </div>
+        </div>
+
+        <div class="blocks" id="B2">
+            <h2>Extracted Weather Data</h2>
+            <div id="weatherData" class="data-table" style="display: none;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Parameter</th>
+                            <th>Value</th>
+                            <th>Unit</th>
+                        </tr>
+                    </thead>
+                    <tbody id="weatherDataBody">
+                        <!-- Data will be inserted here by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="output" style="display: none;">
+                <button id="useDataBtn">Use This Data for ET₀ Calculation</button>
+                <p class="note">This will transfer the extracted data to the main calculator.</p>
+            </div>
+        </div>
+        
+        <div class="nav-links">
+            <a href="index.html" class="btn-link">← Back to Home</a>
+            <a href="calculator.html" class="btn-link">Go to Manual Calculator</a>
+        </div>
+    </div>
+</body>
+
+</html>
+

@@ -1,0 +1,129 @@
+<!--
+###########################################################################################################
+##                                   Credits                                                             ##
+###########################################################################################################
+##                                                                                                       ##
+## Reference Potential Evapotranspiration Calculator                                                     ##
+## Author: Rafat Al Khashan                                                                              ##
+## Email: rafat.khashan82@gmail.com                                                                      ##
+## Corp.: Flaha Agri Tech                                                                                ##
+## Corp.: info@flaha.org                                                                                 ##
+## Date: August 8, 2023                                                                                  ##
+##                                                                                                       ##
+###########################################################################################################
+-->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reference Potential Evapotranspiration Calculator | Flaha Agri Tech</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/script.js" defer></script>
+</head>
+
+<body>
+    <div class="header">
+        <h1>Flaha Calc - ETo Calculator</h1>
+    </div>
+
+    <div class="container">
+        <div class="blocks" id="B1">
+            <h2>Reference Evapotranspiration Calculator</h2>
+            <p>Enter climate data to calculate reference evapotranspiration using the FAO Penman-Monteith method. This calculator provides accurate estimates of crop water requirements for agricultural planning and irrigation management.</p>
+
+            <div class="form-container">
+                <div class="form-group">
+                    <label for="temperature">Mean Temperature:</label>
+                    <input type="number" id="temperature" placeholder="e.g., 25" step="0.1">
+                    <label>°C</label>
+                </div>
+
+                <div class="form-group">
+                    <label for="windSpeed">Wind Speed:</label>
+                    <input type="number" id="windSpeed" placeholder="e.g., 2" step="0.1">
+                    <label>m/s</label>
+                </div>
+
+                <div class="form-group">
+                    <label for="relativeHumidity">Relative Humidity:</label>
+                    <input type="number" id="relativeHumidity" placeholder="e.g., 60" min="0" max="100" step="1">
+                    <label>%</label>
+                </div>
+
+                <div class="form-group">
+                    <label for="atmosphericPressure">Atmospheric Pressure:</label>
+                    <input type="number" id="atmosphericPressure" placeholder="Optional - calculated from elevation" step="0.01">
+                    <label>kPa</label>
+                </div>
+
+                <div class="form-group">
+                    <label for="elevation">Elevation:</label>
+                    <input type="number" id="elevation" placeholder="e.g., 100" step="1">
+                    <label>m</label>
+                </div>
+
+                <div class="form-group">
+                    <label for="latitude">Latitude:</label>
+                    <input type="number" id="latitude" placeholder="e.g., 35.2" step="0.1" min="-90" max="90">
+                    <label>degrees</label>
+                </div>
+
+                <div class="form-group">
+                    <label for="dayNumber">Day of Year:</label>
+                    <input type="number" id="dayNumber" placeholder="1-365" min="1" max="365" step="1">
+                    <label>day</label>
+                </div>
+
+                <div class="form-group">
+                    <label for="sunshineDuration">Sunshine Duration:</label>
+                    <input type="number" id="sunshineDuration" placeholder="e.g., 8" min="0" max="24" step="0.1">
+                    <label>hours</label>
+                </div>
+            </div>
+
+            <button onclick="calculateET()">Calculate ETo</button>
+            
+            <div class="info-note">
+                <p>Note: For more accurate results, you can import weather data from an EPW file using our <a href="epw-import.html">EPW Import Tool</a>.</p>
+            </div>
+        </div>
+
+        <div class="blocks" id="B2">
+            <h2>Results</h2>
+            <div id="intermediate-output">
+                <p id="satVaporPressure">Saturation Vapor Pressure (es): -- kPa</p>
+                <p id="actVaporPressure">Actual Vapor Pressure (ea): -- kPa</p>
+                <p id="slopeVPC">Slope of Vapour Pressure Curve (Δ): -- kPa °C⁻¹</p>
+                <p id="psychoC">Psychrometric Constant (γ): -- kPa °C⁻¹</p>
+                <p id="netRad">Net Radiation (Rn): -- MJ m⁻² d⁻¹</p>
+            </div>
+
+            <div id="output">
+                <div id="result">Reference ET₀: -- mm/day</div>
+            </div>
+
+            <div class="equation-box">
+                <p>FAO Penman-Monteith Equation:</p>
+                <p>ET₀ = (0.408 × Δ × (Rn - G) + γ × (900 / (T + 273)) × u₂ × (es - ea)) / (Δ + γ × (1 + 0.34 × u₂))</p>
+            </div>
+        </div>
+        
+        <div class="nav-links">
+            <a href="index.html" class="btn-link">← Back to Home</a>
+            <a href="epw-import.html" class="btn-link">Import EPW Data →</a>
+        </div>
+    </div>
+    
+    <footer id="footer">
+        <p class="credits">© 2023 Flaha Agri Tech. All rights reserved.</p>
+        <p class="credits">Developed by Rafat Al Khashan | <a href="mailto:info@flaha.org">info@flaha.org</a></p>
+    </footer>
+</body>
+
+</html>
+

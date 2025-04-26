@@ -16,95 +16,54 @@
 <html>
 
 <head>
-    <title>Reference Potential Evapotranspiration Calculator</title>
+    <title>Flaha Calc - Evapotranspiration Calculator</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
-    <script src="js/script.js" defer></script>
 </head>
 
 <body>
     <div class="header">
-        <h1>Flaha Calc - ETo Calculator</h1>
+        <h1>Flaha Calc - Evapotranspiration Calculator</h1>
     </div>
 
     <div class="container">
-        <div class="blocks" id="B1">
-            <h2>Reference Evapotranspiration Calculator</h2>
-            <p>Enter climate data to calculate reference evapotranspiration using the FAO Penman-Monteith method.</p>
-
-            <div id="SBlock1A">
-                <h3>Location Data</h3>
-                <div class="form-group">
-                    <label for="elevation">Elevation :</label>
-                    <input type="number" id="elevation" step="0.1">
-                    <label for="elevation">[m]</label>
-                </div>
-                <div class="form-group">
-                    <label for="latitude">Latitude :</label>
-                    <input type="number" id="latitude" step="0.01">
-                    <label for="latitude">[degrees]</label>
-                </div>
-                <div class="form-group">
-                    <label for="dayNumber">Day of Year :</label>
-                    <input type="number" id="dayNumber" min="1" max="366">
-                    <label for="dayNumber">[1-366]</label>
-                </div>
-                <div class="form-group">
-                    <label for="sunshineDuration">Sunshine Duration :</label>
-                    <input type="number" id="sunshineDuration" step="0.1" min="0">
-                    <label for="sunshineDuration">[hours]</label>
-                </div>
-
-                <h3>Weather Data</h3>
-                <div class="form-group">
-                    <label for="temperature">Air Temperature (T) :</label>
-                    <input type="number" id="temperature" step="0.1">
-                    <label for="temperature">[°C]</label>
-                </div>
-                <div class="form-group">
-                    <label for="windSpeed">Wind Speed (u₂) :</label>
-                    <input type="number" id="windSpeed" step="0.1" min="0">
-                    <label for="windSpeed">[m s⁻¹]</label>
-                </div>
-                <div class="form-group">
-                    <label for="relativeHumidity">Relative Humidity (RH) :</label>
-                    <input type="number" id="relativeHumidity" min="0" max="100">
-                    <label for="relativeHumidity">[%]</label>
-                </div>
-                <div class="form-group">
-                    <label for="atmosphericPressure">Atmospheric Pressure (P) :</label>
-                    <input type="number" id="atmosphericPressure" step="0.1" min="0" placeholder="101.3 (default)">
-                    <label for="atmosphericPressure">[kPa]</label>
-                </div>
+        <div class="blocks" id="intro">
+            <h2>Welcome to Flaha ETo Calculator</h2>
+            <p>This web application calculates reference evapotranspiration (ETo) using the FAO Penman-Monteith method, which is the standard for estimating crop water requirements in agricultural and irrigation planning.</p>
+            
+            <div class="info-box">
+                <h3>About Evapotranspiration</h3>
+                <p>Evapotranspiration (ET) is the combined process of water surface evaporation, soil moisture evaporation, and plant transpiration. Reference ET (ETo) represents the evapotranspiration rate from a reference surface, not short of water.</p>
+                <p>The FAO Penman-Monteith method is widely recognized as the most accurate method for calculating ETo across different regions and climates.</p>
             </div>
-
-            <button onclick="calculateET()">Calculate ETo</button>
         </div>
 
-        <div class="blocks" id="B2">
-            <h2>Intermediate Parameters</h2>
-            <div id="intermediate-output">
-                <p id="satVaporPressure">Saturation Vapor Pressure (es): -- kPa</p>
-                <p id="actVaporPressure">Actual Vapor Pressure (ea): -- kPa</p>
-                <p id="slopeVPC">Slope of Vapour Pressure Curve (Δ): -- kPa °C⁻¹</p>
-                <p id="psychoC">Psychrometric Constant (γ): -- kPa °C⁻¹</p>
-                <p id="netRad">Net Radiation (Rn): -- MJ m⁻² d⁻¹</p>
-            </div>
-
-            <h2>Results</h2>
-            <div id="output">
-                <p id="result">Reference ET₀: -- mm/day</p>
-                <div class="equation-box">
-                    <p>FAO Penman-Monteith Equation:</p>
-                    <p>ET₀ = [0.408·Δ·(Rn−G) + γ·(900/(T+273))·u₂·(es−ea)] / [Δ + γ·(1 + 0.34·u₂)]</p>
+        <div class="blocks" id="options">
+            <h2>Choose Your Input Method</h2>
+            
+            <div class="option-cards">
+                <div class="option-card">
+                    <h3>EPW Weather File Import</h3>
+                    <p>Upload an EnergyPlus Weather (EPW) file to automatically extract climate data for your location.</p>
+                    <p>This option is ideal if you have access to standardized weather data files.</p>
+                    <a href="epw-import.html" class="option-btn">Use EPW Import</a>
+                </div>
+                
+                <div class="option-card">
+                    <h3>Manual Data Input</h3>
+                    <p>Enter climate data manually for your specific location and time period.</p>
+                    <p>This option gives you full control over all input parameters.</p>
+                    <a href="calculator.html" class="option-btn">Use Manual Input</a>
                 </div>
             </div>
+        </div>
+        
+        <div class="blocks" id="footer">
+            <p class="credits">Developed by Flaha Agri Tech | Contact: info@flaha.org</p>
         </div>
     </div>
-    <!-- Add script at the end of body -->
-    <script src="js/script.js"></script>
 </body>
 
 </html>

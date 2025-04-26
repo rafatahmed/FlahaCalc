@@ -20,6 +20,35 @@
 ###     : More error handling (I'm patching along the way and it shows)
 */
 
+// Check if there's data from EPW import
+document.addEventListener('DOMContentLoaded', function() {
+    // Check if there's data from EPW import
+    const storedData = localStorage.getItem('etoCalcData');
+    if (storedData) {
+        try {
+            const data = JSON.parse(storedData);
+            
+            // Fill in the form fields
+            document.getElementById('temperature').value = data.temperature;
+            document.getElementById('windSpeed').value = data.windSpeed;
+            document.getElementById('relativeHumidity').value = data.relativeHumidity;
+            document.getElementById('atmosphericPressure').value = data.atmosphericPressure;
+            document.getElementById('elevation').value = data.elevation;
+            document.getElementById('latitude').value = data.latitude;
+            document.getElementById('dayNumber').value = data.dayNumber;
+            document.getElementById('sunshineDuration').value = data.sunshineDuration;
+            
+            // Clear the stored data
+            localStorage.removeItem('etoCalcData');
+            
+            // Optionally, automatically calculate ET0
+            calculateET();
+        } catch (e) {
+            console.error('Error loading EPW data:', e);
+        }
+    }
+});
+
 // # -[ Functions ]----------------------------------------------------------------
 
 // # define safe functions for variable conversion, preventing errors with NaN and Null as string values*/
