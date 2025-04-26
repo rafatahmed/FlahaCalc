@@ -1,82 +1,103 @@
 /** @format */
 
 /* 
+###########################################################################################################
+##                                   Credits                                                             ##
+###########################################################################################################
+##                                                                                                       ##
+## Evapotranspiration Calculation using Penman-Monteith Method                                           ##
+## Author: Rafat Al Khashan                                                                              ##
+## Email: rafat.khashan82@gmail.com                                                                      ##
+## Corp.: Flaha Agri Tech                                                                                ##
+## Corp.: info@flaha.org                                                                                 ##
+## Date: August 8, 2023                                                                                  ##
+##                                                                                                       ##
+###########################################################################################################
+
 ### @Todo
 ###		: Well lots, I'm still trying to completely understand this (and I don't).
 ###     : A lot of this data really needs to be in a db schem
 ###     : More error handling (I'm patching along the way and it shows)
+*/
 
-###########################################################################################################
-##                                   Credits                                                             ##
-###########################################################################################################
-## 																										 ##	
-## Evapotranspiration Calculation using Penman-Monteith Method											 ##
-## Author: Rafat Al Khashan																				 ##
-## Email: rafat.khashan82@gmail.com																		 ##
-## Corp.: Flaha Agri Tech																				 ##
-## Corp.: info@flaha.org																				 ##
-## Date: August 8, 2023																					 ##
-##																										 ##
-###########################################################################################################
+// # -[ Functions ]----------------------------------------------------------------
 
-# -[ Functions ]----------------------------------------------------------------
-
-# define safe functions for variable conversion, preventing errors with NaN and Null as string values*/
+// # define safe functions for variable conversion, preventing errors with NaN and Null as string values*/
 
 function calculateET() {
 	// Get input values
 	const temp = parseFloat(document.getElementById("temperature").value);
 	const windSpeed = parseFloat(document.getElementById("windSpeed").value);
 	const rh = parseFloat(document.getElementById("relativeHumidity").value);
-	const pressure = parseFloat(document.getElementById("atmosphericPressure").value) || calculateAtmosphericPressure();
+	const pressure =
+		parseFloat(document.getElementById("atmosphericPressure").value) ||
+		calculateAtmosphericPressure();
 	const elev = parseFloat(document.getElementById("elevation").value);
 	const lat = parseFloat(document.getElementById("latitude").value);
 	const dayOfYear = parseFloat(document.getElementById("dayNumber").value);
-	const sunshineDuration = parseFloat(document.getElementById("sunshineDuration").value);
-	
+	const sunshineDuration = parseFloat(
+		document.getElementById("sunshineDuration").value
+	);
+
 	// Convert latitude to radians
-	const latRad = lat * Math.PI / 180;
-	
+	const latRad = (lat * Math.PI) / 180;
+
 	// Calculate extraterrestrial radiation
 	const Ra = extraterrestrialRadiation(latRad, dayOfYear);
-	
+
 	// Calculate clear sky radiation
 	const Rso = clearSkyRadiation(Ra, elev);
-	
+
 	// Calculate daylight hours (N)
-	const solarDeclination = 0.409 * Math.sin(2 * Math.PI / 365 * dayOfYear - 1.39);
+	const solarDeclination =
+		0.409 * Math.sin(((2 * Math.PI) / 365) * dayOfYear - 1.39);
 	const omegaS = Math.acos(-Math.tan(latRad) * Math.tan(solarDeclination));
-	const N = 24 * omegaS / Math.PI;
-	
+	const N = (24 * omegaS) / Math.PI;
+
 	// Calculate relative sunshine duration (n/N)
 	const n_N = sunshineDuration ? sunshineDuration / N : 0.5; // Use 0.5 as default if not provided
-	
+
 	// Estimate solar radiation (Rs) using Angstrom formula with actual sunshine data
 	const Rs = (0.25 + 0.5 * n_N) * Ra;
-	
+
 	// Rest of the calculation remains the same
 	const albedo = 0.23;
 	const Rns = netShortwaveRadiation(Rs, albedo);
 	const es = saturationVaporPressure(temp);
-	const ea = es * rh / 100;
+	const ea = (es * rh) / 100;
 	const delta = slopeVaporPressureCurve(temp);
 	const gamma = psychrometricConstant(pressure);
 	const Rnl = netLongwaveRadiation(temp, temp, ea, Rs, Rso);
 	const Rn = Rns - Rnl;
 	const G = 0;
-	
-	const numerator = 0.408 * delta * (Rn - G) + 
-					 gamma * (900 / (temp + 273)) * windSpeed * (es - ea);
+
+	const numerator =
+		0.408 * delta * (Rn - G) +
+		gamma * (900 / (temp + 273)) * windSpeed * (es - ea);
 	const denominator = delta + gamma * (1 + 0.34 * windSpeed);
 	const ET0 = numerator / denominator;
-	
+
 	// Display results
-	document.getElementById("satVaporPressure").textContent = `Saturation Vapor Pressure (es): ${es.toFixed(3)} kPa`;
-	document.getElementById("actVaporPressure").textContent = `Actual Vapor Pressure (ea): ${ea.toFixed(3)} kPa`;
-	document.getElementById("slopeVPC").textContent = `Slope of Vapour Pressure Curve (Δ): ${delta.toFixed(4)} kPa °C⁻¹`;
-	document.getElementById("psychoC").textContent = `Psychrometric Constant (γ): ${gamma.toFixed(4)} kPa °C⁻¹`;
-	document.getElementById("netRad").textContent = `Net Radiation (Rn): ${Rn.toFixed(2)} MJ m⁻² d⁻¹`;
-	document.getElementById("result").textContent = `Reference ET₀: ${ET0.toFixed(2)} mm/day`;
+	document.getElementById(
+		"satVaporPressure"
+	).textContent = `Saturation Vapor Pressure (es): ${es.toFixed(3)} kPa`;
+	document.getElementById(
+		"actVaporPressure"
+	).textContent = `Actual Vapor Pressure (ea): ${ea.toFixed(3)} kPa`;
+	document.getElementById(
+		"slopeVPC"
+	).textContent = `Slope of Vapour Pressure Curve (Δ): ${delta.toFixed(
+		4
+	)} kPa °C⁻¹`;
+	document.getElementById(
+		"psychoC"
+	).textContent = `Psychrometric Constant (γ): ${gamma.toFixed(4)} kPa °C⁻¹`;
+	document.getElementById(
+		"netRad"
+	).textContent = `Net Radiation (Rn): ${Rn.toFixed(2)} MJ m⁻² d⁻¹`;
+	document.getElementById("result").textContent = `Reference ET₀: ${ET0.toFixed(
+		2
+	)} mm/day`;
 }
 
 function calculateETB() {
@@ -478,7 +499,7 @@ function saturationVaporPressure(tempC) {
 
 function slopeVaporPressureCurve(tempC) {
 	const svp = saturationVaporPressure(tempC);
-	return 4098 * svp / Math.pow((tempC + 237.3), 2);
+	return (4098 * svp) / Math.pow(tempC + 237.3, 2);
 }
 
 function psychrometricConstant(pressureKpa) {
@@ -486,18 +507,21 @@ function psychrometricConstant(pressureKpa) {
 }
 
 function calculateAtmosphericPressure(elevationM = 0) {
-	return 101.3 * Math.pow(((293.0 - 0.0065 * elevationM) / 293.0), 5.26);
+	return 101.3 * Math.pow((293.0 - 0.0065 * elevationM) / 293.0, 5.26);
 }
 
 function extraterrestrialRadiation(latRad, doy) {
-	const dr = 1 + 0.033 * Math.cos(2 * Math.PI / 365 * doy);
-	const delta = 0.409 * Math.sin(2 * Math.PI / 365 * doy - 1.39);
+	const dr = 1 + 0.033 * Math.cos(((2 * Math.PI) / 365) * doy);
+	const delta = 0.409 * Math.sin(((2 * Math.PI) / 365) * doy - 1.39);
 	const omegaS = Math.acos(-Math.tan(latRad) * Math.tan(delta));
-	const gsc = 0.0820; // MJ m⁻² min⁻¹
-	
-	return (24 * 60 / Math.PI) * gsc * dr * (
-		omegaS * Math.sin(latRad) * Math.sin(delta) + 
-		Math.cos(latRad) * Math.cos(delta) * Math.sin(omegaS)
+	const gsc = 0.082; // MJ m⁻² min⁻¹
+
+	return (
+		((24 * 60) / Math.PI) *
+		gsc *
+		dr *
+		(omegaS * Math.sin(latRad) * Math.sin(delta) +
+			Math.cos(latRad) * Math.cos(delta) * Math.sin(omegaS))
 	);
 }
 
@@ -511,11 +535,14 @@ function netShortwaveRadiation(rs, albedo = 0.23) {
 
 function netLongwaveRadiation(tMaxC, tMinC, ea, rs, rso) {
 	// Using mean temperature for simplicity
-	const tMeanK = ((tMaxC + tMinC) / 2) + 273.16;
+	const tMeanK = (tMaxC + tMinC) / 2 + 273.16;
 	const stefanBoltzmann = 4.903e-9; // MJ K⁻⁴ m⁻² day⁻¹
-	
+
 	// Simplified version using mean temperature
-	return stefanBoltzmann * Math.pow(tMeanK, 4) * 
-		   (0.34 - 0.14 * Math.sqrt(ea)) * 
-		   (1.35 * (rs / rso) - 0.35);
+	return (
+		stefanBoltzmann *
+		Math.pow(tMeanK, 4) *
+		(0.34 - 0.14 * Math.sqrt(ea)) *
+		(1.35 * (rs / rso) - 0.35)
+	);
 }
