@@ -52,6 +52,19 @@ body {
 	background-size: 100% 100%;
 }
 
+/* Header logo styles */
+.header-logo {
+	height: 60px;
+	margin-bottom: 15px;
+	filter: brightness(0) invert(1); /* Makes the logo white */
+}
+
+@media (max-width: 600px) {
+	.header-logo {
+		height: 40px;
+	}
+}
+
 h1 {
 	font-size: 2.5rem;
 	margin: 0;
@@ -656,4 +669,103 @@ button:active {
 	border-left: 4px solid #43a047;
 	border-radius: 8px;
 	color: #2e7d32;
+}
+
+/* Heatmap styles */
+#heatmapContainer {
+	background-color: #fff;
+	border-radius: 12px;
+	box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+	padding: 20px;
+	margin: 30px auto;
+	max-width: 1000px;
+	height: auto;
+}
+
+.heatmap-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 20px;
+}
+
+.heatmap-wrapper {
+	height: 600px;
+	position: relative;
+}
+
+#heatmapChart {
+	width: 100%;
+	height: 100%;
+}
+
+/* Legend styles */
+.heatmap-legend {
+	margin-top: 20px;
+	text-align: center;
+}
+
+.legend-title {
+	font-weight: bold;
+	margin-bottom: 5px;
+}
+
+.legend-scale {
+	display: flex;
+	justify-content: center;
+}
+
+.legend-labels {
+	display: flex;
+	align-items: center;
+	width: 300px;
+}
+
+.legend-min, .legend-max {
+	font-size: 12px;
+	width: 50px;
+}
+
+.legend-gradient {
+	flex-grow: 1;
+	height: 20px;
+	background: linear-gradient(to right, 
+		#1a9850, #66bd63, #a6d96a, #d9ef8b, 
+		#fee08b, #fdae61, #f46d43, #d73027);
+	border: 1px solid #ccc;
+}
+
+/* Update legend values dynamically */
+function updateLegend(min, max) {
+	document.querySelector('.legend-min').textContent = min.toFixed(1);
+	document.querySelector('.legend-max').textContent = max.toFixed(1);
+}
+
+/* Heatmap cell styles to eliminate gaps */
+canvas#heatmapChart {
+	image-rendering: pixelated;
+	image-rendering: -moz-crisp-edges;
+	image-rendering: crisp-edges;
+}
+
+/* Loading spinner */
+.loading-spinner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 20px 0;
+}
+
+.spinner {
+    border: 4px solid rgba(0, 0, 0, 0.1);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border-left-color: #4CAF50;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }

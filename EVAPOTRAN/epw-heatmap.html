@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EPW Weather Data Heatmap - Evapotranspiration Calculator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-matrix@1.2.0/dist/chartjs-chart-matrix.min.js"></script>
+    <script src="js/epw-heatmap.js" defer></script>
+</head>
+<body>
+    <div class="header">
+        <img src="img/Flaha_logo.svg" alt="Flaha Logo" class="header-logo">
+        <h1>Flaha Calc - EPW Weather Data Heatmap</h1>
+    </div>
+
+    <div class="container">
+        <div class="blocks" id="B1">
+            <h2>EPW Weather Data Visualization</h2>
+            <p>Upload an EPW file to visualize temperature, humidity, and other weather parameters as heatmaps.</p>
+
+            <div id="SBlock1A">
+                <h3>File Upload</h3>
+                <div class="form-group">
+                    <label for="epwFile">Select EPW File:</label>
+                    <input type="file" id="epwFile" accept=".epw">
+                </div>
+                
+                <div class="form-group">
+                    <label for="paramSelect">Select Parameter:</label>
+                    <select id="paramSelect" disabled>
+                        <option value="dryBulbTemp">Temperature (°C)</option>
+                        <option value="relativeHumidity">Relative Humidity (%)</option>
+                        <option value="windSpeed">Wind Speed (m/s)</option>
+                        <option value="globalHorizontalRadiation">Global Horizontal Radiation (Wh/m²)</option>
+                        <option value="directNormalRadiation">Direct Normal Radiation (Wh/m²)</option>
+                        <option value="diffuseHorizontalRadiation">Diffuse Horizontal Radiation (Wh/m²)</option>
+                    </select>
+                </div>
+            </div>
+
+            <button id="processEpwBtn" disabled>Process EPW File</button>
+            
+            <div id="locationInfo" class="info-box" style="display: none;">
+                <h3>Location Information</h3>
+                <p id="locationName">Location: --</p>
+                <p id="locationLat">Latitude: -- degrees</p>
+                <p id="locationLon">Longitude: -- degrees</p>
+                <p id="locationElev">Elevation: -- m</p>
+            </div>
+        </div>
+
+        <div class="blocks" id="B2">
+            <h2>Weather Data Heatmap</h2>
+            <div id="heatmapContainer" style="display: none;">
+                <div class="heatmap-header">
+                    <h3>Weather Data Visualization</h3>
+                    <select id="paramSelect" disabled>
+                        <option value="dryBulbTemp">Temperature (°C)</option>
+                        <option value="dewPointTemp">Dew Point Temperature (°C)</option>
+                        <option value="relativeHumidity">Relative Humidity (%)</option>
+                        <option value="atmosphericPressure">Atmospheric Pressure (kPa)</option>
+                        <option value="windSpeed">Wind Speed (m/s)</option>
+                        <option value="windDirection">Wind Direction (°)</option>
+                        <option value="globalHorizontalRadiation">Global Horizontal Radiation (Wh/m²)</option>
+                        <option value="directNormalRadiation">Direct Normal Radiation (Wh/m²)</option>
+                        <option value="diffuseHorizontalRadiation">Diffuse Horizontal Radiation (Wh/m²)</option>
+                        <option value="extraterrestrialRadiation">Extraterrestrial Radiation (Wh/m²)</option>
+                    </select>
+                </div>
+                <div class="heatmap-wrapper">
+                    <canvas id="heatmapChart"></canvas>
+                </div>
+                <div class="heatmap-legend">
+                    <div class="legend-title">Value Range</div>
+                    <div class="legend-scale">
+                        <div class="legend-labels">
+                            <span class="legend-min">Min</span>
+                            <div class="legend-gradient"></div>
+                            <span class="legend-max">Max</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="noDataMessage">
+                Please upload an EPW file to view the heatmap.
+            </div>
+        </div>
+        
+        <div class="nav-links">
+            <a href="index.html" class="btn-link">← Back to Home</a>
+            <a href="epw-import.html" class="btn-link">EPW Data Import</a>
+            <a href="calculator.html" class="btn-link">ET₀ Calculator</a>
+        </div>
+    </div>
+    <footer id="footer">
+        <p class="credits">© 2023 Flaha Agri Tech. All rights reserved.</p>
+        <p class="credits">Developed by Rafat Al Khashan | <a href="mailto:info@flaha.org">info@flaha.org</a></p>
+    </footer>
+</body>
+</html>
+
