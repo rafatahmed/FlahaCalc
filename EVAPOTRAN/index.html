@@ -26,7 +26,7 @@
 <body>
     <div class="header">
         <img src="img/Flaha_logo.svg" alt="Flaha Logo" class="header-logo"
-             onerror="this.onerror=null; this.src='img/Flaha_logo.png';">
+            onerror="this.onerror=null; this.src='img/Flaha_logo.png';">
         <h1>Flaha Calc - Evapotranspiration Calculator</h1>
         <div class="nav-bar">
             <a href="index.html" class="nav-link active">Home</a>
@@ -40,22 +40,28 @@
     <div class="container">
         <div class="blocks" id="intro">
             <h2>Welcome to Flaha ETo Calculator</h2>
-            <p>This web application calculates reference evapotranspiration (ETo) using the FAO Penman-Monteith method, which is the standard for estimating crop water requirements in agricultural and irrigation planning.</p>
-            
+            <p>This web application calculates reference evapotranspiration (ETo) using the FAO Penman-Monteith method,
+                which is the standard for estimating crop water requirements in agricultural and irrigation planning.
+            </p>
+
             <div class="info-box">
                 <h3>About Evapotranspiration</h3>
-                <p>Evapotranspiration (ET) is the combined process of water surface evaporation, soil moisture evaporation, and plant transpiration. Reference ET (ETo) represents the evapotranspiration rate from a reference surface, not short of water.</p>
-                <p>The FAO Penman-Monteith method is widely recognized as the most accurate method for calculating ETo across different regions and climates.</p>
+                <p>Evapotranspiration (ET) is the combined process of water surface evaporation, soil moisture
+                    evaporation, and plant transpiration. Reference ET (ETo) represents the evapotranspiration rate from
+                    a reference surface, not short of water.</p>
+                <p>The FAO Penman-Monteith method is widely recognized as the most accurate method for calculating ETo
+                    across different regions and climates.</p>
             </div>
         </div>
 
         <div class="blocks" id="options">
             <h2>Choose Your Input Method</h2>
-            
+
             <div class="option-cards">
                 <div class="option-card">
                     <h3>EPW Weather File Import</h3>
-                    <p>Upload an EnergyPlus Weather (EPW) file to automatically extract climate data for your location.</p>
+                    <p>Upload an EnergyPlus Weather (EPW) file to automatically extract climate data for your location.
+                    </p>
                     <p>After uploading, you can:</p>
                     <ul class="option-list">
                         <li>Select a specific day for ET₀ calculation</li>
@@ -63,14 +69,14 @@
                     </ul>
                     <a href="epw-import.html" class="option-btn">Use EPW Import</a>
                 </div>
-                
+
                 <div class="option-card">
                     <h3>Live Weather Data</h3>
                     <p>Fetch current weather data from OpenWeatherMap for your location.</p>
                     <p>This option provides real-time climate data for immediate calculations.</p>
                     <a href="live-weather.html" class="option-btn">Use Live Weather</a>
                 </div>
-                
+
                 <div class="option-card">
                     <h3>Manual Data Input</h3>
                     <p>Enter climate data manually for your specific location and time period.</p>
@@ -79,15 +85,12 @@
                 </div>
             </div>
         </div>
-        
-        <div class="blocks" id="footer">
-            <p class="credits">Developed by Flaha Agri Tech | Contact: info@flaha.org</p>
-        </div>
+
     </div>
     <div class="page-footer">
         <div class="footer-content">
             <img src="img/Flaha_logo.svg" alt="Flaha Logo" class="footer-logo"
-                 onerror="this.onerror=null; this.src='img/Flaha_logo.png';">
+                onerror="this.onerror=null; this.src='img/Flaha_logo.png';">
             <div class="footer-links">
                 <a href="index.html" class="footer-link">Home</a>
                 <a href="calculator.html" class="footer-link">Manual Calculator</a>
@@ -96,7 +99,8 @@
                 <a href="live-weather.html" class="footer-link">Live Weather</a>
             </div>
             <p class="footer-credits">© 2023 Flaha Agri Tech. All rights reserved.</p>
-            <p class="footer-credits">Developed by Rafat Al Khashan | <a href="mailto:info@flaha.org">info@flaha.org</a></p>
+            <p class="footer-credits">Developed by Rafat Al Khashan | <a href="mailto:info@flaha.org">info@flaha.org</a>
+            </p>
         </div>
     </div>
 </body>

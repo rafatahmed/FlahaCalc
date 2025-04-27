@@ -1,19 +1,24 @@
 <!-- @format -->
 
-# FlahaCalc - Horticulture and Agriculture Calculators
-
-![Flaha Logo](EVAPOTRAN/img/Flaha_logo.svg)
+<div align="center">
+  <img src="EVAPOTRAN/img/Flaha_logo.svg" alt="Flaha Logo" width="80" height="80" style="vertical-align: middle;">
+  <div>
+    <h1>Flaha Agri Tech</h1>
+    <h3>Flaha Precision Agriculture | FlahaCalc</h3>
+    <h2>EVAPOTRAN</h2>
+  </div>
+</div>
 
 ## Overview
 
-FlahaCalc is a comprehensive suite of specialized calculators designed for professionals in horticulture, agronomy, landscaping, and agricultural engineering. This web application provides essential tools for precise calculations in plant cultivation, irrigation management, fertilization planning, and hydroponic solution design.
+EVAPOTRAN is a comprehensive calculator designed for professionals in horticulture, agronomy, landscaping, and agricultural engineering. This web application provides essential tools for precise calculations of evapotranspiration using the FAO Penman-Monteith method, supporting irrigation management and water resource planning.
 
 ## Key Features
 
 - **Evapotranspiration Calculator:** Calculate water loss through evaporation and transpiration using the industry-standard FAO Penman-Monteith method
-- **Irrigation Schedule Planner:** Generate customized irrigation schedules based on plant types, soil conditions, and climate data
-- **Fertilizer Program Generator:** Create optimized fertilization plans tailored to specific plant nutrient requirements
-- **Hydroponic Solution Calculator:** Design balanced nutrient solutions for hydroponic systems with precise concentration control
+- **Multiple Data Input Options:** Enter climate data manually or import from EPW weather files
+- **Weather Data Visualization:** Generate heatmaps and visual representations of climate data
+- **Live Weather Integration:** Connect to real-time weather data for immediate calculations
 
 ## Application Architecture
 
@@ -100,7 +105,7 @@ The diagram below illustrates the user journey and data flow through the applica
 
 ## Technical Implementation
 
-FlahaCalc implements the FAO Penman-Monteith method, widely recognized as the international standard for calculating reference evapotranspiration. The application supports multiple data input methods:
+EVAPOTRAN implements the FAO Penman-Monteith method, widely recognized as the international standard for calculating reference evapotranspiration. The application supports multiple data input methods:
 
 - Manual parameter entry
 - EPW (EnergyPlus Weather) file import
@@ -109,12 +114,15 @@ FlahaCalc implements the FAO Penman-Monteith method, widely recognized as the in
 
 ## License
 
-This project is licensed under the [GNU General Public License (GPL) version 3.0](https://www.gnu.org/licenses/gpl-3.0.en.html). This copyleft license ensures that all modifications and derivative works of FlahaCalc must be distributed under the same terms, preserving the open-source nature of the project.
+This project is licensed under the [GNU General Public License (GPL) version 3.0](https://www.gnu.org/licenses/gpl-3.0.en.html). This copyleft license ensures that all modifications and derivative works of EVAPOTRAN must be distributed under the same terms, preserving the open-source nature of the project.
 
 ## Contributing
 
-We welcome contributions from the agricultural and software development communities. By collaborating, we can enhance FlahaCalc's capabilities and accuracy, making it an even more valuable tool for professionals worldwide.
+We welcome contributions from the agricultural and software development communities. By collaborating, we can enhance EVAPOTRAN's capabilities and accuracy, making it an even more valuable tool for professionals worldwide.
 
 ---
 
-© 2023 Flaha Agri Tech | [info@flaha.org](mailto:info@flaha.org)
+<div align="center">
+  <p>© 2023 Flaha Agri Tech | <a href="mailto:info@flaha.org">info@flaha.org</a></p>
+  <p><small>Developed by Flaha Precision Agriculture Division</small></p>
+</div>
