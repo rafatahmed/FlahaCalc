@@ -20,6 +20,25 @@
 ###     : More error handling (I'm patching along the way and it shows)
 */
 
+// Enhanced form validation
+document.addEventListener('DOMContentLoaded', function() {
+    // Get all form inputs that need validation
+    const inputs = document.querySelectorAll('input[type="number"], input[type="text"], select');
+    
+    // Add validation event listeners to each input
+    inputs.forEach(input => {
+        // Set custom validation messages
+        if (input.hasAttribute('data-validate')) {
+            input.addEventListener('invalid', function(event) {
+                event.target.setCustomValidity(input.getAttribute('data-validate'));
+            });
+            input.addEventListener('input', function(event) {
+                event.target.setCustomValidity('');
+            });
+        }
+    });
+});
+
 // Check if there's data from EPW import
 document.addEventListener('DOMContentLoaded', function() {
     // Check if there's data from EPW import

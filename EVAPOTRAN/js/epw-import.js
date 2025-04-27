@@ -14,240 +14,274 @@
 ###########################################################################################################
 */
 
-// Global variables to store EPW data
-let epwData = null;
-let locationData = null;
-let selectedDayData = null;
-
-// DOM elements
-const epwFileInput = document.getElementById('epwFile');
-const processEpwBtn = document.getElementById('processEpwBtn');
-const epwOptions = document.getElementById('epwOptions');
-const selectDayBtn = document.getElementById('selectDayBtn');
-const viewHeatmapsBtn = document.getElementById('viewHeatmapsBtn');
-const daySelectionSection = document.getElementById('daySelectionSection');
-const daySelect = document.getElementById('daySelect');
-const locationInfo = document.getElementById('locationInfo');
-const weatherData = document.getElementById('weatherData');
-const weatherDataBody = document.getElementById('weatherDataBody');
-const useDataBtn = document.getElementById('useDataBtn');
-
-// Event listeners
-epwFileInput.addEventListener('change', handleFileSelect);
-processEpwBtn.addEventListener('click', processEpwFile);
-selectDayBtn.addEventListener('click', showDaySelection);
-daySelect.addEventListener('change', handleDaySelect);
-viewHeatmapsBtn.addEventListener('click', transferDataToHeatmap);
-useDataBtn.addEventListener('click', transferDataToCalculator);
-
-// Handle file selection
-function handleFileSelect(event) {
-    const file = event.target.files[0];
-    if (file) {
-        processEpwBtn.disabled = false;
+// Add this function near the top of your file
+function showError(message) {
+    const errorElement = document.getElementById('epwFileValidation');
+    if (errorElement) {
+        errorElement.textContent = message;
+        errorElement.style.display = 'block';
+        errorElement.classList.add('error');
     } else {
-        processEpwBtn.disabled = true;
+        // Fallback to alert if the validation element doesn't exist
+        alert(message);
     }
 }
 
-// Process the EPW file
-let rawEpwContent = '';
-let epwFileName = '';
+// Global variable to store the parsed EPW data
+let epwData = null;
 
-function processEpwFile() {
-    const file = epwFileInput.files[0];
+// Process EPW file button click handler
+document.getElementById('processEpwBtn').addEventListener('click', function() {
+    const fileInput = document.getElementById('epwFile');
+    const file = fileInput.files[0];
+    
     if (!file) {
-        alert('Please select an EPW file first.');
+        showError('Please select an EPW file first');
         return;
     }
     
-    epwFileName = file.name;
+    // Show progress container
+    const progressContainer = document.getElementById('progressContainer');
+    const progressBar = document.getElementById('progressBar');
+    const progressText = document.getElementById('progressText');
+    progressContainer.style.display = 'block';
     
+    // Read the file
     const reader = new FileReader();
+    
     reader.onload = function(e) {
-        rawEpwContent = e.target.result;
-        parseEpwFile(rawEpwContent);
-        
-        // Show options after processing
-        epwOptions.style.display = 'block';
-        
-        // Hide the weather data section until a day is selected
-        weatherData.style.display = 'none';
-        document.getElementById('output').style.display = 'none';
-    };
-    reader.readAsText(file);
-}
-
-// Parse EPW file content
-function parseEpwFile(contents) {
-    // Split the file into lines
-    const lines = contents.split('\n');
-    
-    // Extract location data (line 1)
-    const locationLine = lines[0].split(',');
-    locationData = {
-        city: locationLine[1],
-        state: locationLine[2],
-        country: locationLine[3],
-        source: locationLine[4],
-        latitude: parseFloat(locationLine[6]),
-        longitude: parseFloat(locationLine[7]),
-        timezone: parseFloat(locationLine[8]),
-        elevation: parseFloat(locationLine[9])
-    };
-    
-    // Display location information
-    displayLocationInfo(locationData);
-    
-    // Extract weather data (starting from line 9)
-    epwData = [];
-    for (let i = 8; i < lines.length; i++) {
-        const line = lines[i].trim();
-        if (line) {
-            const fields = line.split(',');
-            if (fields.length >= 35) {
-                epwData.push({
-                    year: parseInt(fields[0]),
-                    month: parseInt(fields[1]),
-                    day: parseInt(fields[2]),
-                    hour: parseInt(fields[3]),
-                    minute: parseInt(fields[4]),
-                    dryBulbTemp: parseFloat(fields[6]),
-                    dewPointTemp: parseFloat(fields[7]),
-                    relativeHumidity: parseFloat(fields[8]),
-                    atmosphericPressure: parseFloat(fields[9]) / 1000, // Convert Pa to kPa
-                    windDirection: parseFloat(fields[20]),
-                    windSpeed: parseFloat(fields[21]),
-                    globalHorizontalRadiation: parseFloat(fields[13]),
-                    directNormalRadiation: parseFloat(fields[14]),
-                    diffuseHorizontalRadiation: parseFloat(fields[15])
-                });
-            }
+        try {
+            // Parse the EPW content
+            const content = e.target.result;
+            
+            // Update progress during parsing
+            epwData = parseEpwContent(content, function(progress) {
+                progressBar.value = progress;
+                progressText.textContent = `Processing: ${progress}%`;
+            });
+            
+            // Show success message
+            progressText.textContent = 'EPW file processed successfully!';
+            
+            // Display location information
+            displayLocationInfo(epwData.header);
+            
+            // Show options for next steps
+            document.getElementById('epwOptions').style.display = 'block';
+            
+            // Populate day selection dropdown
+            populateDaySelection();
+            
+        } catch (error) {
+            console.error('Error processing EPW file:', error);
+            progressText.textContent = 'Error processing EPW file: ' + error.message;
         }
-    }
+    };
     
-    // Populate day selection dropdown
-    populateDaySelect();
+    reader.onerror = function() {
+        progressText.textContent = 'Error reading the file';
+    };
     
-    // Enable day selection
-    daySelect.disabled = false;
-}
+    reader.readAsText(file);
+});
 
-// Display location information
-function displayLocationInfo(data) {
-    document.getElementById('locationName').textContent = `Location: ${data.city}, ${data.state}, ${data.country}`;
-    document.getElementById('locationLat').textContent = `Latitude: ${data.latitude.toFixed(2)} degrees`;
-    document.getElementById('locationLon').textContent = `Longitude: ${data.longitude.toFixed(2)} degrees`;
-    document.getElementById('locationElev').textContent = `Elevation: ${data.elevation.toFixed(1)} m`;
-    document.getElementById('locationTimeZone').textContent = `Time Zone: GMT${data.timezone >= 0 ? '+' : ''}${data.timezone} hours`;
+// Display location information from EPW header
+function displayLocationInfo(header) {
+    const locationInfo = document.getElementById('locationInfo');
     
-    // Show the location info section
+    // Create a location string from city, state, country
+    let locationName = header.city || "Unknown";
+    if (header.state) locationName += ", " + header.state;
+    if (header.country) locationName += ", " + header.country;
+    
+    document.getElementById('locationName').textContent = 'Location: ' + locationName;
+    document.getElementById('locationLat').textContent = 'Latitude: ' + (isNaN(header.latitude) ? "Unknown" : header.latitude.toFixed(2) + ' degrees');
+    document.getElementById('locationLon').textContent = 'Longitude: ' + (isNaN(header.longitude) ? "Unknown" : header.longitude.toFixed(2) + ' degrees');
+    document.getElementById('locationElev').textContent = 'Elevation: ' + (isNaN(header.elevation) ? "Unknown" : header.elevation.toFixed(2) + ' m');
+    document.getElementById('locationTimeZone').textContent = 'Time Zone: ' + (isNaN(header.timeZone) ? "Unknown" : header.timeZone + ' hours');
+    
     locationInfo.style.display = 'block';
 }
 
 // Populate day selection dropdown
-function populateDaySelect() {
-    // Clear existing options
+function populateDaySelection() {
+    if (!epwData || !epwData.data || epwData.data.length === 0) {
+        console.error("No EPW data available");
+        return;
+    }
+    
+    const daySelect = document.getElementById('daySelect');
     daySelect.innerHTML = '<option value="">-- Select a day --</option>';
     
-    // Create a map to store unique days
-    const uniqueDays = new Map();
+    // Get unique days from the data
+    const uniqueDays = new Set();
+    const dayOptions = [];
     
-    // Populate the map with unique days
-    epwData.forEach(hourData => {
-        const dateKey = `${hourData.year}-${hourData.month}-${hourData.day}`;
-        const dayOfYear = getDayOfYear(hourData.year, hourData.month, hourData.day);
-        
-        if (!uniqueDays.has(dateKey)) {
-            uniqueDays.set(dateKey, {
-                dateKey,
-                dayOfYear,
-                displayDate: `${hourData.year}-${hourData.month.toString().padStart(2, '0')}-${hourData.day.toString().padStart(2, '0')} (Day ${dayOfYear})`
+    epwData.data.forEach(entry => {
+        const key = `${entry.month}-${entry.day}`;
+        if (!uniqueDays.has(key) && entry.hour === 12) { // Only add noon entries
+            uniqueDays.add(key);
+            
+            const date = new Date(2000, entry.month - 1, entry.day);
+            const monthName = date.toLocaleString('default', { month: 'long' });
+            
+            dayOptions.push({
+                key: key,
+                text: `${monthName} ${entry.day}`,
+                month: entry.month,
+                day: entry.day
             });
         }
     });
     
-    // Add options to the dropdown
-    Array.from(uniqueDays.values()).forEach(day => {
-        const option = document.createElement('option');
-        option.value = day.dateKey;
-        option.textContent = day.displayDate;
-        option.dataset.dayOfYear = day.dayOfYear;
-        daySelect.appendChild(option);
+    // Sort by month and day
+    dayOptions.sort((a, b) => {
+        if (a.month !== b.month) return a.month - b.month;
+        return a.day - b.day;
+    });
+    
+    // Add options to select
+    dayOptions.forEach(option => {
+        const optElement = document.createElement('option');
+        optElement.value = option.key;
+        optElement.textContent = option.text;
+        daySelect.appendChild(optElement);
     });
 }
 
-// Handle day selection
-function handleDaySelect() {
-    const selectedDateKey = daySelect.value;
-    if (!selectedDateKey) {
-        weatherData.style.display = 'none';
-        document.getElementById('output').style.display = 'none';
+// Day selection change handler
+document.getElementById('daySelect').addEventListener('change', function() {
+    const selectedDay = this.value;
+    if (!selectedDay) return;
+    
+    // Find the data for the selected day
+    const dayParts = selectedDay.split('-');
+    const month = parseInt(dayParts[0]);
+    const day = parseInt(dayParts[1]);
+    
+    // Find data for this day at noon (hour 12)
+    const dayData = epwData.data.find(entry => 
+        entry.month === month && 
+        entry.day === day && 
+        entry.hour === 12
+    );
+    
+    if (dayData) {
+        displayWeatherData(dayData);
+    }
+});
+
+// Select day button click handler
+document.getElementById('selectDayBtn').addEventListener('click', function() {
+    document.getElementById('daySelectionSection').style.display = 'block';
+});
+
+// View heatmaps button click handler
+document.getElementById('viewHeatmapsBtn').addEventListener('click', function() {
+    // Validate data before storing
+    if (!Array.isArray(epwData) || epwData.length === 0) {
+        console.error("Invalid EPW data - cannot generate heatmaps", epwData);
+        alert("Error: No valid weather data available for visualization.");
         return;
     }
     
-    // Extract date components
-    const [year, month, day] = selectedDateKey.split('-').map(Number);
-    
-    // Filter data for the selected day
-    const dayData = epwData.filter(hourData => 
-        hourData.year === year && hourData.month === month && hourData.day === day
-    );
-    
-    // Calculate daily averages
-    selectedDayData = calculateDailyAverages(dayData);
-    
-    // Display the weather data
-    displayWeatherData(selectedDayData);
-    
-    // Show the weather data and output sections
-    weatherData.style.display = 'block';
-    document.getElementById('output').style.display = 'block';
-}
+    try {
+        // Create a structured object with header and data
+        const dataToStore = {
+            header: {
+                location: epwHeader.location || "",
+                city: epwHeader.city || "",
+                state: epwHeader.state || "",
+                country: epwHeader.country || "",
+                latitude: epwHeader.latitude || 0,
+                longitude: epwHeader.longitude || 0,
+                timeZone: epwHeader.timeZone || 0,
+                elevation: epwHeader.elevation || 0
+            },
+            data: epwData
+        };
+        
+        // Store the EPW data in localStorage
+        const jsonData = JSON.stringify(dataToStore);
+        console.log(`Storing ${epwData.length} data points, JSON length: ${jsonData.length}`);
+        localStorage.setItem('epwData', jsonData);
+        
+        // Set a flag in sessionStorage
+        sessionStorage.setItem('epwDataLoaded', 'true');
+        
+        // Redirect to heatmap page
+        window.location.href = 'epw-heatmap.html';
+    } catch (error) {
+        console.error("Error storing EPW data:", error);
+        alert("Error: Could not store weather data. The dataset may be too large.");
+    }
+});
 
-// Calculate daily averages from hourly data
-function calculateDailyAverages(dayData) {
-    // Calculate averages
-    const avgTemp = dayData.reduce((sum, hour) => sum + hour.dryBulbTemp, 0) / dayData.length;
-    const avgDewPoint = dayData.reduce((sum, hour) => sum + hour.dewPointTemp, 0) / dayData.length;
-    const avgRH = dayData.reduce((sum, hour) => sum + hour.relativeHumidity, 0) / dayData.length;
-    const avgPressure = dayData.reduce((sum, hour) => sum + hour.atmosphericPressure, 0) / dayData.length;
-    const avgWindSpeed = dayData.reduce((sum, hour) => sum + hour.windSpeed, 0) / dayData.length;
+// Display weather data for the selected day
+function displayWeatherData(dayData) {
+    const weatherData = document.getElementById('weatherData');
+    const weatherDataBody = document.getElementById('weatherDataBody');
     
-    // Calculate sunshine duration (hours with direct normal radiation > 0)
-    const sunshineHours = dayData.filter(hour => hour.directNormalRadiation > 0).length;
-    
-    // Get day of year
-    const dayOfYear = getDayOfYear(dayData[0].year, dayData[0].month, dayData[0].day);
-    
-    return {
-        date: `${dayData[0].year}-${dayData[0].month}-${dayData[0].day}`,
-        dayOfYear,
-        temperature: avgTemp,
-        dewPointTemperature: avgDewPoint,
-        relativeHumidity: avgRH,
-        atmosphericPressure: avgPressure,
-        windSpeed: avgWindSpeed,
-        sunshineDuration: sunshineHours
-    };
-}
-
-// Display weather data
-function displayWeatherData(data) {
-    // Clear existing data
+    // Clear previous data
     weatherDataBody.innerHTML = '';
     
     // Add rows for each parameter
-    addDataRow('Date', data.date, '');
-    addDataRow('Day of Year', data.dayOfYear, '');
-    addDataRow('Average Temperature', data.temperature.toFixed(1), '°C');
-    addDataRow('Average Dew Point', data.dewPointTemperature.toFixed(1), '°C');
-    addDataRow('Average Relative Humidity', data.relativeHumidity.toFixed(1), '%');
-    addDataRow('Average Atmospheric Pressure', data.atmosphericPressure.toFixed(2), 'kPa');
-    addDataRow('Average Wind Speed', data.windSpeed.toFixed(2), 'm/s');
-    addDataRow('Sunshine Duration', data.sunshineDuration.toFixed(1), 'hours');
-    addDataRow('Latitude', locationData.latitude.toFixed(2), 'degrees');
-    addDataRow('Elevation', locationData.elevation.toFixed(1), 'm');
+    const parameters = [
+        { name: 'Temperature', value: dayData.dryBulbTemp, unit: '°C' },
+        { name: 'Dew Point Temperature', value: dayData.dewPointTemp, unit: '°C' },
+        { name: 'Relative Humidity', value: dayData.relativeHumidity, unit: '%' },
+        { name: 'Atmospheric Pressure', value: dayData.atmosphericPressure, unit: 'kPa' },
+        { name: 'Wind Speed', value: dayData.windSpeed, unit: 'm/s' },
+        { name: 'Global Horizontal Radiation', value: dayData.globalHorizontalRadiation, unit: 'Wh/m²' },
+        { name: 'Direct Normal Radiation', value: dayData.directNormalRadiation, unit: 'Wh/m²' },
+        { name: 'Diffuse Horizontal Radiation', value: dayData.diffuseHorizontalRadiation, unit: 'Wh/m²' },
+        { name: 'Day of Year', value: dayData.dayOfYear, unit: '' }
+    ];
+    
+    parameters.forEach(param => {
+        const row = document.createElement('tr');
+        
+        const nameCell = document.createElement('td');
+        nameCell.textContent = param.name;
+        
+        const valueCell = document.createElement('td');
+        valueCell.textContent = isNaN(param.value) ? 'N/A' : param.value.toFixed(2);
+        
+        const unitCell = document.createElement('td');
+        unitCell.textContent = param.unit;
+        
+        row.appendChild(nameCell);
+        row.appendChild(valueCell);
+        row.appendChild(unitCell);
+        
+        weatherDataBody.appendChild(row);
+    });
+    
+    // Show the weather data and output options
+    weatherData.style.display = 'block';
+    document.getElementById('output').style.display = 'block';
+    
+    // Set up the "Use Selected Day" button
+    document.getElementById('useDataBtn').addEventListener('click', function() {
+        // Prepare data for the calculator
+        const calculatorData = {
+            temperature: dayData.dryBulbTemp,
+            windSpeed: dayData.windSpeed,
+            relativeHumidity: dayData.relativeHumidity,
+            atmosphericPressure: dayData.atmosphericPressure,
+            elevation: epwData.header.elevation,
+            latitude: epwData.header.latitude,
+            dayNumber: dayData.dayOfYear,
+            // Estimate sunshine duration as 8 hours (default)
+            sunshineDuration: 8
+        };
+        
+        // Store data for the calculator page
+        localStorage.setItem('etoCalcData', JSON.stringify(calculatorData));
+        
+        // Redirect to calculator page
+        window.location.href = 'calculator.html';
+    });
 }
 
 // Add a row to the weather data table
@@ -272,63 +306,42 @@ function addDataRow(parameter, value, unit) {
 
 // Transfer data to the main calculator
 function transferDataToCalculator() {
-    if (!selectedDayData || !locationData) {
-        alert('Please select a day first.');
-        return;
-    }
-    
-    // Store data in localStorage
-    localStorage.setItem('etoCalcData', JSON.stringify({
-        temperature: selectedDayData.temperature,
-        windSpeed: selectedDayData.windSpeed,
-        relativeHumidity: selectedDayData.relativeHumidity,
-        atmosphericPressure: selectedDayData.atmosphericPressure,
-        elevation: locationData.elevation,
-        latitude: locationData.latitude,
-        dayNumber: selectedDayData.dayOfYear,
-        sunshineDuration: selectedDayData.sunshineDuration
-    }));
-    
-    // Redirect to the calculator page instead of index.html
-    window.location.href = 'calculator.html';
-}
-
-// Function to transfer EPW data to heatmap page
-function transferDataToHeatmap() {
-    console.log('transferDataToHeatmap called');
-    
-    if (!rawEpwContent) {
-        console.error('No EPW content available to transfer');
+    if (!epwData) {
         alert('Please process an EPW file first.');
         return;
     }
     
-    console.log('EPW content available, length:', rawEpwContent.length);
-    console.log('EPW filename:', epwFileName || 'unnamed');
-    
-    try {
-        // Store the raw EPW file content in localStorage
-        localStorage.setItem('epwFileContent', rawEpwContent);
-        localStorage.setItem('epwFileName', epwFileName || 'uploaded-file.epw');
-        
-        // Verify storage was successful
-        const storedContent = localStorage.getItem('epwFileContent');
-        console.log('Stored in localStorage successfully:', 
-                    storedContent ? 'Yes, length: ' + storedContent.length : 'No');
-        
-        // Redirect to the heatmap page
-        console.log('Redirecting to epw-heatmap.html');
-        window.location.href = 'epw-heatmap.html';
-    } catch (error) {
-        console.error('Error storing EPW data in localStorage:', error);
-        alert('Error transferring data: ' + error.message);
+    const selectedDay = document.getElementById('daySelect').value;
+    if (!selectedDay) {
+        alert('Please select a day first.');
+        return;
     }
-}
-
-// Show day selection section
-function showDaySelection() {
-    daySelectionSection.style.display = 'block';
-    populateDaySelect();
+    
+    const dayParts = selectedDay.split('-');
+    const month = parseInt(dayParts[0]);
+    const day = parseInt(dayParts[1]);
+    
+    const dayData = epwData.data.find(entry => 
+        entry.month === month && 
+        entry.day === day && 
+        entry.hour === 12
+    );
+    
+    if (dayData) {
+        const calculatorData = {
+            temperature: dayData.dryBulbTemp,
+            windSpeed: dayData.windSpeed,
+            relativeHumidity: dayData.relativeHumidity,
+            atmosphericPressure: dayData.atmosphericPressure / 1000, // Convert Pa to kPa
+            elevation: epwData.header.elevation,
+            latitude: epwData.header.latitude,
+            dayNumber: getDayOfYear(month, day),
+            sunshineDuration: estimateSunshineDuration(dayData)
+        };
+        
+        localStorage.setItem('etoCalcData', JSON.stringify(calculatorData));
+        window.location.href = 'calculator.html';
+    }
 }
 
 // Helper function to get day of year
@@ -340,13 +353,169 @@ function getDayOfYear(year, month, day) {
     return Math.floor(diff / oneDay);
 }
 
-// Add event listener for the View Heatmaps button
-document.addEventListener('DOMContentLoaded', function() {
-    const viewHeatmapsBtn = document.getElementById('viewHeatmapsBtn');
-    if (viewHeatmapsBtn) {
-        viewHeatmapsBtn.addEventListener('click', transferDataToHeatmap);
+// Estimate sunshine duration from radiation data
+function estimateSunshineDuration(dayData) {
+    if (dayData.globalHorizontalRadiation > 0) {
+        return 8; // Rough estimate: if there's significant radiation, assume 8 hours of sunshine
     }
+    return 0;
+}
+
+// Add event listener for the "Use Data" button
+document.getElementById('useDataBtn').addEventListener('click', function() {
+    transferDataToCalculator();
 });
 
+/**
+ * Parse the content of an EPW file
+ * @param {string} content - The text content of the EPW file
+ * @param {function} progressCallback - Callback function to report progress
+ * @returns {Object} Parsed EPW data
+ */
+function parseEpwContent(content, progressCallback) {
+    // Split the content into lines
+    const lines = content.split('\n');
+    
+    // EPW format has a specific structure:
+    // Line 1: LOCATION info
+    if (lines.length < 8) {
+        throw new Error("Invalid EPW file format: not enough header lines");
+    }
+    
+    // Parse the LOCATION line (first line)
+    const locationLine = lines[0].trim();
+    const locationParts = locationLine.split(',').map(part => part.trim());
+    
+    // EPW LOCATION line format: 
+    // LOCATION,City,State/Province,Country,Source,WMO,Latitude,Longitude,Time Zone,Elevation
+    const header = {
+        location: locationLine,
+        city: locationParts[1] || "Unknown",
+        state: locationParts[2] || "",
+        country: locationParts[3] || "",
+        latitude: parseFloat(locationParts[6]) || 0,
+        longitude: parseFloat(locationParts[7]) || 0,
+        timeZone: parseFloat(locationParts[8]) || 0,
+        elevation: parseFloat(locationParts[9]) || 0
+    };
+    
+    console.log("Parsed header:", header); // Debug log
+    
+    // Parse the data rows (starting from line 9)
+    const data = [];
+    const totalLines = lines.length;
+    
+    for (let i = 8; i < totalLines; i++) {
+        // Report progress
+        if (progressCallback && i % 100 === 0) {
+            const progress = Math.floor(((i - 8) / (totalLines - 8)) * 100);
+            progressCallback(progress);
+        }
+        
+        const line = lines[i].trim();
+        if (!line) continue; // Skip empty lines
+        
+        const fields = line.split(',');
+        if (fields.length < 35) continue; // Skip incomplete lines
+        
+        // Extract relevant data
+        const entry = {
+            year: parseInt(fields[0]),
+            month: parseInt(fields[1]),
+            day: parseInt(fields[2]),
+            hour: parseInt(fields[3]),
+            dryBulbTemp: parseFloat(fields[6]),
+            dewPointTemp: parseFloat(fields[7]),
+            relativeHumidity: parseFloat(fields[8]),
+            atmosphericPressure: parseFloat(fields[9]) / 100, // Convert Pa to kPa
+            windSpeed: parseFloat(fields[21]),
+            globalHorizontalRadiation: parseFloat(fields[13]),
+            directNormalRadiation: parseFloat(fields[14]),
+            diffuseHorizontalRadiation: parseFloat(fields[15])
+        };
+        
+        // Calculate day of year
+        const date = new Date(entry.year, entry.month - 1, entry.day);
+        const startOfYear = new Date(entry.year, 0, 0);
+        const diff = date - startOfYear;
+        const oneDay = 1000 * 60 * 60 * 24;
+        entry.dayOfYear = Math.floor(diff / oneDay);
+        
+        data.push(entry);
+    }
+    
+    // Report 100% progress when done
+    if (progressCallback) {
+        progressCallback(100);
+    }
+    
+    return { header, data };
+}
 
+// Enable the process button when a file is selected
+document.getElementById('epwFile').addEventListener('change', function() {
+    const processBtn = document.getElementById('processEpwBtn');
+    processBtn.disabled = !this.files.length;
+});
+
+// Add this function to ensure data is properly formatted before saving
+function prepareDataForHeatmap(header, data) {
+    // Make sure all required properties exist in each data point
+    const requiredProps = ["dryBulbTemp", "relativeHumidity", "windSpeed", "globalHorizontalRadiation"];
+    
+    // Check the first item to see if it has all required properties
+    if (data.length > 0) {
+        const firstItem = data[0];
+        const missingProps = requiredProps.filter(prop => firstItem[prop] === undefined);
+        
+        if (missingProps.length > 0) {
+            console.error(`Data missing required properties for heatmap: ${missingProps.join(', ')}`);
+            return null;
+        }
+    }
+    
+    // Create the properly formatted data object
+    return {
+        header: header,
+        data: data
+    };
+}
+
+// Find where the data is saved to localStorage and modify it to use the prepare function
+// This might be in a function like saveEpwData or similar
+// Example:
+function saveEpwData(header, data) {
+    const formattedData = prepareDataForHeatmap(header, data);
+    
+    if (formattedData) {
+        localStorage.setItem("epwData", JSON.stringify(formattedData));
+        console.log("EPW data saved to localStorage for heatmap visualization");
+        return true;
+    } else {
+        console.error("Failed to format EPW data for heatmap visualization");
+        return false;
+    }
+}
+
+// If you can't find the exact function, add this to the viewHeatmapsBtn click handler
+document.getElementById("viewHeatmapsBtn").addEventListener("click", function() {
+    // Get the parsed EPW data
+    if (!epwData) {
+        alert("No EPW data available. Please process an EPW file first.");
+        return;
+    }
+    
+    // Format and save the data
+    const formattedData = prepareDataForHeatmap(epwData.header, epwData.data);
+    
+    if (formattedData) {
+        localStorage.setItem("epwData", JSON.stringify(formattedData));
+        console.log("EPW data saved to localStorage for heatmap visualization");
+        
+        // Navigate to the heatmap page
+        window.location.href = "epw-heatmap.html";
+    } else {
+        alert("Error: Cannot generate heatmaps. The weather data is missing required properties.");
+    }
+});
 

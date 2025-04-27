@@ -134,9 +134,14 @@ body {
   transition: transform var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
 }
 
-.blocks:hover, .option-card:hover, .heatmap-item:hover {
+.blocks:hover, .option-card:hover {
   box-shadow: var(--shadow-medium);
   transform: translateY(-3px);
+}
+
+.heatmap-item:hover {
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  transform: translateY(-2px);
 }
 
 #B1,
@@ -798,17 +803,123 @@ button:active {
 	color: #2e7d32;
 }
 
-/* Calendar heatmap styles */
+/* Heatmap grid layout - modified for cascading effect with wider heatmaps */
+#heatmapsGrid {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    margin-top: 20px;
+    width: 100%;
+}
+
+/* Heatmap item styling for cascading layout with wider display */
+.heatmap-item {
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+    width: 95%; /* Increased from 85% to 95% */
+    max-width: 1400px; /* Added max-width for very large screens */
+}
+
+.heatmap-item.full-width {
+    width: 100%;
+}
+
+.heatmap-item.offset-right {
+    align-self: flex-end;
+}
+
+.heatmap-item.offset-left {
+    align-self: flex-start;
+}
+
+/* Ensure heatmap wrappers can handle the new layout and wider display */
 .heatmap-wrapper {
-	height: auto;
-	margin-bottom: 20px;
-	position: relative;
-	overflow-x: auto;
+    width: 100%;
+    overflow-x: auto;
+    display: flex;
+    justify-content: flex-start; /* Changed from center to flex-start */
+    padding: 10px 0;
+}
+
+/* Make SVG responsive within the wrapper */
+.heatmap-wrapper svg {
+    display: block;
+    min-width: 900px; /* Minimum width to ensure readability */
+    max-width: 100%;
+    height: auto;
+}
+
+/* Add a subtle visual connection between items */
+.heatmap-item:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    bottom: -25px;
+    left: 50%;
+    width: 2px;
+    height: 25px;
+    background-color: #ddd;
+    z-index: 1;
+}
+
+/* Make sure the heatmap items have relative positioning for the connector */
+.heatmap-item {
+    position: relative;
+}
+
+.heatmap-title {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 1.2rem;
+    color: #333;
+    text-align: center;
+}
+
+.heatmap-wrapper {
+    height: auto;
+    margin-bottom: 15px;
+    position: relative;
+    overflow-x: auto;
+    display: flex;
+    justify-content: center;
 }
 
 .heatmap-wrapper svg {
-	display: block;
-	margin: 0 auto;
+    display: block;
+}
+
+/* Heatmap tooltip */
+.heatmap-tooltip {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 10px 14px;
+    font-size: 12px;
+    pointer-events: none;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    z-index: 1000;
+    max-width: 250px;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.heatmap-tooltip.visible {
+    opacity: 1;
+}
+
+.heatmap-tooltip-date {
+    font-weight: bold;
+    margin-bottom: 4px;
+    color: #333;
+}
+
+.heatmap-tooltip-value {
+    color: #555;
+    margin-bottom: 2px;
 }
 
 /* Enhanced hover effects */
@@ -985,4 +1096,149 @@ button:active {
     padding: 15px;
     margin: 15px 0;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Progress indicator styling */
+.progress-container {
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 20px 0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+.progress-container progress {
+    width: 100%;
+    height: 20px;
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 10px 0;
+}
+
+.progress-container progress::-webkit-progress-bar {
+    background-color: #e0e0e0;
+    border-radius: 10px;
+}
+
+.progress-container progress::-webkit-progress-value {
+    background: linear-gradient(to right, #4caf50, #8bc34a);
+    border-radius: 10px;
+    transition: width 0.3s ease;
+}
+
+.progress-container progress::-moz-progress-bar {
+    background: linear-gradient(to right, #4caf50, #8bc34a);
+    border-radius: 10px;
+}
+
+/* Form validation styling */
+.validation-message {
+    color: #d32f2f;
+    font-size: 0.85rem;
+    margin-top: 5px;
+    min-height: 20px;
+}
+
+input:invalid, select:invalid {
+    border-color: #d32f2f;
+}
+
+/* Enhanced heatmap styling */
+.heatmap-item {
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 30px;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.heatmap-info {
+    margin-top: 15px;
+    padding: 10px;
+    background-color: #e8f5e9;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    color: #2e7d32;
+}
+
+.legend-container {
+    margin: 15px 0;
+    display: flex;
+    justify-content: center;
+}
+
+/* Visualization guide styling */
+.visualization-guide {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.guide-item {
+    margin-bottom: 20px;
+}
+
+.guide-colors {
+    height: 20px;
+    width: 100%;
+    border-radius: 4px;
+    margin: 10px 0;
+}
+
+.temp-scale {
+    background: linear-gradient(to right, #313695, #4575b4, #74add1, #abd9e9, #e0f3f8, #ffffbf, #fee090, #fdae61, #f46d43, #d73027, #a50026);
+}
+
+.humidity-scale {
+    background: linear-gradient(to right, #f7fbff, #deebf7, #c6dbef, #9ecae1, #6baed6, #4292c6, #2171b5, #08519c, #08306b);
+}
+
+.radiation-scale {
+    background: linear-gradient(to right, #ffffcc, #ffeda0, #fed976, #feb24c, #fd8d3c, #fc4e2a, #e31a1c, #bd0026, #800026);
+}
+
+/* Enhanced tooltip */
+.heatmap-tooltip {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 10px 14px;
+    font-size: 12px;
+    pointer-events: none;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    z-index: 1000;
+    max-width: 250px;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.heatmap-tooltip.visible {
+    opacity: 1;
+}
+
+.heatmap-tooltip-date {
+    font-weight: bold;
+    margin-bottom: 4px;
+    color: #333;
+}
+
+.heatmap-tooltip-value {
+    color: #555;
+    margin-bottom: 2px;
+}
+
+/* Responsive adjustments for different screen sizes */
+@media (max-width: 1200px) {
+    .heatmap-item {
+        width: 100%;
+    }
+    
+    .heatmap-item.offset-right,
+    .heatmap-item.offset-left {
+        align-self: center;
+    }
 }

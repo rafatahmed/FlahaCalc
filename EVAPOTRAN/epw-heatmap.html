@@ -68,14 +68,11 @@
                 </div>
                 <!-- We'll create multiple heatmap wrappers for each parameter -->
                 <div id="heatmapsGrid">
-                    <div class="heatmap-item">
+                    <!-- Dry Bulb Temperature -->
+                    <div class="heatmap-item full-width">
                         <h3 class="heatmap-title">Dry Bulb Temperature</h3>
                         <div id="dryBulbTemp-wrapper" class="heatmap-wrapper"></div>
-                        <div class="legend">
-                            <span id="dryBulbTemp-min" class="legend-min">-</span>
-                            <div class="legend-gradient"></div>
-                            <span id="dryBulbTemp-max" class="legend-max">-</span>
-                        </div>
+                        <div class="legend-container" id="dryBulbTemp-legend"></div>
                         <div class="heatmap-stats">
                             <div class="stat-item">
                                 <span class="stat-label">Min:</span>
@@ -90,15 +87,16 @@
                                 <span class="stat-value" id="dryBulbTemp-stat-avg">-</span>
                             </div>
                         </div>
+                        <div class="heatmap-info">
+                            <p>Temperature affects evapotranspiration rates. Higher temperatures generally increase water loss.</p>
+                        </div>
                     </div>
-                    <div class="heatmap-item">
+                    
+                    <!-- Relative Humidity -->
+                    <div class="heatmap-item offset-right">
                         <h3 class="heatmap-title">Relative Humidity</h3>
                         <div id="relativeHumidity-wrapper" class="heatmap-wrapper"></div>
-                        <div class="legend">
-                            <span id="relativeHumidity-min" class="legend-min">-</span>
-                            <div class="legend-gradient"></div>
-                            <span id="relativeHumidity-max" class="legend-max">-</span>
-                        </div>
+                        <div class="legend-container" id="relativeHumidity-legend"></div>
                         <div class="heatmap-stats">
                             <div class="stat-item">
                                 <span class="stat-label">Min:</span>
@@ -113,15 +111,16 @@
                                 <span class="stat-value" id="relativeHumidity-stat-avg">-</span>
                             </div>
                         </div>
+                        <div class="heatmap-info">
+                            <p>Humidity affects evapotranspiration rates. Higher humidity generally reduces water loss.</p>
+                        </div>
                     </div>
-                    <div class="heatmap-item">
+                    
+                    <!-- Wind Speed -->
+                    <div class="heatmap-item offset-left">
                         <h3 class="heatmap-title">Wind Speed</h3>
                         <div id="windSpeed-wrapper" class="heatmap-wrapper"></div>
-                        <div class="legend">
-                            <span id="windSpeed-min" class="legend-min">-</span>
-                            <div class="legend-gradient"></div>
-                            <span id="windSpeed-max" class="legend-max">-</span>
-                        </div>
+                        <div class="legend-container" id="windSpeed-legend"></div>
                         <div class="heatmap-stats">
                             <div class="stat-item">
                                 <span class="stat-label">Min:</span>
@@ -136,15 +135,16 @@
                                 <span class="stat-value" id="windSpeed-stat-avg">-</span>
                             </div>
                         </div>
+                        <div class="heatmap-info">
+                            <p>Wind speed affects evapotranspiration rates. Higher wind speeds generally increase water loss.</p>
+                        </div>
                     </div>
-                    <div class="heatmap-item">
+                    
+                    <!-- Global Horizontal Radiation -->
+                    <div class="heatmap-item offset-right">
                         <h3 class="heatmap-title">Global Horizontal Radiation</h3>
                         <div id="globalHorizontalRadiation-wrapper" class="heatmap-wrapper"></div>
-                        <div class="legend">
-                            <span id="globalHorizontalRadiation-min" class="legend-min">-</span>
-                            <div class="legend-gradient"></div>
-                            <span id="globalHorizontalRadiation-max" class="legend-max">-</span>
-                        </div>
+                        <div class="legend-container" id="globalHorizontalRadiation-legend"></div>
                         <div class="heatmap-stats">
                             <div class="stat-item">
                                 <span class="stat-label">Min:</span>
@@ -159,57 +159,47 @@
                                 <span class="stat-value" id="globalHorizontalRadiation-stat-avg">-</span>
                             </div>
                         </div>
-                    </div>
-                    <div class="heatmap-item">
-                        <h3 class="heatmap-title">Direct Normal Radiation</h3>
-                        <div id="directNormalRadiation-wrapper" class="heatmap-wrapper"></div>
-                        <div class="legend">
-                            <span id="directNormalRadiation-min" class="legend-min">-</span>
-                            <div class="legend-gradient"></div>
-                            <span id="directNormalRadiation-max" class="legend-max">-</span>
-                        </div>
-                        <div class="heatmap-stats">
-                            <div class="stat-item">
-                                <span class="stat-label">Min:</span>
-                                <span class="stat-value" id="directNormalRadiation-stat-min">-</span>
-                            </div>
-                            <div class="stat-item">
-                                <span class="stat-label">Max:</span>
-                                <span class="stat-value" id="directNormalRadiation-stat-max">-</span>
-                            </div>
-                            <div class="stat-item">
-                                <span class="stat-label">Avg:</span>
-                                <span class="stat-value" id="directNormalRadiation-stat-avg">-</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="heatmap-item">
-                        <h3 class="heatmap-title">Diffuse Horizontal Radiation</h3>
-                        <div id="diffuseHorizontalRadiation-wrapper" class="heatmap-wrapper"></div>
-                        <div class="legend">
-                            <span id="diffuseHorizontalRadiation-min" class="legend-min">-</span>
-                            <div class="legend-gradient"></div>
-                            <span id="diffuseHorizontalRadiation-max" class="legend-max">-</span>
-                        </div>
-                        <div class="heatmap-stats">
-                            <div class="stat-item">
-                                <span class="stat-label">Min:</span>
-                                <span class="stat-value" id="diffuseHorizontalRadiation-stat-min">-</span>
-                            </div>
-                            <div class="stat-item">
-                                <span class="stat-label">Max:</span>
-                                <span class="stat-value" id="diffuseHorizontalRadiation-stat-max">-</span>
-                            </div>
-                            <div class="stat-item">
-                                <span class="stat-label">Avg:</span>
-                                <span class="stat-value" id="diffuseHorizontalRadiation-stat-avg">-</span>
-                            </div>
+                        <div class="heatmap-info">
+                            <p>Solar radiation is a key driver of evapotranspiration.</p>
                         </div>
                     </div>
                 </div>
             </div>
             <div id="noDataMessage">
                 Please upload an EPW file to view the calendar heatmaps.
+            </div>
+        </div>
+
+        <div class="blocks" id="B3">
+            <h2>Visualization Guide</h2>
+            <div class="visualization-guide">
+                <h3>How to Read the Heatmaps</h3>
+                <p>Each cell represents a specific day and hour. The color intensity indicates the value of the selected parameter:</p>
+                
+                <div class="guide-item">
+                    <h4>Temperature (°C)</h4>
+                    <div class="guide-colors temp-scale"></div>
+                    <p>Blue represents cooler temperatures, while red indicates warmer temperatures.</p>
+                </div>
+                
+                <div class="guide-item">
+                    <h4>Relative Humidity (%)</h4>
+                    <div class="guide-colors humidity-scale"></div>
+                    <p>Lighter blue indicates lower humidity, while darker blue represents higher humidity.</p>
+                </div>
+                
+                <div class="guide-item">
+                    <h4>Solar Radiation (W/m²)</h4>
+                    <div class="guide-colors radiation-scale"></div>
+                    <p>Yellow to red gradient indicates increasing solar radiation intensity.</p>
+                </div>
+                
+                <h3>Interaction Tips</h3>
+                <ul>
+                    <li>Hover over any cell to see detailed information for that specific time</li>
+                    <li>Hover over the legend to see the exact value represented by each color</li>
+                    <li>The statistics below each heatmap show minimum, maximum, and average values</li>
+                </ul>
             </div>
         </div>
     </div>
@@ -232,3 +222,7 @@
 </body>
 
 </html>
+
+
+
+
