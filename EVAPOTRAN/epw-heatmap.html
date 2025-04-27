@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,10 +16,19 @@
     <!-- Custom scripts -->
     <script src="js/epw-heatmap.js" defer></script>
 </head>
+
 <body>
     <div class="header">
-        <img src="img/Flaha_logo.svg" alt="Flaha Logo" class="header-logo" onerror="this.onerror=null; this.src='img/Flaha_logo.png';">
+        <img src="img/Flaha_logo.svg" alt="Flaha Logo" class="header-logo"
+             onerror="this.onerror=null; this.src='img/Flaha_logo.png';">
         <h1>Flaha Calc - EPW Weather Data Heatmap</h1>
+        <div class="nav-bar">
+            <a href="index.html" class="nav-link">Home</a>
+            <a href="calculator.html" class="nav-link">Manual Calculator</a>
+            <a href="epw-import.html" class="nav-link">EPW Import</a>
+            <a href="epw-heatmap.html" class="nav-link active">Weather Visualization</a>
+            <a href="live-weather.html" class="nav-link">Live Weather</a>
+        </div>
     </div>
 
     <div class="container">
@@ -39,7 +49,7 @@
             </div>
 
             <button id="processEpwBtn" disabled>Process EPW File</button>
-            
+
             <div id="locationInfo" class="info-box" style="display: none;">
                 <h3>Location Information</h3>
                 <p id="locationName">Location: --</p>
@@ -202,19 +212,23 @@
                 Please upload an EPW file to view the calendar heatmaps.
             </div>
         </div>
-        
-        <div class="nav-links">
-            <a href="index.html" class="btn-link">← Back to Home</a>
-            <a href="epw-import.html" class="btn-link">EPW Data Import</a>
-            <a href="calculator.html" class="btn-link">ET₀ Calculator</a>
+    </div>
+    
+    <div class="page-footer">
+        <div class="footer-content">
+            <img src="img/Flaha_logo.svg" alt="Flaha Logo" class="footer-logo"
+                 onerror="this.onerror=null; this.src='img/Flaha_logo.png';">
+            <div class="footer-links">
+                <a href="index.html" class="footer-link">Home</a>
+                <a href="calculator.html" class="footer-link">Manual Calculator</a>
+                <a href="epw-import.html" class="footer-link">EPW Import</a>
+                <a href="epw-heatmap.html" class="footer-link">Weather Visualization</a>
+                <a href="live-weather.html" class="footer-link">Live Weather</a>
+            </div>
+            <p class="footer-credits">© 2023 Flaha Agri Tech. All rights reserved.</p>
+            <p class="footer-credits">Developed by Rafat Al Khashan | <a href="mailto:info@flaha.org">info@flaha.org</a></p>
         </div>
     </div>
-    <footer id="footer">
-        <p class="credits">© 2023 Flaha Agri Tech. All rights reserved.</p>
-        <p class="credits">Developed by Rafat Al Khashan | <a href="mailto:info@flaha.org">info@flaha.org</a></p>
-    </footer>
 </body>
+
 </html>
-
-
-

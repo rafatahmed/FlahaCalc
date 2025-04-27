@@ -19,8 +19,16 @@
 
 <body>
     <div class="header">
-        <img src="img/Flaha_logo.svg" alt="Flaha Logo" class="header-logo">
+        <img src="img/Flaha_logo.svg" alt="Flaha Logo" class="header-logo"
+             onerror="this.onerror=null; this.src='img/Flaha_logo.png';">
         <h1>Flaha Calc - EPW Weather File Import</h1>
+        <div class="nav-bar">
+            <a href="index.html" class="nav-link">Home</a>
+            <a href="calculator.html" class="nav-link">Manual Calculator</a>
+            <a href="epw-import.html" class="nav-link active">EPW Import</a>
+            <a href="epw-heatmap.html" class="nav-link">Weather Visualization</a>
+            <a href="live-weather.html" class="nav-link">Live Weather</a>
+        </div>
     </div>
 
     <div class="container">
@@ -92,20 +100,27 @@
                 <p class="note">You can either use the selected day's data for ET₀ calculation or visualize the entire EPW file as heatmaps to analyze climate patterns.</p>
             </div>
         </div>
-        
-        <div class="nav-links">
-            <a href="index.html" class="btn-link">← Back to Home</a>
-            <a href="calculator.html" class="btn-link">Go to Manual Calculator</a>
-            <a href="epw-heatmap.html" class="btn-link">Visualize Weather Data</a>
+    </div>
+    
+    <div class="page-footer">
+        <div class="footer-content">
+            <img src="img/Flaha_logo.svg" alt="Flaha Logo" class="footer-logo"
+                 onerror="this.onerror=null; this.src='img/Flaha_logo.png';">
+            <div class="footer-links">
+                <a href="index.html" class="footer-link">Home</a>
+                <a href="calculator.html" class="footer-link">Manual Calculator</a>
+                <a href="epw-import.html" class="footer-link">EPW Import</a>
+                <a href="epw-heatmap.html" class="footer-link">Weather Visualization</a>
+                <a href="live-weather.html" class="footer-link">Live Weather</a>
+            </div>
+            <p class="footer-credits">© 2023 Flaha Agri Tech. All rights reserved.</p>
+            <p class="footer-credits">Developed by Rafat Al Khashan | <a href="mailto:info@flaha.org">info@flaha.org</a></p>
         </div>
     </div>
-    <footer id="footer">
-        <p class="credits">© 2023 Flaha Agri Tech. All rights reserved.</p>
-        <p class="credits">Developed by Rafat Al Khashan | <a href="mailto:info@flaha.org">info@flaha.org</a></p>
-    </footer>
 </body>
 
 </html>
+
 
 
 
