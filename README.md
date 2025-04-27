@@ -2,181 +2,119 @@
 
 # FlahaCalc - Horticulture and Agriculture Calculators
 
-FlahaCalc is a versatile and comprehensive web application that offers a set of specialized calculators tailored for Horticulturists, Agronomists, Landscapers, and Engineers. Whether you're involved in plant cultivation, irrigation management, fertilization, or hydroponic solutions, FlahaCalc provides the tools you need to streamline your work and make informed decisions.
+![Flaha Logo](EVAPOTRAN/img/Flaha_logo.svg)
 
-## Project Structure
+## Overview
+
+FlahaCalc is a comprehensive suite of specialized calculators designed for professionals in horticulture, agronomy, landscaping, and agricultural engineering. This web application provides essential tools for precise calculations in plant cultivation, irrigation management, fertilization planning, and hydroponic solution design.
+
+## Key Features
+
+- **Evapotranspiration Calculator:** Calculate water loss through evaporation and transpiration using the industry-standard FAO Penman-Monteith method
+- **Irrigation Schedule Planner:** Generate customized irrigation schedules based on plant types, soil conditions, and climate data
+- **Fertilizer Program Generator:** Create optimized fertilization plans tailored to specific plant nutrient requirements
+- **Hydroponic Solution Calculator:** Design balanced nutrient solutions for hydroponic systems with precise concentration control
+
+## Application Architecture
+
+The application follows a modular structure with specialized components for different calculation needs:
 
 ```
 EVAPOTRAN/
 │
-├── index.html           # Main landing page with options
-├── calculator.html      # Manual ET₀ calculator page
-├── epw-import.html      # EPW weather file import page
-├── epw-heatmap.html     # EPW data visualization page
-├── live-weather.html    # Live weather data fetching page
+├── index.html           # Main landing page with navigation options
+├── calculator.html      # Manual ET₀ calculator interface
+├── epw-import.html      # EPW weather file import functionality
+├── epw-heatmap.html     # Weather data visualization dashboard
+├── live-weather.html    # Real-time weather data integration
 │
 ├── css/
-│   └── style.css        # Main stylesheet for the application
+│   └── style.css        # Unified stylesheet for consistent UI
 │
 ├── js/
-│   ├── script.js        # Main calculator logic
-│   ├── epw-import.js    # EPW file parsing and data handling
-│   ├── epw-heatmap.js   # EPW data visualization logic
-│   └── live-weather.js  # Live weather API integration
+│   ├── script.js        # Core calculation engine
+│   ├── epw-import.js    # EPW file parsing utilities
+│   ├── epw-heatmap.js   # Data visualization components
+│   └── live-weather.js  # Weather API integration services
 │
 └── img/
-    ├── Flaha_logo.svg   # Vector logo
-    └── Flaha_logo.png   # Fallback raster logo
+    ├── Flaha_logo.svg   # Vector logo for high-resolution displays
+    └── Flaha_logo.png   # Raster fallback for legacy browsers
 ```
 
-## Flaha Calc - Evapotranspiration Calculator Flow Chart
+## Application Flow
 
-### Flow chart representation of the application:
+The diagram below illustrates the user journey and data flow through the application:
 
 ```
 ┌─────────────────┐
-│                 │
 │   index.html    │
 │  (Entry Point)  │
-│                 │
 └────────┬────────┘
          │
          ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│                                                                 │
-<<<<<<< HEAD
 │                      User Selects Option                        │
-│                                                                 │
 └───────┬───────────────────┬───────────────────┬─────────────────┘
         │                   │                   │
         ▼                   ▼                   ▼
 ┌───────────────┐   ┌───────────────┐   ┌───────────────┐   ┌───────────────┐
-│               │   │               │   │               │   │               │
 │ epw-import.html│   │live-weather.html│   │ calculator.html │   │ epw-heatmap.html│
-│               │   │               │   │               │   │               │
 └───────┬───────┘   └───────┬───────┘   └───────┬───────┘   └───────┬───────┘
         │                   │                   │                   │
         ▼                   ▼                   │                   ▼
 ┌───────────────┐   ┌───────────────┐          │           ┌───────────────┐
-│  Upload EPW   │   │  Fetch Live   │          │           │  Upload EPW   │
-│ Weather File  │   │ Weather Data  │          │           │ Weather File  │
-└───────┬───────┘   └───────┬───────┘          │           └───────┬───────┘
-        │                   │                   │                   │
-        ▼                   ▼                   │                   ▼
-┌───────────────┐   ┌───────────────┐          │           ┌───────────────┐
-│   Parse EPW   │   │  Process API  │          │           │   Parse EPW   │
-│     Data      │   │   Response    │          │           │     Data      │
-└───────┬───────┘   └───────┬───────┘          │           └───────┬───────┘
-        │                   │                   │                   │
-        ▼                   ▼                   │                   ▼
-┌───────────────┐   ┌───────────────┐          │           ┌───────────────┐
-│  Select Day   │   │    Display    │          │           │   Generate    │
-│ from EPW Data │   │ Weather Info  │          │           │   Heatmaps    │
+│  Upload EPW   │   │  Fetch Live   │          │           │  Generate     │
+│ Weather File  │   │ Weather Data  │          │           │   Heatmaps    │
 └───────┬───────┘   └───────┬───────┘          │           └───────────────┘
+        │                   │                   │                   
+        ▼                   ▼                   │                   
+┌───────────────┐   ┌───────────────┐          │           
+│   Parse EPW   │   │  Process API  │          │           
+│     Data      │   │   Response    │          │           
+└───────┬───────┘   └───────┬───────┘          │           
+        │                   │                   │                   
+        ▼                   ▼                   │                   
+┌───────────────┐   ┌───────────────┐          │           
+│  Select Day   │   │    Display    │          │           
+│ from EPW Data │   │ Weather Info  │          │           
+└───────┬───────┘   └───────┬───────┘          │           
         │                   │                   │
         │                   │                   │
         ▼                   ▼                   ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│                                                                 │
 │                   Input Climate Parameters                      │
-│                                                                 │
 └───────────────────────────────┬─────────────────────────────────┘
                                 │
                                 ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│                                                                 │
 │              Calculate Reference Evapotranspiration             │
 │                   (FAO Penman-Monteith Method)                  │
-│                                                                 │
 └───────────────────────────────┬─────────────────────────────────┘
                                 │
                                 ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│                                                                 │
 │                       Display ET₀ Results                       │
-│                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-```
-│                       User Selects Option                       │
-│                                                                 │
-└───────┬───────────────────┬───────────────────┬────────────────┘
-        │                   │                   │
-        ▼                   ▼                   ▼
-┌───────────────┐   ┌───────────────┐   ┌───────────────┐
-│               │   │               │   │               │
-│ epw-import.html │ │live-weather.html│ │ calculator.html │
-│               │   │               │   │               │
-└───────┬───────┘   └───────┬───────┘   └───────┬───────┘
-        │                   │                   │
-        ▼                   ▼                   │
-┌───────────────┐   ┌───────────────┐          │
-│ Upload EPW    │   │ Fetch Live    │          │
-│ Weather File  │   │ Weather Data  │          │
-└───────┬───────┘   └───────┬───────┘          │
-        │                   │                   │
-        ▼                   ▼                   │
-┌───────────────┐   ┌───────────────┐          │
-│ Parse EPW     │   │ Process API   │          │
-│ Data          │   │ Response      │          │
-└───────┬───────┘   └───────┬───────┘          │
-        │                   │                   │
-        ▼                   ▼                   │
-┌───────────────┐   ┌───────────────┐          │
-│ User Chooses  │   │ Display       │          │
-│ Action        │   │ Weather Info  │          │
-└───┬─────┬─────┘   └───────┬───────┘          │
-    │     │                 │                   │
-    │     │                 │                   │
-    │     ▼                 ▼                   ▼
-    │  ┌──────────────────────────────────────────────────────┐
-    │  │                                                      │
-    │  │              Input Climate Parameters                │
-    │  │                                                      │
-    │  └──────────────────────┬───────────────────────────────┘
-    │                         │
-    │                         ▼
-    │  ┌──────────────────────────────────────────────────────┐
-    │  │                                                      │
-    │  │         Calculate Reference Evapotranspiration       │
-    │  │             (FAO Penman-Monteith Method)            │
-    │  │                                                      │
-    │  └──────────────────────┬───────────────────────────────┘
-    │                         │
-    │                         ▼
-    │  ┌──────────────────────────────────────────────────────┐
-    │  │                                                      │
-    │  │                Display ET₀ Results                   │
-    │  │                                                      │
-    │  └──────────────────────────────────────────────────────┘
-    │
-    ▼
-┌───────────────┐
-│               │
-│ epw-heatmap.html │
-│               │
-└───────┬───────┘
-        │
-        ▼
-┌───────────────┐
-│ Generate      │
-│ Heatmaps      │
-└───────────────┘
->>>>>>> 91c65573e4d80027365ea914d51043704bdfcc4f
-```
+## Technical Implementation
 
-## Features
+FlahaCalc implements the FAO Penman-Monteith method, widely recognized as the international standard for calculating reference evapotranspiration. The application supports multiple data input methods:
 
-- **Evapotranspiration Calculator:** Calculate the rate at which water is lost from the soil through evaporation and transpiration, aiding in irrigation planning.
-- **Irrigation Schedule Planner:** Create customized irrigation schedules based on various factors like plant types, soil moisture levels, and climate conditions.
-- **Fertilizers Program Generator:** Generate optimized fertilization plans to meet specific plant nutrient requirements, promoting healthy growth and yield.
-- **Hydroponic Solution Calculator:** Design nutrient solutions for hydroponic systems, ensuring optimal nutrient concentrations for plants.
+- Manual parameter entry
+- EPW (EnergyPlus Weather) file import
+- Real-time weather data integration via API
+- Historical weather data visualization
 
 ## License
 
-This project is licensed under the [GNU General Public License (GPL) version 3.0](https://www.gnu.org/licenses/gpl-3.0.en.html). The GPL v3 is a copyleft license that ensures any modifications or derivative works of FlahaCalc will also be released under the same license, preserving the open-source nature of the project and encouraging collaboration within the community.
+This project is licensed under the [GNU General Public License (GPL) version 3.0](https://www.gnu.org/licenses/gpl-3.0.en.html). This copyleft license ensures that all modifications and derivative works of FlahaCalc must be distributed under the same terms, preserving the open-source nature of the project.
 
-Feel free to use, modify, and distribute FlahaCalc under the terms of the GPL v3. We welcome contributions and improvements from the community to make FlahaCalc even more powerful and useful for professionals in the field of horticulture and agriculture.
+## Contributing
 
-Let's cultivate a thriving and collaborative ecosystem together!
+We welcome contributions from the agricultural and software development communities. By collaborating, we can enhance FlahaCalc's capabilities and accuracy, making it an even more valuable tool for professionals worldwide.
+
+---
+
+© 2023 Flaha Agri Tech | [info@flaha.org](mailto:info@flaha.org)
