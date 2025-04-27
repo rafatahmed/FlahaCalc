@@ -8,6 +8,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
     <script src="js/epw-import.js" defer></script>
+    <style>
+        /* Fix the transform property that's causing the error */
+        .heatmap-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+    </style>
 </head>
 
 <body>
@@ -27,17 +34,28 @@
                     <label for="epwFile">Select EPW File:</label>
                     <input type="file" id="epwFile" accept=".epw">
                 </div>
+            </div>
 
+            <button id="processEpwBtn" disabled>Process EPW File</button>
+
+            <div id="epwOptions" style="display: none;">
+                <h3>Choose Your Next Step</h3>
+                <div class="action-buttons">
+                    <button id="selectDayBtn">Select a Day for ET₀ Calculation</button>
+                    <button id="viewHeatmapsBtn">Generate Heatmaps from EPW Data</button>
+                </div>
+                <p class="note">You can either select a specific day for ET₀ calculation or visualize the entire EPW file as heatmaps.</p>
+            </div>
+
+            <div id="daySelectionSection" style="display: none;">
                 <div class="form-group">
                     <label for="daySelect">Select Day:</label>
-                    <select id="daySelect" disabled>
-                        <option value="">-- Select a day after uploading file --</option>
+                    <select id="daySelect">
+                        <option value="">-- Select a day --</option>
                     </select>
                 </div>
             </div>
 
-            <button id="processEpwBtn" disabled>Process EPW File</button>
-            
             <div id="locationInfo" class="info-box" style="display: none;">
                 <h3>Location Information</h3>
                 <p id="locationName">Location: --</p>
@@ -66,8 +84,12 @@
             </div>
 
             <div id="output" style="display: none;">
-                <button id="useDataBtn">Use This Data for ET₀ Calculation</button>
-                <p class="note">This will transfer the extracted data to the main calculator.</p>
+                <h3>Choose Your Next Step</h3>
+                <div class="action-buttons">
+                    <button id="useDataBtn">Use Selected Day for ET₀ Calculation</button>
+                    <button id="viewHeatmapsBtn">Generate Heatmaps from EPW Data</button>
+                </div>
+                <p class="note">You can either use the selected day's data for ET₀ calculation or visualize the entire EPW file as heatmaps to analyze climate patterns.</p>
             </div>
         </div>
         
@@ -84,6 +106,7 @@
 </body>
 
 </html>
+
 
 
 

@@ -21,8 +21,12 @@ let selectedDayData = null;
 
 // DOM elements
 const epwFileInput = document.getElementById('epwFile');
-const daySelect = document.getElementById('daySelect');
 const processEpwBtn = document.getElementById('processEpwBtn');
+const epwOptions = document.getElementById('epwOptions');
+const selectDayBtn = document.getElementById('selectDayBtn');
+const viewHeatmapsBtn = document.getElementById('viewHeatmapsBtn');
+const daySelectionSection = document.getElementById('daySelectionSection');
+const daySelect = document.getElementById('daySelect');
 const locationInfo = document.getElementById('locationInfo');
 const weatherData = document.getElementById('weatherData');
 const weatherDataBody = document.getElementById('weatherDataBody');
@@ -30,8 +34,10 @@ const useDataBtn = document.getElementById('useDataBtn');
 
 // Event listeners
 epwFileInput.addEventListener('change', handleFileSelect);
-daySelect.addEventListener('change', handleDaySelect);
 processEpwBtn.addEventListener('click', processEpwFile);
+selectDayBtn.addEventListener('click', showDaySelection);
+daySelect.addEventListener('change', handleDaySelect);
+viewHeatmapsBtn.addEventListener('click', transferDataToHeatmap);
 useDataBtn.addEventListener('click', transferDataToCalculator);
 
 // Handle file selection
@@ -45,17 +51,29 @@ function handleFileSelect(event) {
 }
 
 // Process the EPW file
+let rawEpwContent = '';
+let epwFileName = '';
+
 function processEpwFile() {
     const file = epwFileInput.files[0];
     if (!file) {
         alert('Please select an EPW file first.');
         return;
     }
-
+    
+    epwFileName = file.name;
+    
     const reader = new FileReader();
     reader.onload = function(e) {
-        const contents = e.target.result;
-        parseEpwFile(contents);
+        rawEpwContent = e.target.result;
+        parseEpwFile(rawEpwContent);
+        
+        // Show options after processing
+        epwOptions.style.display = 'block';
+        
+        // Hide the weather data section until a day is selected
+        weatherData.style.display = 'none';
+        document.getElementById('output').style.display = 'none';
     };
     reader.readAsText(file);
 }
@@ -102,8 +120,7 @@ function parseEpwFile(contents) {
                     windSpeed: parseFloat(fields[21]),
                     globalHorizontalRadiation: parseFloat(fields[13]),
                     directNormalRadiation: parseFloat(fields[14]),
-                    diffuseHorizontalRadiation: parseFloat(fields[15]),
-                    extraterrestrialRadiation: parseFloat(fields[28])
+                    diffuseHorizontalRadiation: parseFloat(fields[15])
                 });
             }
         }
@@ -117,13 +134,14 @@ function parseEpwFile(contents) {
 }
 
 // Display location information
-function displayLocationInfo(location) {
-    document.getElementById('locationName').textContent = `Location: ${location.city}, ${location.country}`;
-    document.getElementById('locationLat').textContent = `Latitude: ${location.latitude.toFixed(2)} degrees`;
-    document.getElementById('locationLon').textContent = `Longitude: ${location.longitude.toFixed(2)} degrees`;
-    document.getElementById('locationElev').textContent = `Elevation: ${location.elevation.toFixed(2)} m`;
-    document.getElementById('locationTimeZone').textContent = `Time Zone: ${location.timezone} hours`;
+function displayLocationInfo(data) {
+    document.getElementById('locationName').textContent = `Location: ${data.city}, ${data.state}, ${data.country}`;
+    document.getElementById('locationLat').textContent = `Latitude: ${data.latitude.toFixed(2)} degrees`;
+    document.getElementById('locationLon').textContent = `Longitude: ${data.longitude.toFixed(2)} degrees`;
+    document.getElementById('locationElev').textContent = `Elevation: ${data.elevation.toFixed(1)} m`;
+    document.getElementById('locationTimeZone').textContent = `Time Zone: GMT${data.timezone >= 0 ? '+' : ''}${data.timezone} hours`;
     
+    // Show the location info section
     locationInfo.style.display = 'block';
 }
 
@@ -275,6 +293,44 @@ function transferDataToCalculator() {
     window.location.href = 'calculator.html';
 }
 
+// Function to transfer EPW data to heatmap page
+function transferDataToHeatmap() {
+    console.log('transferDataToHeatmap called');
+    
+    if (!rawEpwContent) {
+        console.error('No EPW content available to transfer');
+        alert('Please process an EPW file first.');
+        return;
+    }
+    
+    console.log('EPW content available, length:', rawEpwContent.length);
+    console.log('EPW filename:', epwFileName || 'unnamed');
+    
+    try {
+        // Store the raw EPW file content in localStorage
+        localStorage.setItem('epwFileContent', rawEpwContent);
+        localStorage.setItem('epwFileName', epwFileName || 'uploaded-file.epw');
+        
+        // Verify storage was successful
+        const storedContent = localStorage.getItem('epwFileContent');
+        console.log('Stored in localStorage successfully:', 
+                    storedContent ? 'Yes, length: ' + storedContent.length : 'No');
+        
+        // Redirect to the heatmap page
+        console.log('Redirecting to epw-heatmap.html');
+        window.location.href = 'epw-heatmap.html';
+    } catch (error) {
+        console.error('Error storing EPW data in localStorage:', error);
+        alert('Error transferring data: ' + error.message);
+    }
+}
+
+// Show day selection section
+function showDaySelection() {
+    daySelectionSection.style.display = 'block';
+    populateDaySelect();
+}
+
 // Helper function to get day of year
 function getDayOfYear(year, month, day) {
     const date = new Date(year, month - 1, day);
@@ -283,4 +339,14 @@ function getDayOfYear(year, month, day) {
     const oneDay = 1000 * 60 * 60 * 24;
     return Math.floor(diff / oneDay);
 }
+
+// Add event listener for the View Heatmaps button
+document.addEventListener('DOMContentLoaded', function() {
+    const viewHeatmapsBtn = document.getElementById('viewHeatmapsBtn');
+    if (viewHeatmapsBtn) {
+        viewHeatmapsBtn.addEventListener('click', transferDataToHeatmap);
+    }
+});
+
+
 
