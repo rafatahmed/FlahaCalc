@@ -1,4 +1,4 @@
-/** @format */
+ /** @format */
 /*
 ###########################################################################################################
 ##                                   Credits                                                             ##
@@ -16,20 +16,29 @@
 // Global variables
 let epwData = null;
 let locationData = null;
-let heatmapChart = null;
+let heatmapCharts = {}; // Object to store multiple charts
+let tooltip = null;
 
 // DOM elements
 const epwFileInput = document.getElementById('epwFile');
-const paramSelect = document.getElementById('paramSelect');
 const processEpwBtn = document.getElementById('processEpwBtn');
 const locationInfo = document.getElementById('locationInfo');
 const heatmapContainer = document.getElementById('heatmapContainer');
-const legendContainer = document.getElementById('legendContainer');
+
+// Parameters to display
+const parameters = [
+    'dryBulbTemp',
+    'relativeHumidity',
+    'windSpeed',
+    'globalHorizontalRadiation',
+    'directNormalRadiation',
+    'diffuseHorizontalRadiation'
+];
 
 // Event listeners
 epwFileInput.addEventListener('change', handleFileSelect);
 processEpwBtn.addEventListener('click', processEpwFile);
-paramSelect.addEventListener('change', updateHeatmap);
+// Remove paramSelect change listener since we're removing the select element
 
 // Handle file selection
 function handleFileSelect(event) {
@@ -107,15 +116,12 @@ function parseEpwFile(contents) {
             }
         }
         
-        // Enable parameter selection
-        paramSelect.disabled = false;
-        
         // Show heatmap container and hide no data message
         document.getElementById('heatmapContainer').style.display = 'block';
         document.getElementById('noDataMessage').style.display = 'none';
         
-        // Create initial heatmap
-        createHeatmap();
+        // Create heatmaps for all parameters
+        createAllHeatmaps();
         
         console.log("EPW data loaded successfully:", epwData.length, "hours of data");
     } catch (error) {
@@ -142,183 +148,40 @@ function dayOfYearToMonthDay(dayOfYear, year = new Date().getFullYear()) {
     return `${month} ${day}`;
 }
 
-// Create heatmap visualization
-function createHeatmap() {
-    console.log("Creating heatmap...");
-    
-    // Destroy existing chart if it exists
-    if (heatmapChart) {
-        console.log("Destroying existing chart");
-        heatmapChart.destroy();
-    }
-    
-    // Prepare data for heatmap
-    const data = prepareHeatmapData();
-    
-    if (data.dataPoints.length === 0) {
-        console.error("No valid data points for heatmap");
-        return;
-    }
-    
-    // Get canvas context
-    const ctx = document.getElementById('heatmapChart').getContext('2d');
-    
-    // Create matrix chart (for heatmap visualization)
-    heatmapChart = new Chart(ctx, {
-        type: 'matrix',
-        data: {
-            datasets: [{
-                label: paramSelect.options[paramSelect.selectedIndex].text,
-                data: data.dataPoints,
-                backgroundColor: (context) => {
-                    if (!context || !context.dataset || !context.dataset.data || !context.dataIndex) {
-                        return 'rgba(0, 0, 255, 0.5)';
-                    }
-                    
-                    const value = context.dataset.data[context.dataIndex].v;
-                    const min = data.min;
-                    const max = data.max;
-                    const normalizedValue = (value - min) / (max - min);
-                    
-                    // Color scale similar to the D3 example (green to red)
-                    return d3ColorScale(normalizedValue);
-                },
-                borderWidth: 1,
-                borderColor: '#fff',
-                width: (ctx) => {
-                    // Fixed width for each cell
-                    return 20;
-                },
-                height: (ctx) => {
-                    // Fixed height for each cell
-                    return 20;
-                }
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            layout: {
-                padding: {
-                    top: 20,
-                    right: 20,
-                    bottom: 40,
-                    left: 60
-                }
-            },
-            plugins: {
-                tooltip: {
-                    callbacks: {
-                        title: function(context) {
-                            if (!context || context.length === 0) return '';
-                            const dataPoint = context[0].dataset.data[context[0].dataIndex];
-                            const date = dayOfYearToMonthDay(dataPoint.y);
-                            return `${date} (Day ${dataPoint.y}), Hour ${dataPoint.x}`;
-                        },
-                        label: function(context) {
-                            const dataPoint = context.dataset.data[context.dataIndex];
-                            const paramName = paramSelect.options[paramSelect.selectedIndex].text;
-                            const unit = getParameterUnit(paramSelect.value);
-                            return `${paramName}: ${dataPoint.v.toFixed(1)} ${unit}`;
-                        }
-                    }
-                },
-                legend: {
-                    display: false
-                }
-            },
-            scales: {
-                x: {
-                    type: 'linear',
-                    position: 'bottom',
-                    min: 0,
-                    max: 23,
-                    offset: true,
-                    title: {
-                        display: true,
-                        text: 'Hour of Day',
-                        font: {
-                            weight: 'bold'
-                        }
-                    },
-                    ticks: {
-                        stepSize: 1,
-                        maxRotation: 0
-                    },
-                    grid: {
-                        display: false
-                    }
-                },
-                y: {
-                    type: 'linear',
-                    min: 1,
-                    max: 365,
-                    offset: true,
-                    reverse: true,
-                    title: {
-                        display: true,
-                        text: 'Day of Year',
-                        font: {
-                            weight: 'bold'
-                        }
-                    },
-                    ticks: {
-                        callback: function(value) {
-                            // Show day numbers at the beginning of each month
-                            const monthStarts = [1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335];
-                            const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-                            
-                            for (let i = 0; i < monthStarts.length; i++) {
-                                if (value === monthStarts[i]) {
-                                    return `${monthNames[i]} (${value})`;
-                                }
-                            }
-                            
-                            // Show every 30th day
-                            if (value % 30 === 0) {
-                                return value;
-                            }
-                            
-                            return '';
-                        },
-                        stepSize: 10,
-                        font: {
-                            size: 10
-                        }
-                    },
-                    grid: {
-                        display: false
-                    }
-                }
-            }
+// Create heatmaps for all parameters
+async function createAllHeatmaps() {
+    try {
+        await loadD3Library();
+        
+        // Create a heatmap for each parameter
+        for (const param of parameters) {
+            createCalendarHeatmap(param);
         }
-    });
-    
-    console.log("Heatmap created successfully");
-    
-    // Update legend
-    updateLegend(data.min, data.max);
+    } catch (error) {
+        console.error("Failed to load D3 library:", error);
+        alert("Failed to load required libraries. Please check your internet connection.");
+    }
 }
 
-// Prepare data for heatmap
-function prepareHeatmapData() {
-    const selectedParam = paramSelect.value;
+// Prepare data for calendar heatmap
+function prepareCalendarHeatmapData(paramName) {
     const dataPoints = [];
     let min = Infinity;
     let max = -Infinity;
     
-    // Create a 2D array to store values by day and hour
-    const valuesByDayAndHour = {};
-    
     // Process data
     epwData.forEach(hourData => {
-        const dayOfYear = getDayOfYear(hourData.year, hourData.month, hourData.day);
-        const hour = hourData.hour - 1; // EPW hours are 1-24, we need 0-23
+        const date = new Date(hourData.year, hourData.month - 1, hourData.day);
+        const dayOfWeek = date.getDay(); // 0 = Sunday, 6 = Saturday
         
-        // Skip if hour is out of range (some EPW files have hour 24)
-        if (hour < 0 || hour > 23) return;
+        // Calculate week number (0-51)
+        const startOfYear = new Date(hourData.year, 0, 1);
+        const millisecondsPerDay = 24 * 60 * 60 * 1000;
+        const dayOfYear = Math.floor((date - startOfYear) / millisecondsPerDay);
+        const weekIndex = Math.floor(dayOfYear / 7);
         
-        const value = hourData[selectedParam];
+        // Get value for the selected parameter
+        const value = hourData[paramName];
         
         // Skip invalid values
         if (isNaN(value) || value === undefined) return;
@@ -327,30 +190,204 @@ function prepareHeatmapData() {
         min = Math.min(min, value);
         max = Math.max(max, value);
         
-        // Store value by day and hour
-        const key = `${dayOfYear}-${hour}`;
-        valuesByDayAndHour[key] = value;
+        // Store data point
+        dataPoints.push({
+            x: weekIndex,
+            y: dayOfWeek,
+            v: value,
+            date: date
+        });
     });
-    
-    // Create data points for each day and hour
-    for (let day = 1; day <= 365; day++) {
-        for (let hour = 0; hour <= 23; hour++) {
-            const key = `${day}-${hour}`;
-            if (valuesByDayAndHour[key] !== undefined) {
-                dataPoints.push({
-                    x: hour,
-                    y: day,
-                    v: valuesByDayAndHour[key]
-                });
-            }
-        }
-    }
     
     return {
         dataPoints,
         min,
         max
     };
+}
+
+// Create calendar heatmap visualization for a specific parameter
+function createCalendarHeatmap(paramName) {
+    console.log(`Creating calendar heatmap for ${paramName}...`);
+    
+    // Clear any existing chart
+    if (heatmapCharts[paramName]) {
+        heatmapCharts[paramName].destroy();
+        heatmapCharts[paramName] = null;
+    }
+    
+    // Get the container and clear it
+    const container = document.getElementById(`${paramName}-wrapper`);
+    if (!container) {
+        console.error(`Container for ${paramName} not found`);
+        return;
+    }
+    container.innerHTML = '';
+    
+    // Prepare data for heatmap
+    const data = prepareCalendarHeatmapData(paramName);
+    
+    if (data.dataPoints.length === 0) {
+        console.error(`No valid data points for ${paramName} heatmap`);
+        return;
+    }
+    
+    // Configuration - increase cell size for better visibility
+    const cellSize = 14; // Increased from 12
+    const width = (cellSize + 1.5) * 53; // Width for 53 weeks
+    const height = cellSize * 7; // Height for 7 days
+    
+    // Create SVG element
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("width", width);
+    svg.setAttribute("height", height);
+    svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+    svg.setAttribute("style", "max-width: 100%; height: auto; font: 11px sans-serif;"); // Increased font size
+    
+    // Group data by year
+    const yearData = d3.group(data.dataPoints, d => d.date.getFullYear());
+    const years = Array.from(yearData.entries());
+    
+    // Create a group for each year
+    years.forEach(([year, values], i) => {
+        const yearGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        yearGroup.setAttribute("transform", `translate(40.5, ${cellSize * 1.5})`);
+        
+        // Add year label
+        const yearLabel = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        yearLabel.setAttribute("x", -5);
+        yearLabel.setAttribute("y", -5);
+        yearLabel.setAttribute("font-weight", "bold");
+        yearLabel.setAttribute("text-anchor", "end");
+        yearLabel.textContent = year;
+        yearGroup.appendChild(yearLabel);
+        
+        // Add day labels (Sun-Sat)
+        const dayLabels = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        dayLabels.setAttribute("text-anchor", "end");
+        
+        const days = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+        days.forEach((day, j) => {
+            const dayLabel = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            dayLabel.setAttribute("x", -5);
+            dayLabel.setAttribute("y", (j + 0.5) * cellSize);
+            dayLabel.setAttribute("dy", "0.31em");
+            dayLabel.textContent = day;
+            dayLabels.appendChild(dayLabel);
+        });
+        yearGroup.appendChild(dayLabels);
+        
+        // Create cells for each data point
+        const cellGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        
+        // Group data by day to get daily averages
+        const dailyData = d3.rollup(
+            values,
+            v => d3.mean(v, d => d.v),
+            d => d.date.toDateString()
+        );
+        
+        // Create a map of week index to day of week to value
+        const cellMap = new Map();
+        
+        for (const [dateStr, value] of dailyData.entries()) {
+            const date = new Date(dateStr);
+            const dayOfWeek = date.getDay(); // 0 = Sunday, 6 = Saturday
+            
+            // Calculate week number (0-51)
+            const startOfYear = new Date(date.getFullYear(), 0, 1);
+            const millisecondsPerDay = 24 * 60 * 60 * 1000;
+            const dayOfYear = Math.floor((date - startOfYear) / millisecondsPerDay);
+            const weekIndex = Math.floor(dayOfYear / 7);
+            
+            if (!cellMap.has(weekIndex)) {
+                cellMap.set(weekIndex, new Map());
+            }
+            cellMap.get(weekIndex).set(dayOfWeek, value);
+        }
+        
+        // Create cells
+        for (const [weekIndex, dayMap] of cellMap.entries()) {
+            for (const [dayOfWeek, value] of dayMap.entries()) {
+                const cell = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+                cell.setAttribute("width", cellSize - 1);
+                cell.setAttribute("height", cellSize - 1);
+                cell.setAttribute("x", weekIndex * cellSize + 0.5);
+                cell.setAttribute("y", dayOfWeek * cellSize + 0.5);
+                
+                // Calculate color based on value
+                const normalizedValue = (value - data.min) / (data.max - data.min);
+                cell.setAttribute("fill", d3ColorScale(normalizedValue));
+                
+                // Create date object for this cell
+                const date = new Date(year, 0, 1);
+                date.setDate(date.getDate() + weekIndex * 7 + dayOfWeek);
+                
+                // Add event listeners for custom tooltip
+                cell.addEventListener('mouseover', (e) => showTooltip(e, date, paramName, value));
+                cell.addEventListener('mouseout', hideTooltip);
+                
+                cellGroup.appendChild(cell);
+            }
+        }
+        
+        yearGroup.appendChild(cellGroup);
+        
+        // Add month separators
+        const monthGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        
+        // Get all months in the year
+        const months = [];
+        for (let month = 0; month < 12; month++) {
+            months.push(new Date(year, month, 1));
+        }
+        
+        // Add month labels and separators
+        months.forEach(date => {
+            const monthIndex = date.getMonth();
+            
+            // Calculate week index for the first day of the month
+            const startOfYear = new Date(year, 0, 1);
+            const millisecondsPerDay = 24 * 60 * 60 * 1000;
+            const dayOfYear = Math.floor((date - startOfYear) / millisecondsPerDay);
+            const weekIndex = Math.floor(dayOfYear / 7);
+            
+            // Add month label
+            const monthLabel = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            monthLabel.setAttribute("x", weekIndex * cellSize + 2);
+            monthLabel.setAttribute("y", -5);
+            monthLabel.textContent = date.toLocaleString('default', { month: 'short' });
+            monthGroup.appendChild(monthLabel);
+            
+            // Add separator line (except for January)
+            if (date.getMonth() > 0) {
+                const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                path.setAttribute("fill", "none");
+                path.setAttribute("stroke", "#fff");
+                path.setAttribute("stroke-width", 1.5);
+                
+                // Create path for month separator
+                const d = `M${weekIndex * cellSize},0V${7 * cellSize}`;
+                path.setAttribute("d", d);
+                
+                monthGroup.appendChild(path);
+            }
+        });
+        
+        yearGroup.appendChild(monthGroup);
+        svg.appendChild(yearGroup);
+    });
+    
+    // Add the SVG to the container
+    container.appendChild(svg);
+    
+    // Update legend
+    updateLegend(data.min, data.max, paramName);
+    
+    // Update statistics
+    updateStatistics(paramName, data);
+    
+    console.log("Calendar heatmap created successfully");
 }
 
 // Update heatmap when parameter changes
@@ -361,12 +398,12 @@ function updateHeatmap() {
 }
 
 // Update legend with min and max values
-function updateLegend(min, max) {
-    const legendMin = document.querySelector('.legend-min');
-    const legendMax = document.querySelector('.legend-max');
+function updateLegend(min, max, paramName) {
+    const legendMin = document.querySelector(`#${paramName}-min`);
+    const legendMax = document.querySelector(`#${paramName}-max`);
     
     if (legendMin && legendMax) {
-        const unit = getParameterUnit(paramSelect.value);
+        const unit = getParameterUnit(paramName);
         legendMin.textContent = `${min.toFixed(1)} ${unit}`;
         legendMax.textContent = `${max.toFixed(1)} ${unit}`;
     }
@@ -451,35 +488,169 @@ function getDayOfYear(year, month, day) {
     return Math.floor(diff / oneDay);
 }
 
-// Function to generate a color scale similar to the D3 example
+// Function to generate a unified color scale for all heatmaps
 function d3ColorScale(value) {
-    // Similar to D3's schemeRdYlGn color scale
+    // Using a more distinguishable color scale (similar to viridis/spectral)
     const colors = [
-        '#d73027', // dark red
-        '#f46d43', // red-orange
+        '#313695', // deep blue
+        '#4575b4', // blue
+        '#74add1', // light blue
+        '#abd9e9', // pale blue
+        '#e0f3f8', // very pale blue
+        '#ffffbf', // pale yellow
+        '#fee090', // light orange
         '#fdae61', // orange
-        '#fee08b', // yellow
-        '#d9ef8b', // light green
-        '#a6d96a', // green
-        '#66bd63', // medium green
-        '#1a9850'  // dark green
+        '#f46d43', // dark orange
+        '#d73027', // red
+        '#a50026'  // dark red
     ];
     
-    // Reverse the colors to match the D3 example (low values are green, high values are red)
-    const reversedValue = 1 - value;
+    // Use direct value mapping (low values are blue, high values are red)
+    // No longer reversing the value
     
-    // Map the value to a color index
-    const index = Math.min(Math.floor(reversedValue * colors.length), colors.length - 1);
+    // Map the value to a color index with better interpolation
+    const index = Math.min(Math.floor(value * (colors.length - 1)), colors.length - 2);
+    const remainder = (value * (colors.length - 1)) - index;
+    
+    // Simple linear interpolation between colors for smoother gradient
+    if (remainder > 0) {
+        const c1 = hexToRgb(colors[index]);
+        const c2 = hexToRgb(colors[index + 1]);
+        
+        return `rgb(${Math.round(c1.r + remainder * (c2.r - c1.r))}, 
+                    ${Math.round(c1.g + remainder * (c2.g - c1.g))}, 
+                    ${Math.round(c1.b + remainder * (c2.b - c1.b))})`;
+    }
     
     return colors[index];
 }
 
+// Helper function to convert hex to RGB
+function hexToRgb(hex) {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16)
+    } : {r: 0, g: 0, b: 0};
+}
 
+// Make sure we have the d3 library loaded
+function loadD3Library() {
+    return new Promise((resolve, reject) => {
+        if (window.d3) {
+            resolve();
+            return;
+        }
+        
+        const script = document.createElement('script');
+        script.src = 'https://d3js.org/d3.v7.min.js';
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
+    });
+}
 
+// Update the createHeatmap function to load D3 first
+async function createHeatmap() {
+    try {
+        await loadD3Library();
+        createCalendarHeatmap();
+    } catch (error) {
+        console.error("Failed to load D3 library:", error);
+        alert("Failed to load required libraries. Please check your internet connection.");
+    }
+}
 
+// Function to get parameter display name
+function getParameterDisplayName(paramName) {
+    const displayName = {
+        'dryBulbTemp': 'Dry Bulb Temperature',
+        'relativeHumidity': 'Relative Humidity',
+        'windSpeed': 'Wind Speed',
+        'globalHorizontalRadiation': 'Global Horizontal Radiation',
+        'directNormalRadiation': 'Direct Normal Radiation',
+        'diffuseHorizontalRadiation': 'Diffuse Horizontal Radiation'
+    };
+    
+    return displayName[paramName] || paramName;
+}
 
+// Initialize tooltip
+function initTooltip() {
+    if (!tooltip) {
+        tooltip = document.createElement('div');
+        tooltip.className = 'heatmap-tooltip';
+        document.body.appendChild(tooltip);
+    }
+}
 
+// Show tooltip with proper parameters
+function showTooltip(event, date, paramName, value) {
+    initTooltip();
+    
+    const formattedDate = date.toLocaleDateString('en-US', { 
+        weekday: 'long', 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+    });
+    
+    const paramDisplayName = getParameterDisplayName(paramName);
+    const unit = getParameterUnit(paramName);
+    
+    tooltip.innerHTML = `
+        <div class="heatmap-tooltip-date">${formattedDate}</div>
+        <div class="heatmap-tooltip-value">${paramDisplayName}: ${value.toFixed(1)} ${unit}</div>
+    `;
+    
+    // Position the tooltip
+    const rect = event.target.getBoundingClientRect();
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+    
+    tooltip.style.top = `${rect.top + scrollTop - tooltip.offsetHeight - 10}px`;
+    tooltip.style.left = `${rect.left + scrollLeft + (rect.width / 2) - (tooltip.offsetWidth / 2)}px`;
+    tooltip.classList.add('visible');
+}
 
+// Hide tooltip
+function hideTooltip() {
+    if (tooltip) {
+        tooltip.classList.remove('visible');
+    }
+}
+
+// Add this function to calculate and display statistics
+function updateStatistics(paramName, data) {
+    const min = data.min;
+    const max = data.max;
+    
+    // Calculate average
+    let sum = 0;
+    let count = 0;
+    data.dataPoints.forEach(point => {
+        sum += point.v;
+        count++;
+    });
+    const avg = count > 0 ? sum / count : 0;
+    
+    // Update DOM elements
+    const minElement = document.getElementById(`${paramName}-stat-min`);
+    const maxElement = document.getElementById(`${paramName}-stat-max`);
+    const avgElement = document.getElementById(`${paramName}-stat-avg`);
+    
+    if (minElement && maxElement && avgElement) {
+        const unit = getParameterUnit(paramName);
+        minElement.textContent = `${min.toFixed(1)} ${unit}`;
+        maxElement.textContent = `${max.toFixed(1)} ${unit}`;
+        avgElement.textContent = `${avg.toFixed(1)} ${unit}`;
+    }
+}
+
+// Call this function at the end of createCalendarHeatmap
+// Add after updateLegend call:
+updateStatistics(paramName, data);
 
 
 

@@ -8,13 +8,14 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-matrix@1.2.0/dist/chartjs-chart-matrix.min.js"></script>
     <script src="js/epw-heatmap.js" defer></script>
 </head>
 <body>
     <div class="header">
-        <img src="img/Flaha_logo.svg" alt="Flaha Logo" class="header-logo">
+        <img src="img/Flaha_logo.svg" alt="Flaha Logo" class="header-logo" onerror="this.onerror=null; this.src='img/Flaha_logo.png';">
         <h1>Flaha Calc - EPW Weather Data Heatmap</h1>
     </div>
 
@@ -55,39 +56,156 @@
         </div>
 
         <div class="blocks" id="B2">
-            <h2>Weather Data Heatmap</h2>
+            <h2>Weather Data Calendar Heatmap</h2>
             <div id="heatmapContainer" style="display: none;">
                 <div class="heatmap-header">
                     <h3>Weather Data Visualization</h3>
-                    <select id="paramSelect" disabled>
-                        <option value="dryBulbTemp">Temperature (°C)</option>
-                        <option value="dewPointTemp">Dew Point Temperature (°C)</option>
-                        <option value="relativeHumidity">Relative Humidity (%)</option>
-                        <option value="atmosphericPressure">Atmospheric Pressure (kPa)</option>
-                        <option value="windSpeed">Wind Speed (m/s)</option>
-                        <option value="windDirection">Wind Direction (°)</option>
-                        <option value="globalHorizontalRadiation">Global Horizontal Radiation (Wh/m²)</option>
-                        <option value="directNormalRadiation">Direct Normal Radiation (Wh/m²)</option>
-                        <option value="diffuseHorizontalRadiation">Diffuse Horizontal Radiation (Wh/m²)</option>
-                        <option value="extraterrestrialRadiation">Extraterrestrial Radiation (Wh/m²)</option>
-                    </select>
+                    <!-- Removing the parameter select dropdown -->
                 </div>
-                <div class="heatmap-wrapper">
-                    <canvas id="heatmapChart"></canvas>
-                </div>
-                <div class="heatmap-legend">
-                    <div class="legend-title">Value Range</div>
-                    <div class="legend-scale">
-                        <div class="legend-labels">
-                            <span class="legend-min">Min</span>
+                <!-- We'll create multiple heatmap wrappers for each parameter -->
+                <div id="heatmapsGrid">
+                    <div class="heatmap-item">
+                        <h3 class="heatmap-title">Dry Bulb Temperature</h3>
+                        <div id="dryBulbTemp-wrapper" class="heatmap-wrapper"></div>
+                        <div class="legend">
+                            <span id="dryBulbTemp-min" class="legend-min">-</span>
                             <div class="legend-gradient"></div>
-                            <span class="legend-max">Max</span>
+                            <span id="dryBulbTemp-max" class="legend-max">-</span>
+                        </div>
+                        <div class="heatmap-stats">
+                            <div class="stat-item">
+                                <span class="stat-label">Min:</span>
+                                <span class="stat-value" id="dryBulbTemp-stat-min">-</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Max:</span>
+                                <span class="stat-value" id="dryBulbTemp-stat-max">-</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Avg:</span>
+                                <span class="stat-value" id="dryBulbTemp-stat-avg">-</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="heatmap-item">
+                        <h3 class="heatmap-title">Relative Humidity</h3>
+                        <div id="relativeHumidity-wrapper" class="heatmap-wrapper"></div>
+                        <div class="legend">
+                            <span id="relativeHumidity-min" class="legend-min">-</span>
+                            <div class="legend-gradient"></div>
+                            <span id="relativeHumidity-max" class="legend-max">-</span>
+                        </div>
+                        <div class="heatmap-stats">
+                            <div class="stat-item">
+                                <span class="stat-label">Min:</span>
+                                <span class="stat-value" id="relativeHumidity-stat-min">-</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Max:</span>
+                                <span class="stat-value" id="relativeHumidity-stat-max">-</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Avg:</span>
+                                <span class="stat-value" id="relativeHumidity-stat-avg">-</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="heatmap-item">
+                        <h3 class="heatmap-title">Wind Speed</h3>
+                        <div id="windSpeed-wrapper" class="heatmap-wrapper"></div>
+                        <div class="legend">
+                            <span id="windSpeed-min" class="legend-min">-</span>
+                            <div class="legend-gradient"></div>
+                            <span id="windSpeed-max" class="legend-max">-</span>
+                        </div>
+                        <div class="heatmap-stats">
+                            <div class="stat-item">
+                                <span class="stat-label">Min:</span>
+                                <span class="stat-value" id="windSpeed-stat-min">-</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Max:</span>
+                                <span class="stat-value" id="windSpeed-stat-max">-</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Avg:</span>
+                                <span class="stat-value" id="windSpeed-stat-avg">-</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="heatmap-item">
+                        <h3 class="heatmap-title">Global Horizontal Radiation</h3>
+                        <div id="globalHorizontalRadiation-wrapper" class="heatmap-wrapper"></div>
+                        <div class="legend">
+                            <span id="globalHorizontalRadiation-min" class="legend-min">-</span>
+                            <div class="legend-gradient"></div>
+                            <span id="globalHorizontalRadiation-max" class="legend-max">-</span>
+                        </div>
+                        <div class="heatmap-stats">
+                            <div class="stat-item">
+                                <span class="stat-label">Min:</span>
+                                <span class="stat-value" id="globalHorizontalRadiation-stat-min">-</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Max:</span>
+                                <span class="stat-value" id="globalHorizontalRadiation-stat-max">-</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Avg:</span>
+                                <span class="stat-value" id="globalHorizontalRadiation-stat-avg">-</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="heatmap-item">
+                        <h3 class="heatmap-title">Direct Normal Radiation</h3>
+                        <div id="directNormalRadiation-wrapper" class="heatmap-wrapper"></div>
+                        <div class="legend">
+                            <span id="directNormalRadiation-min" class="legend-min">-</span>
+                            <div class="legend-gradient"></div>
+                            <span id="directNormalRadiation-max" class="legend-max">-</span>
+                        </div>
+                        <div class="heatmap-stats">
+                            <div class="stat-item">
+                                <span class="stat-label">Min:</span>
+                                <span class="stat-value" id="directNormalRadiation-stat-min">-</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Max:</span>
+                                <span class="stat-value" id="directNormalRadiation-stat-max">-</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Avg:</span>
+                                <span class="stat-value" id="directNormalRadiation-stat-avg">-</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="heatmap-item">
+                        <h3 class="heatmap-title">Diffuse Horizontal Radiation</h3>
+                        <div id="diffuseHorizontalRadiation-wrapper" class="heatmap-wrapper"></div>
+                        <div class="legend">
+                            <span id="diffuseHorizontalRadiation-min" class="legend-min">-</span>
+                            <div class="legend-gradient"></div>
+                            <span id="diffuseHorizontalRadiation-max" class="legend-max">-</span>
+                        </div>
+                        <div class="heatmap-stats">
+                            <div class="stat-item">
+                                <span class="stat-label">Min:</span>
+                                <span class="stat-value" id="diffuseHorizontalRadiation-stat-min">-</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Max:</span>
+                                <span class="stat-value" id="diffuseHorizontalRadiation-stat-max">-</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Avg:</span>
+                                <span class="stat-value" id="diffuseHorizontalRadiation-stat-avg">-</span>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
             <div id="noDataMessage">
-                Please upload an EPW file to view the heatmap.
+                Please upload an EPW file to view the calendar heatmaps.
             </div>
         </div>
         
@@ -103,4 +221,12 @@
     </footer>
 </body>
 </html>
+
+
+
+
+
+
+
+
 
