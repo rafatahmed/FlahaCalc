@@ -1242,3 +1242,131 @@ input:invalid, select:invalid {
         align-self: center;
     }
 }
+
+/* Action buttons styling */
+.action-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.secondary-button {
+    background-color: var(--white);
+    color: var(--primary-color);
+    border: 2px solid var(--primary-color);
+    padding: 10px 20px;
+    border-radius: 4px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.secondary-button:hover {
+    background-color: var(--primary-light);
+    color: var(--primary-dark);
+    transform: translateY(-2px);
+}
+
+.secondary-button i {
+    font-size: 1.1rem;
+}
+
+/* Modal styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+    background-color: #fff;
+    margin: 5% auto;
+    width: 80%;
+    max-width: 900px;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    animation: modalFadeIn 0.3s;
+}
+
+.modal-header {
+    padding: 15px 20px;
+    border-bottom: 1px solid #e0e0e0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h2 {
+    margin: 0;
+    color: var(--primary-color);
+}
+
+.close-modal {
+    color: #aaa;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close-modal:hover {
+    color: var(--text-dark);
+}
+
+.modal-body {
+    padding: 20px;
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+/* Initially disable calculation sheet buttons */
+#showCalcSheet, #printCalcSheet {
+    opacity: 0.7;
+}
+
+#showCalcSheet:disabled, #printCalcSheet:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+@keyframes modalFadeIn {
+    from {opacity: 0; transform: translateY(-20px);}
+    to {opacity: 1; transform: translateY(0);}
+}
+
+/* Calculation sheet styles */
+.calc-param {
+    display: grid;
+    grid-template-columns: 2fr 3fr 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 8px;
+    padding: 5px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.param-name {
+    font-weight: 500;
+}
+
+.param-formula {
+    font-family: 'Courier New', monospace;
+    color: #555;
+}
+
+.param-value {
+    font-weight: 600;
+    text-align: right;
+}
+
+.param-unit {
+    color: #666;
+}

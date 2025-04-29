@@ -68,84 +68,281 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// # -[ Functions ]----------------------------------------------------------------
+// Add Font Awesome for icons in the head section
+document.addEventListener('DOMContentLoaded', function() {
+    // Add Font Awesome if not already present
+    if (!document.querySelector('link[href*="font-awesome"]')) {
+        const fontAwesome = document.createElement('link');
+        fontAwesome.rel = 'stylesheet';
+        fontAwesome.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css';
+        document.head.appendChild(fontAwesome);
+    }
+    
+    // Set up modal functionality
+    const modal = document.getElementById('calcSheetModal');
+    const showCalcSheetBtn = document.getElementById('showCalcSheet');
+    const printCalcSheetBtn = document.getElementById('printCalcSheet');
+    const printFromModalBtn = document.getElementById('printFromModal');
+    const closeModalBtn = document.querySelector('.close-modal');
+    const closeButton = document.querySelector('.close-button');
+    
+    if (showCalcSheetBtn) {
+        showCalcSheetBtn.addEventListener('click', function() {
+            generateCalcSheet();
+            modal.style.display = 'block';
+        });
+    }
+    
+    if (printCalcSheetBtn) {
+        printCalcSheetBtn.addEventListener('click', function() {
+            generateCalcSheet();
+            printCalcSheet();
+        });
+    }
+    
+    if (printFromModalBtn) {
+        printFromModalBtn.addEventListener('click', printCalcSheet);
+    }
+    
+    if (closeModalBtn) {
+        closeModalBtn.addEventListener('click', function() {
+            modal.style.display = 'none';
+        });
+    }
+    
+    if (closeButton) {
+        closeButton.addEventListener('click', function() {
+            modal.style.display = 'none';
+        });
+    }
+    
+    // Close modal when clicking outside
+    window.addEventListener('click', function(event) {
+        if (event.target === modal) {
+            modal.style.display = 'none';
+        }
+    });
+});
 
-// # define safe functions for variable conversion, preventing errors with NaN and Null as string values*/
-
-function calculateET() {
-	// Get input values
-	const temp = parseFloat(document.getElementById("temperature").value);
-	const windSpeed = parseFloat(document.getElementById("windSpeed").value);
-	const rh = parseFloat(document.getElementById("relativeHumidity").value);
-	const pressure =
-		parseFloat(document.getElementById("atmosphericPressure").value) ||
-		calculateAtmosphericPressure();
-	const elev = parseFloat(document.getElementById("elevation").value);
-	const lat = parseFloat(document.getElementById("latitude").value);
-	const dayOfYear = parseFloat(document.getElementById("dayNumber").value);
-	const sunshineDuration = parseFloat(
-		document.getElementById("sunshineDuration").value
-	);
-
-	// Convert latitude to radians
-	const latRad = (lat * Math.PI) / 180;
-
-	// Calculate extraterrestrial radiation
-	const Ra = extraterrestrialRadiation(latRad, dayOfYear);
-
-	// Calculate clear sky radiation
-	const Rso = clearSkyRadiation(Ra, elev);
-
-	// Calculate daylight hours (N)
-	const solarDeclination =
-		0.409 * Math.sin(((2 * Math.PI) / 365) * dayOfYear - 1.39);
-	const omegaS = Math.acos(-Math.tan(latRad) * Math.tan(solarDeclination));
-	const N = (24 * omegaS) / Math.PI;
-
-	// Calculate relative sunshine duration (n/N)
-	const n_N = sunshineDuration ? sunshineDuration / N : 0.5; // Use 0.5 as default if not provided
-
-	// Estimate solar radiation (Rs) using Angstrom formula with actual sunshine data
-	const Rs = (0.25 + 0.5 * n_N) * Ra;
-
-	// Rest of the calculation remains the same
-	const albedo = 0.23;
-	const Rns = netShortwaveRadiation(Rs, albedo);
-	const es = saturationVaporPressure(temp);
-	const ea = (es * rh) / 100;
-	const delta = slopeVaporPressureCurve(temp);
-	const gamma = psychrometricConstant(pressure);
-	const Rnl = netLongwaveRadiation(temp, temp, ea, Rs, Rso);
-	const Rn = Rns - Rnl;
-	const G = 0;
-
-	const numerator =
-		0.408 * delta * (Rn - G) +
-		gamma * (900 / (temp + 273)) * windSpeed * (es - ea);
-	const denominator = delta + gamma * (1 + 0.34 * windSpeed);
-	const ET0 = numerator / denominator;
-
-	// Display results
-	document.getElementById(
-		"satVaporPressure"
-	).textContent = `Saturation Vapor Pressure (es): ${es.toFixed(3)} kPa`;
-	document.getElementById(
-		"actVaporPressure"
-	).textContent = `Actual Vapor Pressure (ea): ${ea.toFixed(3)} kPa`;
-	document.getElementById(
-		"slopeVPC"
-	).textContent = `Slope of Vapour Pressure Curve (Δ): ${delta.toFixed(
-		4
-	)} kPa °C⁻¹`;
-	document.getElementById(
-		"psychoC"
-	).textContent = `Psychrometric Constant (γ): ${gamma.toFixed(4)} kPa °C⁻¹`;
-	document.getElementById(
-		"netRad"
-	).textContent = `Net Radiation (Rn): ${Rn.toFixed(2)} MJ m⁻² d⁻¹`;
-	document.getElementById("result").textContent = `Reference ET₀: ${ET0.toFixed(
-		2
-	)} mm/day`;
+// Function to generate calculation sheet
+function generateCalcSheet() {
+    const calcSheetContent = document.getElementById('calcSheetContent');
+    if (!calcSheetContent) return;
+    
+    // Get input values
+    const temp = parseFloat(document.getElementById("temperature").value);
+    const windSpeed = parseFloat(document.getElementById("windSpeed").value);
+    const rh = parseFloat(document.getElementById("relativeHumidity").value);
+    const elevation = parseFloat(document.getElementById("elevation").value);
+    const pressure = parseFloat(document.getElementById("atmosphericPressure").value) || calculateAtmosphericPressure(elevation);
+    const lat = parseFloat(document.getElementById("latitude").value);
+    const dayOfYear = parseFloat(document.getElementById("dayNumber").value);
+    const sunshineDuration = parseFloat(document.getElementById("sunshineDuration").value);
+    
+    // Check if calculation has been performed
+    const etoResult = document.getElementById("result").textContent;
+    if (etoResult === "Reference ET₀: -- mm/day") {
+        calcSheetContent.innerHTML = `
+            <div class="calc-sheet">
+                <div class="calc-sheet-header">
+                    <h2>No Calculation Available</h2>
+                    <p>Please calculate ETo first by entering all required data and clicking the "Calculate ETo" button.</p>
+                </div>
+            </div>
+        `;
+        return;
+    }
+    
+    // Calculate all parameters needed for the sheet
+    const dr = inverseRelativeDistanceEarthSun(dayOfYear);
+    const delta = solarDeclination(dayOfYear);
+    const ws = sunsetHourAngle(lat, delta);
+    const Ra = extraterrestrialRadiation(dr, ws, lat, delta);
+    const N = dayLength(ws);
+    const n = sunshineDuration;
+    const Rs = solarRadiation(Ra, n, N);
+    const Rso = clearSkySolarRadiation(Ra, elevation);
+    const albedo = 0.23;
+    const Rns = netShortwaveRadiation(Rs, albedo);
+    const es = saturationVaporPressure(temp);
+    const ea = (es * rh) / 100;
+    const deltaVPC = slopeVaporPressureCurve(temp);
+    const gamma = psychrometricConstant(pressure);
+    const Rnl = netLongwaveRadiation(temp, temp, ea, Rs, Rso);
+    const Rn = Rns - Rnl;
+    const G = 0;
+    
+    // Calculate ETo
+    const numerator = 0.408 * deltaVPC * (Rn - G) + gamma * (900 / (temp + 273)) * windSpeed * (es - ea);
+    const denominator = deltaVPC + gamma * (1 + 0.34 * windSpeed);
+    const ET0 = numerator / denominator;
+    
+    // Generate HTML content
+    calcSheetContent.innerHTML = `
+        <div class="calc-sheet">
+            <div class="calc-sheet-header">
+                <h2>Reference Evapotranspiration (ETo) Calculation</h2>
+                <p>FAO Penman-Monteith Method</p>
+                <p>Date: ${new Date().toLocaleDateString()}</p>
+            </div>
+            
+            <div class="calc-sheet-section">
+                <h3>Input Parameters</h3>
+                <div class="calc-param">
+                    <div class="param-name">Mean Temperature</div>
+                    <div class="param-formula">T</div>
+                    <div class="param-value">${temp.toFixed(2)}</div>
+                    <div class="param-unit">°C</div>
+                </div>
+                <div class="calc-param">
+                    <div class="param-name">Wind Speed</div>
+                    <div class="param-formula">u₂</div>
+                    <div class="param-value">${windSpeed.toFixed(2)}</div>
+                    <div class="param-unit">m/s</div>
+                </div>
+                <div class="calc-param">
+                    <div class="param-name">Relative Humidity</div>
+                    <div class="param-formula">RH</div>
+                    <div class="param-value">${rh.toFixed(0)}</div>
+                    <div class="param-unit">%</div>
+                </div>
+                <div class="calc-param">
+                    <div class="param-name">Elevation</div>
+                    <div class="param-formula">z</div>
+                    <div class="param-value">${elevation.toFixed(0)}</div>
+                    <div class="param-unit">m</div>
+                </div>
+                <div class="calc-param">
+                    <div class="param-name">Atmospheric Pressure</div>
+                    <div class="param-formula">P = 101.3 × ((293 - 0.0065z) / 293)^5.26</div>
+                    <div class="param-value">${pressure.toFixed(2)}</div>
+                    <div class="param-unit">kPa</div>
+                </div>
+                <div class="calc-param">
+                    <div class="param-name">Latitude</div>
+                    <div class="param-formula">φ</div>
+                    <div class="param-value">${lat.toFixed(2)}</div>
+                    <div class="param-unit">degrees</div>
+                </div>
+                <div class="calc-param">
+                    <div class="param-name">Day of Year</div>
+                    <div class="param-formula">J</div>
+                    <div class="param-value">${dayOfYear}</div>
+                    <div class="param-unit">day</div>
+                </div>
+                <div class="calc-param">
+                    <div class="param-name">Sunshine Duration</div>
+                    <div class="param-formula">n</div>
+                    <div class="param-value">${sunshineDuration.toFixed(1)}</div>
+                    <div class="param-unit">hours</div>
+                </div>
+            </div>
+            
+            <div class="calc-sheet-section">
+                <h3>Radiation Parameters</h3>
+                <div class="calc-param">
+                    <div class="param-name">Inverse Relative Distance</div>
+                    <div class="param-formula">dr = 1 + 0.033 × cos(2π × J / 365)</div>
+                    <div class="param-value">${dr.toFixed(5)}</div>
+                    <div class="param-unit">-</div>
+                </div>
+                <div class="calc-param">
+                    <div class="param-name">Solar Declination</div>
+                    <div class="param-formula">δ = 0.409 × sin(2π × J / 365 - 1.39)</div>
+                    <div class="param-value">${delta.toFixed(5)}</div>
+                    <div class="param-unit">radians</div>
+                </div>
+                <div class="calc-param">
+                    <div class="param-name">Sunset Hour Angle</div>
+                    <div class="param-formula">ωs = arccos(-tan(φ) × tan(δ))</div>
+                    <div class="param-value">${ws.toFixed(5)}</div>
+                    <div class="param-unit">radians</div>
+                </div>
+                <div class="calc-param">
+                    <div class="param-name">Daylight Hours</div>
+                    <div class="param-formula">N = 24 × ωs / π</div>
+                    <div class="param-value">${N.toFixed(2)}</div>
+                    <div class="param-unit">hours</div>
+                </div>
+                <div class="calc-param">
+                    <div class="param-name">Extraterrestrial Radiation</div>
+                    <div class="param-formula">Ra = (24 × 60 / π) × Gsc × dr × [ωs × sin(φ) × sin(δ) + cos(φ) × cos(δ) × sin(ωs)]</div>
+                    <div class="param-value">${Ra.toFixed(2)}</div>
+                    <div class="param-unit">MJ m⁻² d⁻¹</div>
+                </div>
+                <div class="calc-param">
+                    <div class="param-name">Solar Radiation</div>
+                    <div class="param-formula">Rs = (0.25 + 0.5 × n/N) × Ra</div>
+                    <div class="param-value">${Rs.toFixed(2)}</div>
+                    <div class="param-unit">MJ m⁻² d⁻¹</div>
+                </div>
+                <div class="calc-param">
+                    <div class="param-name">Clear Sky Radiation</div>
+                    <div class="param-formula">Rso = (0.75 + 2 × 10⁻⁵ × z) × Ra</div
+                    <div class="param-value">${Rso.toFixed(2)}</div>
+                    <div class="param-unit">MJ m⁻² d⁻¹</div>
+                </div>
+            </div>
+            
+            <div class="calc-sheet-section">
+                <h3>Evapotranspiration Calculation</h3>
+                <div class="calc-param">
+                    <div class="param-name">Net Shortwave Radiation</div>
+                    <div class="param-formula">Rns = (1 - albedo) × Rs</div>
+                    <div class="param-value">${Rns.toFixed(2)}</div>
+                    <div class="param-unit">MJ m⁻² d⁻¹</div>
+                </div>
+                <div class="calc-param">
+                    <div class="param-name">Net Longwave Radiation</div>
+                    <div class="param-formula">Rnl = 4.903 × 10⁻⁹ × 0.5 × (Tmax⁴ + Tmin⁴) × (0.34 - 0.14 × √ea) × (1.35 × Rs/Rso - 0.35)</div>
+                    <div class="param-value">${Rnl.toFixed(2)}</div>
+                    <div class="param-unit">MJ m⁻² d⁻¹</div>
+                </div>
+                <div class="calc-param">
+                    <div class="param-name">Net Radiation</div>
+                    <div class="param-formula">Rn = Rns - Rnl</div>
+                    <div class="param-value">${Rn.toFixed(2)}</div>
+                    <div class="param-unit">MJ m⁻² d⁻¹</div>
+                </div>
+                <div class="calc-param">
+                    <div class="param-name">Soil Heat Flux Density</div>
+                    <div class="param-formula">G = 0</div>
+                    <div class="param-value">${G.toFixed(2)}</div>
+                    <div class="param-unit">MJ m⁻² d⁻¹</div>
+                </div>
+                <div class="calc-param">
+                    <div class="param-name">Saturation Vapor Pressure</div>
+                    <div class="param-formula">es = 0.6108 × exp((17.27 × T) / (T + 237.3))</div>
+                    <div class="param-value">${es.toFixed(3)}</div>
+                    <div class="param-unit">kPa</div>
+                </div>
+                <div class="calc-param">
+                    <div class="param-name">Actual Vapor Pressure</div>
+                    <div class="param-formula">ea = (es × RH) / 100</div>
+                    <div class="param-value">${ea.toFixed(3)}</div>
+                    <div class="param-unit">kPa</div>
+                </div>
+                <div class="calc-param">
+                    <div class="param-name">Slope of Vapor Pressure Curve</div>
+                    <div class="param-formula">Δ = (4098 × es) / (T + 237.3)²</div>
+                    <div class="param-value">${deltaVPC.toFixed(4)}</div>
+                    <div class="param-unit">kPa/°C</div>
+                </div>
+                <div class="calc-param">
+                    <div class="param-name">Psychrometric Constant</div>
+                    <div class="param-formula">γ = 0.000665 × P</div>
+                    <div class="param-value">${gamma.toFixed(4)}</div>
+                    <div class="param-unit">kPa/°C</div>
+                </div>
+                <div class="calc-param">
+                    <div class="param-name">Reference ET₀</div>
+                    <div class="param-formula">ET₀ = (0.408 × Δ × (Rn - G) + γ × (900 / (T + 273)) × u₂ × (es - ea)) / (Δ + γ × (1 + 0.34 × u₂))</div>
+                    <div class="param-value">${ET0.toFixed(2)}</div>
+                    <div class="param-unit">mm/day</div>
+                </div>
+            </div>
+        </div>
+    `;
 }
 
 function calculateETB() {
@@ -593,4 +790,121 @@ function netLongwaveRadiation(tMaxC, tMinC, ea, rs, rso) {
 		(0.34 - 0.14 * Math.sqrt(ea)) *
 		(1.35 * (rs / rso) - 0.35)
 	);
+}
+
+// Function to calculate ET0
+function calculateET() {
+    // Get input values
+    const temp = parseFloat(document.getElementById("temperature").value);
+    const windSpeed = parseFloat(document.getElementById("windSpeed").value);
+    const rh = parseFloat(document.getElementById("relativeHumidity").value);
+    const elevation = parseFloat(document.getElementById("elevation").value);
+    const pressure = parseFloat(document.getElementById("atmosphericPressure").value) || calculateAtmosphericPressure(elevation);
+    const lat = parseFloat(document.getElementById("latitude").value);
+    const dayOfYear = parseFloat(document.getElementById("dayNumber").value);
+    const sunshineDuration = parseFloat(document.getElementById("sunshineDuration").value);
+    
+    // Validate inputs
+    if (isNaN(temp) || isNaN(windSpeed) || isNaN(rh) || isNaN(elevation) || 
+        isNaN(lat) || isNaN(dayOfYear) || isNaN(sunshineDuration)) {
+        alert("Please fill in all required fields with valid numbers.");
+        return;
+    }
+    
+    // Calculate intermediate values
+    const dr = inverseRelativeDistanceEarthSun(dayOfYear);
+    const delta = solarDeclination(dayOfYear);
+    const ws = sunsetHourAngle(lat, delta);
+    const Ra = extraterrestrialRadiation(dr, ws, lat, delta);
+    const N = dayLength(ws);
+    const Rs = solarRadiation(Ra, sunshineDuration, N);
+    const Rso = clearSkySolarRadiation(Ra, elevation);
+    const albedo = 0.23;
+    const Rns = netShortwaveRadiation(Rs, albedo);
+    const es = saturationVaporPressure(temp);
+    const ea = (es * rh) / 100;
+    const deltaVPC = slopeVaporPressureCurve(temp);
+    const gamma = psychrometricConstant(pressure);
+    const Rnl = netLongwaveRadiation(temp, temp, ea, Rs, Rso);
+    const Rn = Rns - Rnl;
+    const G = 0;
+    
+    // Calculate ET0
+    const numerator = 0.408 * deltaVPC * (Rn - G) + gamma * (900 / (temp + 273)) * windSpeed * (es - ea);
+    const denominator = deltaVPC + gamma * (1 + 0.34 * windSpeed);
+    const ET0 = numerator / denominator;
+    
+    // Display results
+    document.getElementById("satVaporPressure").textContent = `Saturation Vapor Pressure (es): ${es.toFixed(3)} kPa`;
+    document.getElementById("actVaporPressure").textContent = `Actual Vapor Pressure (ea): ${ea.toFixed(3)} kPa`;
+    document.getElementById("slopeVPC").textContent = `Slope of Vapour Pressure Curve (Δ): ${deltaVPC.toFixed(4)} kPa °C⁻¹`;
+    document.getElementById("psychoC").textContent = `Psychrometric Constant (γ): ${gamma.toFixed(4)} kPa °C⁻¹`;
+    document.getElementById("netRad").textContent = `Net Radiation (Rn): ${Rn.toFixed(2)} MJ m⁻² d⁻¹`;
+    document.getElementById("result").textContent = `Reference ET₀: ${ET0.toFixed(2)} mm/day`;
+    
+    // Enable calculation sheet buttons
+    document.getElementById("showCalcSheet").disabled = false;
+    document.getElementById("printCalcSheet").disabled = false;
+}
+
+// Add these missing helper functions
+function inverseRelativeDistanceEarthSun(dayOfYear) {
+    return 1 + 0.033 * Math.cos(2 * Math.PI * dayOfYear / 365);
+}
+
+function solarDeclination(dayOfYear) {
+    return 0.409 * Math.sin(2 * Math.PI * dayOfYear / 365 - 1.39);
+}
+
+function sunsetHourAngle(latitude, delta) {
+    const latRad = latitude * Math.PI / 180;
+    return Math.acos(-Math.tan(latRad) * Math.tan(delta));
+}
+
+function extraterrestrialRadiation(dr, ws, latitude, delta) {
+    const latRad = latitude * Math.PI / 180;
+    const Gsc = 0.0820; // Solar constant [MJ m-2 min-1]
+    return (24 * 60 / Math.PI) * Gsc * dr * (ws * Math.sin(latRad) * Math.sin(delta) + 
+            Math.cos(latRad) * Math.cos(delta) * Math.sin(ws));
+}
+
+function dayLength(ws) {
+    return (24 / Math.PI) * ws;
+}
+
+function solarRadiation(Ra, n, N) {
+    return (0.25 + 0.5 * n / N) * Ra;
+}
+
+function clearSkySolarRadiation(Ra, elevation) {
+    return (0.75 + 2e-5 * elevation) * Ra;
+}
+
+function netShortwaveRadiation(Rs, albedo) {
+    return (1 - albedo) * Rs;
+}
+
+function netLongwaveRadiation(Tmax, Tmin, ea, Rs, Rso) {
+    const Tmaxk = Tmax + 273.16;
+    const Tmink = Tmin + 273.16;
+    const sigma = 4.903e-9; // Stefan-Boltzmann constant [MJ K-4 m-2 day-1]
+    
+    return sigma * ((Math.pow(Tmaxk, 4) + Math.pow(Tmink, 4)) / 2) * 
+           (0.34 - 0.14 * Math.sqrt(ea)) * (1.35 * Rs / Rso - 0.35);
+}
+
+// Function to print calculation sheet
+function printCalcSheet() {
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write('<html><head><title>ETo Calculation Sheet</title>');
+    printWindow.document.write('<link rel="stylesheet" href="css/style.css">');
+    printWindow.document.write('</head><body>');
+    printWindow.document.write(document.getElementById('calcSheetContent').innerHTML);
+    printWindow.document.write('</body></html>');
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => {
+        printWindow.print();
+        printWindow.close();
+    }, 500);
 }

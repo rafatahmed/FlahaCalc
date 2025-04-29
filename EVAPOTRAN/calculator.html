@@ -116,6 +116,15 @@
                 <div id="result">Reference ET₀: -- mm/day</div>
             </div>
 
+            <div class="action-buttons">
+                <button id="showCalcSheet" class="secondary-button">
+                    <i class="fas fa-file-alt"></i> Show Calculation Sheet
+                </button>
+                <button id="printCalcSheet" class="secondary-button">
+                    <i class="fas fa-print"></i> Print Calculation Sheet
+                </button>
+            </div>
+
             <div class="equation-box">
                 <p>FAO Penman-Monteith Equation:</p>
                 <p>ET₀ = (0.408 × Δ × (Rn - G) + γ × (900 / (T + 273)) × u₂ × (es - ea)) / (Δ + γ × (1 + 0.34 × u₂))</p>
@@ -143,7 +152,28 @@
             <p class="footer-credits">Developed by Rafat Al Khashan | <a href="mailto:info@flaha.org">info@flaha.org</a></p>
         </div>
     </div>
+
+    <!-- Calculation Sheet Modal -->
+    <div id="calcSheetModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>ETo Calculation Sheet</h2>
+                <span class="close-modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="calcSheetContent"></div>
+            </div>
+            <div class="modal-footer">
+                <button id="printFromModal" class="secondary-button">
+                    <i class="fas fa-print"></i> Print
+                </button>
+                <button class="close-button">Close</button>
+            </div>
+        </div>
+    </div>
 </body>
 
 </html>
+
+
 
