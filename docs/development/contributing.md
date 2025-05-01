@@ -1,42 +1,35 @@
 # Contributing to EVAPOTRAN
 
-Thank you for your interest in contributing to EVAPOTRAN! This guide will help you get started with the development process.
+We welcome contributions to the EVAPOTRAN project! This document provides guidelines and instructions for contributing.
 
-## Getting Started
+## How to Contribute
 
-### Prerequisites
+1. **Report bugs and request features** by creating issues on our GitHub repository
+2. **Submit pull requests** with bug fixes or new features
+3. **Improve documentation** by submitting corrections or additions
+4. **Share case studies** of how you've used EVAPOTRAN in real-world applications
 
-- Basic knowledge of HTML, CSS, and JavaScript
-- Familiarity with Git and GitHub
-- Understanding of evapotranspiration concepts (helpful but not required)
+## Development Process
 
-### Development Environment Setup
+1. **Fork the repository** to your GitHub account
+2. **Create a branch** for your changes
+3. **Make your changes** following our code guidelines
+4. **Test your changes** thoroughly
+5. **Submit a pull request** with a clear description of your changes
 
-1. **Fork the repository**:
-   - Visit the [EVAPOTRAN GitHub repository](https://github.com/flaha-agritech/evapotran)
-   - Click the "Fork" button to create your own copy
+## Code Guidelines
 
-2. **Clone your fork**:
-   ```bash
-   git clone https://github.com/YOUR-USERNAME/evapotran.git
-   cd evapotran
-   ```
+Please follow our [Code Guidelines](code-guidelines.md) when contributing code to EVAPOTRAN.
 
-3. **Set up upstream remote**:
-   ```bash
-   git remote add upstream https://github.com/flaha-agritech/evapotran.git
-   ```
+## Documentation
 
-## Development Workflow
+When contributing documentation:
 
-1. **Create a new branch** for your feature or bugfix:
-   ```bash
-   git checkout -b feature/your-feature-name
-   ```
+1. Use Markdown format
+2. Follow the existing documentation structure
+3. Include clear examples where appropriate
+4. Check for spelling and grammar errors
 
-2. **Make your changes** following the [coding guidelines](code-guidelines.md)
+## Contact
 
-3. **Test your changes** thoroughly:
-   - Open the application in multiple browsers
-   - Test with different input values
-  
+If you have questions about contributing, please contact us at [info@flaha.org](mailto:info@flaha.org).

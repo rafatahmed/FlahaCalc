@@ -1,13 +1,22 @@
-# EVAPOTRAN Documentation
 
 <div align="center">
   <img src="../EVAPOTRAN/img/Flaha_logo.svg" alt="Flaha Logo" width="80" height="80">
   <h1>Flaha Agri Tech - EVAPOTRAN</h1>
+  <p><em>Professional Evapotranspiration Calculator for Agricultural Applications</em></p>
 </div>
 
 ## Overview
 
 EVAPOTRAN is a comprehensive calculator designed for professionals in horticulture, agronomy, landscaping, and agricultural engineering. This web application provides essential tools for precise calculations of evapotranspiration using the FAO Penman-Monteith method, supporting irrigation management and water resource planning.
+
+## What is Evapotranspiration?
+
+Evapotranspiration (ET) is the combined process of water evaporation from soil and plant surfaces and transpiration from plants. Reference evapotranspiration (ET₀) represents the evapotranspiration rate from a reference surface, not short of water. Understanding ET₀ is crucial for:
+
+- Determining crop water requirements
+- Designing efficient irrigation systems
+- Managing water resources sustainably
+- Planning agricultural operations
 
 ## Key Features
 
@@ -32,7 +41,7 @@ This documentation is organized into the following sections:
 - **Development**: Guidelines for contributing to the project
 - **About**: License information and contact details
 
-## FAO Penman-Monteith Equation
+## The Science Behind EVAPOTRAN
 
 EVAPOTRAN implements the FAO Penman-Monteith equation for calculating reference evapotranspiration (ET₀):
 
@@ -48,3 +57,5 @@ Where:
 - $e_a$ = actual vapor pressure [kPa]
 - $\Delta$ = slope of vapor pressure curve [kPa °C⁻¹]
 - $\gamma$ = psychrometric constant [kPa °C⁻¹]
+
+This internationally recognized method provides a standardized approach to estimating evapotranspiration, enabling accurate water management decisions across different climates and regions.
