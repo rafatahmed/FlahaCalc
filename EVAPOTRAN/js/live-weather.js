@@ -583,13 +583,146 @@ function displayForecastData(data) {
 	forecastContainer.appendChild(forecastList);
 }
 
+// Add this function to handle the weather data and calculate ET0
+function processWeatherData(weatherData) {
+    // Display the weather data in the results section
+    displayWeatherResults(weatherData);
+    
+    // Show the output section with the "Use This Data" button
+    const outputSection = document.getElementById('output');
+    if (outputSection) {
+        outputSection.style.display = 'block';
+    }
+    
+    // Add event listener to the "Use This Data" button
+    const useDataBtn = document.getElementById('useWeatherDataBtn');
+    if (useDataBtn) {
+        useDataBtn.addEventListener('click', function() {
+            // Store the weather data in localStorage for use in calculator
+            const calculatorData = {
+                temperature: weatherData.temperature,
+                windSpeed: weatherData.windSpeed,
+                relativeHumidity: weatherData.humidity,
+                // Add other relevant data
+                atmosphericPressure: weatherData.pressure,
+                latitude: weatherData.lat,
+                longitude: weatherData.lon
+            };
+            
+            localStorage.setItem('etoCalcData', JSON.stringify(calculatorData));
+            
+            // Redirect to calculator page
+            window.location.href = 'calculator.html';
+        });
+    }
+}
 
+// Function to display weather results in the B2 block
+function displayWeatherResults(weatherData) {
+    const weatherResults = document.getElementById('weatherResults');
+    if (!weatherResults) return;
+    
+    // Format date and time
+    const timestamp = new Date(weatherData.timestamp || Date.now());
+    const formattedDate = timestamp.toLocaleDateString();
+    const formattedTime = timestamp.toLocaleTimeString();
+    
+    // Create HTML for the weather data table
+    weatherResults.innerHTML = `
+        <h3>${weatherData.location || 'Current Location'}</h3>
+        <p class="timestamp">As of ${formattedDate} at ${formattedTime}</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Parameter</th>
+                    <th>Value</th>
+                    <th>Unit</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Temperature</td>
+                    <td>${weatherData.temperature.toFixed(1)}</td>
+                    <td>°C</td>
+                </tr>
+                <tr>
+                    <td>Wind Speed</td>
+                    <td>${weatherData.windSpeed.toFixed(2)}</td>
+                    <td>m/s</td>
+                </tr>
+                <tr>
+                    <td>Relative Humidity</td>
+                    <td>${weatherData.humidity}</td>
+                    <td>%</td>
+                </tr>
+                <tr>
+                    <td>Atmospheric Pressure</td>
+                    <td>${(weatherData.pressure / 10).toFixed(1)}</td>
+                    <td>kPa</td>
+                </tr>
+                <tr>
+                    <td>Solar Radiation (est.)</td>
+                    <td>${weatherData.solarRadiation ? weatherData.solarRadiation.toFixed(2) : 'N/A'}</td>
+                    <td>MJ/m²/day</td>
+                </tr>
+                <tr>
+                    <td>Calculated ET₀</td>
+                    <td>${weatherData.et0 ? weatherData.et0.toFixed(2) : 'Calculating...'}</td>
+                    <td>mm/day</td>
+                </tr>
+            </tbody>
+        </table>
+    `;
+    
+    // Make the results visible
+    weatherResults.style.display = 'block';
+}
 
+// Add this to your fetchWeatherData function
+async function fetchWeatherData() {
+    const locationInput = document.getElementById('locationInput').value;
+    if (!locationInput) {
+        alert('Please enter a location');
+        return;
+    }
+    
+    // Show loading indicator
+    const loadingIndicator = document.getElementById('loadingIndicator');
+    if (loadingIndicator) {
+        loadingIndicator.style.display = 'block';
+    }
+    
+    try {
+        // Fetch weather data from API
+        const response = await fetch(`http://localhost:3000/api/weather?location=${encodeURIComponent(locationInput)}`);
+        const data = await response.json();
+        
+        if (data.error) {
+            throw new Error(data.error);
+        }
+        
+        // Process and display the weather data
+        processWeatherData(data);
+        
+        // Also fetch forecast data if available
+        fetchForecastData(data.lat, data.lon);
+    } catch (error) {
+        console.error('Error fetching weather data:', error);
+        alert(`Failed to fetch weather data: ${error.message}`);
+    } finally {
+        // Hide loading indicator
+        if (loadingIndicator) {
+            loadingIndicator.style.display = 'none';
+        }
+    }
+}
 
-
-
-
-
-
+// Make sure the fetch button has an event listener
+document.addEventListener('DOMContentLoaded', function() {
+    const fetchWeatherBtn = document.getElementById('fetchWeatherBtn');
+    if (fetchWeatherBtn) {
+        fetchWeatherBtn.addEventListener('click', fetchWeatherData);
+    }
+});
 
 
