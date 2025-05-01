@@ -56,9 +56,9 @@ nav:
     - Urban Landscape: case-studies/urban-landscape.md
     - Drought Response: case-studies/drought-response.md
   - Development:
-    - Contributing: development/contributing.md
-    - Code Guidelines: development/code-guidelines.md
     - Project Structure: development/project-structure.md
+    - Code Guidelines: development/code-guidelines.md
+    - Contributing: development/contributing.md
   - About:
     - License: about/license.md
     - Contact: about/contact.md
