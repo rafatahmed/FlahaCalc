@@ -1,0 +1,28 @@
+{
+  "name": "evapotran",
+  "version": "0.1.0-alpha",
+  "description": "Professional Evapotranspiration Calculator for Agricultural Applications",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "docs": "mkdocs serve",
+    "build-docs": "mkdocs build"
+  },
+  "keywords": [
+    "evapotranspiration",
+    "agriculture",
+    "irrigation",
+    "water-management",
+    "calculator"
+  ],
+  "author": "Flaha Agri Tech",
+  "license": "GPL-3.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/flaha-agritech/evapotran.git"
+  },
+  "bugs": {
+    "url": "https://github.com/flaha-agritech/evapotran/issues"
+  },
+  "homepage": "https://flaha.org/evapotran"
+}
