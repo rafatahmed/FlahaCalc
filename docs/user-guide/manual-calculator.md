@@ -1,74 +1,80 @@
 # Manual Calculator
 
-The Manual Calculator is the core component of EVAPOTRAN, allowing you to calculate reference evapotranspiration (ET₀) by entering climate data directly.
+The Manual Calculator allows you to calculate reference evapotranspiration (ET₀) by entering climate data directly.
 
 ## Accessing the Calculator
 
-1. From the home page, click on "Manual Calculator" in the navigation menu
-2. Alternatively, navigate directly to `calculator.html`
+1. From the EVAPOTRAN home page, click on the "Manual Calculator" option
+2. Alternatively, navigate directly to `calculator.html` in your browser
 
-## Required Input Parameters
+## Input Parameters
 
-To calculate ET₀, you need to provide the following parameters:
+The calculator requires the following input parameters:
 
-| Parameter | Description | Unit | Example Value |
-|-----------|-------------|------|--------------|
-| Mean Temperature | Average daily temperature | °C | 25 |
-| Wind Speed | Wind speed at 2m height | m/s | 2 |
-| Relative Humidity | Average daily relative humidity | % | 60 |
-| Elevation | Site elevation above sea level | m | 100 |
-| Latitude | Site latitude | degrees | 35.2 |
-| Day of Year | Day number (1-365) | day | 182 |
-| Sunshine Duration | Hours of bright sunshine | hours | 8 |
+### Location Information
 
-## Optional Parameters
+| Parameter | Description | Units | Example |
+|-----------|-------------|-------|---------|
+| Latitude | Site latitude (positive for Northern hemisphere) | degrees | 35.2 |
+| Elevation | Height above sea level | meters | 210 |
+| Day of Year | Day number (1-365) | - | 182 |
 
-The following parameter is optional and will be calculated from elevation if not provided:
+### Climate Data
 
-| Parameter | Description | Unit | Example Value |
-|-----------|-------------|------|--------------|
-| Atmospheric Pressure | Average atmospheric pressure | kPa | 101.3 |
+| Parameter | Description | Units | Example |
+|-----------|-------------|-------|---------|
+| Min Temperature | Minimum daily temperature | °C | 15.0 |
+| Max Temperature | Maximum daily temperature | °C | 28.5 |
+| Wind Speed | Average wind speed at 2m height | m/s | 2.1 |
+| Relative Humidity | Average relative humidity | % | 65 |
+| Sunshine Hours | Hours of bright sunshine | hours | 8.5 |
 
 ## Calculation Process
 
-1. Enter all required parameters in the input fields
+1. Enter all required parameters in the form
 2. Click the "Calculate ET₀" button
-3. View the results in the "Results" section
+3. Review the results displayed in the results section
 
 ## Understanding the Results
 
-After calculation, the following results are displayed:
+The calculator provides:
 
-1. **Intermediate Values**:
-   - Saturation Vapor Pressure (es): The vapor pressure at saturation
-   - Actual Vapor Pressure (ea): The actual vapor pressure based on relative humidity
-   - Slope of Vapor Pressure Curve (Δ): Rate of change of saturation vapor pressure with temperature
-   - Psychrometric Constant (γ): Relates partial pressure of water in air to air temperature
-   - Net Radiation (Rn): The difference between incoming and outgoing radiation
+1. **Reference ET₀ Value**: The daily reference evapotranspiration in mm/day
+2. **Detailed Calculation Sheet**: A breakdown of all intermediate parameters:
+   - Net radiation
+   - Soil heat flux
+   - Saturation vapor pressure
+   - Actual vapor pressure
+   - Vapor pressure deficit
+   - Slope of vapor pressure curve
+   - Psychrometric constant
 
-2. **Final Result**:
-   - Reference ET₀: The calculated reference evapotranspiration in mm/day
+## Tips for Accurate Calculations
 
-## Calculation Sheet
+- Use daily average values for best results
+- Ensure wind speed measurements are at 2m height (or use the conversion tool)
+- For sunshine hours, use actual measurements rather than estimates when possible
+- When relative humidity data is unavailable, use the dew point temperature option
 
-For detailed information about the calculation process:
+## Example Calculation
 
-1. Click "Show Calculation Sheet" to view a detailed breakdown of all calculations
-2. Click "Print Calculation Sheet" to print or save the calculation details as a PDF
+Here's an example calculation for a location in the Mediterranean region during summer:
 
-## FAO Penman-Monteith Equation
+- Latitude: 37.5° N
+- Elevation: 150 m
+- Day of Year: 195 (July 14)
+- Min Temperature: 18°C
+- Max Temperature: 32°C
+- Wind Speed: 2.5 m/s
+- Relative Humidity: 55%
+- Sunshine Hours: 10.2 hours
 
-The calculator uses the FAO Penman-Monteith equation:
+Expected result: ET₀ ≈ 6.8 mm/day
 
-$$ET_0 = \frac{0.408 \Delta (R_n - G) + \gamma \frac{900}{T + 273} u_2 (e_s - e_a)}{\Delta + \gamma (1 + 0.34 u_2)}$$
+## Saving and Exporting Results
 
-Where:
-- $ET_0$ = reference evapotranspiration [mm day⁻¹]
-- $R_n$ = net radiation at the crop surface [MJ m⁻² day⁻¹]
-- $G$ = soil heat flux density [MJ m⁻² day⁻¹]
-- $T$ = mean daily air temperature at 2 m height [°C]
-- $u_2$ = wind speed at 2 m height [m s⁻¹]
-- $e_s$ = saturation vapor pressure [kPa]
-- $e_a$ = actual vapor pressure [kPa]
-- $\Delta$ = slope of vapor pressure curve [kPa °C⁻¹]
-- $\gamma$ = psychrometric constant [kPa °C⁻¹]
+You can save your calculation results by:
+
+1. Using the "Save Results" button to store data in your browser
+2. Using the "Export to CSV" option to download results as a spreadsheet
+3. Using the "Print Results" option to create a PDF report
