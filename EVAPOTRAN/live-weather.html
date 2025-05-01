@@ -34,6 +34,9 @@
                 <div class="form-group">
                     <label for="locationInput">Enter Location:</label>
                     <input type="text" id="locationInput" placeholder="City name or City, Country">
+                    <button id="geolocateBtn" style="display: none;" title="Use my current location">
+                        <i class="fas fa-map-marker-alt"></i> Use My Location
+                    </button>
                 </div>
             </div>
 
@@ -51,9 +54,16 @@
                 <!-- Weather data will be inserted here by JavaScript -->
             </div>
 
-            <div id="output">
+            <div id="output" style="display: none;">
                 <button id="useWeatherDataBtn">Use This Data for ET₀ Calculation</button>
                 <p class="note">This will transfer the current weather data to the main calculator.</p>
+            </div>
+        </div>
+
+        <div class="blocks" id="B3">
+            <h2>Weather Forecast</h2>
+            <div id="forecastContainer" class="forecast-container">
+                <!-- Forecast data will be inserted here by JavaScript -->
             </div>
         </div>
     </div>
@@ -75,4 +85,8 @@
     </div>
 </body>
 </html>
+
+
+
+
 

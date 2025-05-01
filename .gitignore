@@ -1,4 +1,5 @@
 
+# VS Code
 .vs
 .git
 
@@ -15,6 +16,20 @@
 # Built Visual Studio Code Extensions
 *.vsix
 
+# Environment variables
+.env
+.env.*
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Server logs
+EVAPOTRAN/server/logs/
+*.log
+
 # mkdocs documentation
 /site
 /rcs
@@ -28,3 +43,11 @@
 /EVAPOTRAN/myd3.js
 /EVAPOTRAN/soilTRI.html
 /EVAPOTRAN/stylesoil.css
+
+# Mac files
+.DS_Store
+
+# Windows files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
