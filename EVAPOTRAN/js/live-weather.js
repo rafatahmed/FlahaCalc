@@ -74,6 +74,9 @@ document.addEventListener("DOMContentLoaded", async function () {
 	}
 
 	if (useWeatherDataBtn) {
+		// Remove any existing event listeners to prevent duplicates
+		useWeatherDataBtn.removeEventListener("click", useWeatherData);
+		// Add the event listener
 		useWeatherDataBtn.addEventListener("click", useWeatherData);
 		console.log("Use weather data button initialized:", useWeatherDataBtn);
 	} else {
@@ -99,6 +102,13 @@ function getUserLocation() {
 		loadingIndicator.style.display = "block";
 	}
 
+	// Show a message to the user
+	const weatherResults = document.getElementById("weatherResults");
+	if (weatherResults) {
+		weatherResults.innerHTML = "<p>Requesting your location... This may take a moment.</p>";
+		weatherResults.style.display = "block";
+	}
+
 	navigator.geolocation.getCurrentPosition(
 		function (position) {
 			// Success callback
@@ -109,13 +119,36 @@ function getUserLocation() {
 			if (loadingIndicator) {
 				loadingIndicator.style.display = "none";
 			}
+			
 			console.error("Geolocation error:", error);
-			alert(`Geolocation error: ${error.message}`);
+			
+			let errorMessage = "Unable to get your location. ";
+			
+			switch(error.code) {
+				case error.PERMISSION_DENIED:
+					errorMessage += "You denied the request for geolocation.";
+					break;
+				case error.POSITION_UNAVAILABLE:
+					errorMessage += "Location information is unavailable.";
+					break;
+				case error.TIMEOUT:
+					errorMessage += "The request to get your location timed out. Try again or enter your location manually.";
+					break;
+				default:
+					errorMessage += error.message;
+			}
+			
+			alert(errorMessage);
+			
+			// Update the results area with the error
+			if (weatherResults) {
+				weatherResults.innerHTML = `<p class="error">${errorMessage}</p>`;
+			}
 		},
 		{
-			enableHighAccuracy: true,
-			timeout: 5000,
-			maximumAge: 0
+			enableHighAccuracy: false, // Set to false for faster response
+			timeout: 10000,           // Increase timeout to 10 seconds
+			maximumAge: 60000         // Allow cached positions up to 1 minute old
 		}
 	);
 }
@@ -184,21 +217,26 @@ async function fetchWeatherByCoordinates(lat, lon) {
 
 // Fetch weather data by location name
 async function fetchWeatherData() {
-	const location = locationInput.value.trim();
+	const locationInput = document.getElementById('locationInput');
+	const location = locationInput ? locationInput.value.trim() : '';
+	
 	if (!location) {
-		alert("Please enter a location");
+		alert('Please enter a location');
 		return;
 	}
-
+	
+	// Show loading indicator
+	const loadingIndicator = document.getElementById('loadingIndicator');
+	if (loadingIndicator) {
+		loadingIndicator.style.display = 'block';
+	}
+	
 	try {
 		// Check cache first
 		if (checkCache(location)) {
 			processWeatherData(weatherCache[location].data);
 			return;
 		}
-
-		// Show loading indicator
-		loadingIndicator.style.display = "block";
 
 		// Fetch data from our proxy server
 		const response = await fetch(
@@ -234,7 +272,9 @@ async function fetchWeatherData() {
 		alert(`Failed to fetch weather data: ${error.message}`);
 	} finally {
 		// Hide loading indicator
-		loadingIndicator.style.display = "none";
+		if (loadingIndicator) {
+			loadingIndicator.style.display = "none";
+		}
 	}
 }
 
@@ -261,39 +301,60 @@ async function fetchForecastData(lat, lon) {
 
 // Process weather data from API response
 function processWeatherData(data) {
-	// Extract relevant weather parameters
-	const weatherData = {
-		temperature: data.main.temp,
-		windSpeed: data.wind.speed,
-		relativeHumidity: data.main.humidity,
-		atmosphericPressure: data.main.pressure / 10, // Convert hPa to kPa
-		latitude: data.coord.lat,
-		longitude: data.coord.lon,
-		location: `${data.name}, ${data.sys.country}`,
-		timestamp: new Date(data.dt * 1000),
-	};
+    console.log("processWeatherData called with:", data);
+    
+    if (!data || !data.main) {
+        console.error("Invalid weather data received:", data);
+        throw new Error("Invalid weather data format");
+    }
 
-	// Calculate day of year
-	const dayOfYear = getDayOfYear(weatherData.timestamp);
-	weatherData.dayNumber = dayOfYear;
+    // Extract relevant weather parameters
+    const weatherData = {
+        temperature: parseFloat(data.main.temp),
+        windSpeed: parseFloat(data.wind.speed),
+        relativeHumidity: parseFloat(data.main.humidity),
+        atmosphericPressure: parseFloat(data.main.pressure) / 10, // Convert hPa to kPa
+        latitude: parseFloat(data.coord.lat),
+        longitude: parseFloat(data.coord.lon),
+        location: data.name + (data.sys && data.sys.country ? `, ${data.sys.country}` : ""),
+        dayNumber: getDayOfYear(new Date()),
+        sunshineDuration: estimateSunshineDuration(
+            data.weather && data.weather[0] ? data.weather[0].id : 800,
+            data.clouds && data.clouds.all ? data.clouds.all : 0
+        ),
+        elevation: 0 // Default elevation since we don't get it from the API
+    };
 
-	// Estimate sunshine duration based on weather conditions
-	weatherData.sunshineDuration = estimateSunshineDuration(
-		data.weather[0].id,
-		data.clouds.all
-	);
+    console.log("Initial weather data object:", weatherData);
 
-	// Store data for later use
-	localStorage.setItem("liveWeatherData", JSON.stringify(weatherData));
+    // Validate all fields are numbers
+    for (const [key, value] of Object.entries(weatherData)) {
+        if (['temperature', 'windSpeed', 'relativeHumidity', 'atmosphericPressure', 
+             'latitude', 'longitude', 'dayNumber', 'sunshineDuration', 'elevation'].includes(key)) {
+            if (isNaN(value)) {
+                console.error(`Invalid value for ${key}: ${value}`);
+                weatherData[key] = key === 'dayNumber' ? 1 : 0; // Set default values
+            }
+        }
+    }
 
-	// Display the weather data
-	displayWeatherData(weatherData);
-	
-	// Show the output section with the button
-	const outputSection = document.getElementById("output");
-	if (outputSection) {
-		outputSection.style.display = "block";
-	}
+    console.log("Final weather data to store:", weatherData);
+
+    // Store data for later use
+    localStorage.setItem("liveWeatherData", JSON.stringify(weatherData));
+    
+    // Verify the data was stored correctly
+    const storedData = localStorage.getItem("liveWeatherData");
+    console.log("Stored weather data:", storedData);
+
+    // Display the weather data
+    displayWeatherResults(data);
+    
+    // Show the output section with the button
+    const outputSection = document.getElementById("output");
+    if (outputSection) {
+        outputSection.style.display = "block";
+    }
 }
 
 // Display weather data in a user-friendly format
@@ -383,31 +444,118 @@ function addDataRow(tbody, parameter, value, unit) {
 
 // Function to use the fetched weather data for ET0 calculation
 function useWeatherData() {
-	// Get the stored weather data
-	const weatherData = JSON.parse(localStorage.getItem("liveWeatherData"));
-	
-	if (!weatherData) {
-		alert("No weather data available. Please fetch weather data first.");
-		return;
-	}
-	
-	// Store data in localStorage for the calculator
-	localStorage.setItem(
-		"etoCalcData",
-		JSON.stringify({
-			temperature: weatherData.temperature,
-			windSpeed: weatherData.windSpeed,
-			relativeHumidity: weatherData.relativeHumidity,
-			atmosphericPressure: weatherData.atmosphericPressure,
-			elevation: 0, // We don't get elevation from the API, could use a geocoding API for this
-			latitude: weatherData.latitude,
-			dayNumber: weatherData.dayNumber,
-			sunshineDuration: weatherData.sunshineDuration,
-		})
-	);
-	
-	// Redirect to the calculator page
-	window.location.href = "calculator.html";
+    try {
+        // First, check if we have weather data displayed
+        const weatherResults = document.getElementById('weatherResults');
+        if (!weatherResults || weatherResults.style.display === 'none') {
+            alert('Please fetch weather data first');
+            return;
+        }
+        
+        // Get the data directly from the displayed weather results
+        const tempElement = document.querySelector('.weather-data-value[data-param="temperature"]');
+        const windElement = document.querySelector('.weather-data-value[data-param="wind"]');
+        const humidityElement = document.querySelector('.weather-data-value[data-param="humidity"]');
+        const locationElement = document.querySelector('.weather-location');
+        
+        if (!tempElement || !windElement || !humidityElement) {
+            alert('Weather data is incomplete. Please fetch weather data again.');
+            return;
+        }
+        
+        // Extract values from the displayed elements
+        const temperature = parseFloat(tempElement.textContent);
+        const windSpeed = parseFloat(windElement.textContent);
+        const relativeHumidity = parseFloat(humidityElement.textContent);
+        const location = locationElement ? locationElement.textContent : '';
+        
+        // Get latitude and longitude from the data attributes
+        const latElement = document.querySelector('[data-param="latitude"]');
+        const lonElement = document.querySelector('[data-param="longitude"]');
+        
+        const latitude = latElement ? parseFloat(latElement.textContent) : 0;
+        const longitude = lonElement ? parseFloat(lonElement.textContent) : 0;
+        
+        // Calculate day of year
+        const today = new Date();
+        const dayNumber = getDayOfYear(today);
+        
+        // Create the calculator data object
+        const calculatorData = {
+            temperature: temperature,
+            windSpeed: windSpeed,
+            relativeHumidity: relativeHumidity,
+            atmosphericPressure: 101.3, // Default value
+            elevation: 0, // Default value
+            latitude: latitude,
+            dayNumber: dayNumber,
+            sunshineDuration: 8, // Default value
+            location: location
+        };
+        
+        // Store individual values directly in localStorage
+        localStorage.setItem("calc_temperature", temperature);
+        localStorage.setItem("calc_windSpeed", windSpeed);
+        localStorage.setItem("calc_relativeHumidity", relativeHumidity);
+        localStorage.setItem("calc_atmosphericPressure", 101.3);
+        localStorage.setItem("calc_elevation", 0);
+        localStorage.setItem("calc_latitude", latitude);
+        localStorage.setItem("calc_dayNumber", dayNumber);
+        localStorage.setItem("calc_sunshineDuration", 8);
+        localStorage.setItem("calc_location", location);
+        
+        // Also store the complete object as a backup
+        localStorage.setItem("etoCalcData", JSON.stringify(calculatorData));
+        
+        // Set a flag to indicate we're coming from the weather page
+        localStorage.setItem("fromWeatherPage", "true");
+        
+        // Redirect to the calculator page
+        window.location.href = "calculator.html";
+    } catch (error) {
+        console.error("Error using weather data:", error);
+        alert(`Failed to use weather data: ${error.message}`);
+    }
+}
+
+// Debug function to inspect localStorage
+function debugLocalStorage() {
+    console.log("=== DEBUG: localStorage Content ===");
+    try {
+        const liveWeatherData = localStorage.getItem("liveWeatherData");
+        console.log("liveWeatherData raw:", liveWeatherData);
+        
+        if (liveWeatherData) {
+            const parsed = JSON.parse(liveWeatherData);
+            console.log("liveWeatherData parsed:", parsed);
+            
+            // Check each required field
+            const requiredFields = [
+                'temperature', 'windSpeed', 'relativeHumidity', 
+                'latitude', 'dayNumber', 'sunshineDuration'
+            ];
+            
+            console.log("Field validation:");
+            for (const field of requiredFields) {
+                const value = parsed[field];
+                console.log(`${field}: ${value} (${typeof value}) - Valid: ${value !== undefined && value !== null && !isNaN(parseFloat(value))}`);
+            }
+        } else {
+            console.log("liveWeatherData is null or empty");
+        }
+        
+        const etoCalcData = localStorage.getItem("etoCalcData");
+        console.log("etoCalcData raw:", etoCalcData);
+        
+        if (etoCalcData) {
+            console.log("etoCalcData parsed:", JSON.parse(etoCalcData));
+        } else {
+            console.log("etoCalcData is null or empty");
+        }
+    } catch (e) {
+        console.error("Error in debugLocalStorage:", e);
+    }
+    console.log("=== END DEBUG ===");
 }
 
 // Helper function to get day of year from date
@@ -618,70 +766,57 @@ function processWeatherData(weatherData) {
 }
 
 // Function to display weather results in the B2 block
-function displayWeatherResults(weatherData) {
+function displayWeatherResults(data) {
     const weatherResults = document.getElementById('weatherResults');
     if (!weatherResults) return;
     
-    // Format date and time
-    const timestamp = new Date(weatherData.timestamp || Date.now());
-    const formattedDate = timestamp.toLocaleDateString();
-    const formattedTime = timestamp.toLocaleTimeString();
-    
-    // Create HTML for the weather data table
+    // Create a clean display of the weather data
     weatherResults.innerHTML = `
-        <h3>${weatherData.location || 'Current Location'}</h3>
-        <p class="timestamp">As of ${formattedDate} at ${formattedTime}</p>
-        <table>
-            <thead>
-                <tr>
-                    <th>Parameter</th>
-                    <th>Value</th>
-                    <th>Unit</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>Temperature</td>
-                    <td>${weatherData.temperature.toFixed(1)}</td>
-                    <td>°C</td>
-                </tr>
-                <tr>
-                    <td>Wind Speed</td>
-                    <td>${weatherData.windSpeed.toFixed(2)}</td>
-                    <td>m/s</td>
-                </tr>
-                <tr>
-                    <td>Relative Humidity</td>
-                    <td>${weatherData.humidity}</td>
-                    <td>%</td>
-                </tr>
-                <tr>
-                    <td>Atmospheric Pressure</td>
-                    <td>${(weatherData.pressure / 10).toFixed(1)}</td>
-                    <td>kPa</td>
-                </tr>
-                <tr>
-                    <td>Solar Radiation (est.)</td>
-                    <td>${weatherData.solarRadiation ? weatherData.solarRadiation.toFixed(2) : 'N/A'}</td>
-                    <td>MJ/m²/day</td>
-                </tr>
-                <tr>
-                    <td>Calculated ET₀</td>
-                    <td>${weatherData.et0 ? weatherData.et0.toFixed(2) : 'Calculating...'}</td>
-                    <td>mm/day</td>
-                </tr>
-            </tbody>
-        </table>
+        <div class="weather-header">
+            <h3 class="weather-location">${data.name}, ${data.sys.country}</h3>
+            <p class="weather-description">${data.weather[0].description}</p>
+        </div>
+        <div class="weather-icon">
+            <img src="https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png" alt="${data.weather[0].description}">
+        </div>
+        <div class="weather-data">
+            <div class="weather-data-item">
+                <span class="weather-data-label">Temperature:</span>
+                <span class="weather-data-value" data-param="temperature">${data.main.temp}</span>
+                <span class="weather-data-unit">°C</span>
+            </div>
+            <div class="weather-data-item">
+                <span class="weather-data-label">Wind Speed:</span>
+                <span class="weather-data-value" data-param="wind">${data.wind.speed}</span>
+                <span class="weather-data-unit">m/s</span>
+            </div>
+            <div class="weather-data-item">
+                <span class="weather-data-label">Humidity:</span>
+                <span class="weather-data-value" data-param="humidity">${data.main.humidity}</span>
+                <span class="weather-data-unit">%</span>
+            </div>
+            <div class="weather-data-item">
+                <span class="weather-data-label">Pressure:</span>
+                <span class="weather-data-value" data-param="pressure">${data.main.pressure}</span>
+                <span class="weather-data-unit">hPa</span>
+            </div>
+        </div>
+        <div class="weather-data-hidden">
+            <span data-param="latitude">${data.coord.lat}</span>
+            <span data-param="longitude">${data.coord.lon}</span>
+        </div>
     `;
     
-    // Make the results visible
-    weatherResults.style.display = 'block';
+    // Show the weather results
+    weatherResults.style.display = "block";
 }
 
 // Add this to your fetchWeatherData function
 async function fetchWeatherData() {
-    const locationInput = document.getElementById('locationInput').value;
-    if (!locationInput) {
+    const locationInput = document.getElementById('locationInput');
+    const location = locationInput ? locationInput.value.trim() : '';
+    
+    if (!location) {
         alert('Please enter a location');
         return;
     }
@@ -694,18 +829,36 @@ async function fetchWeatherData() {
     
     try {
         // Fetch weather data from API
-        const response = await fetch(`http://localhost:3000/api/weather?location=${encodeURIComponent(locationInput)}`);
-        const data = await response.json();
+        const response = await fetch(`${API_BASE_URL}/weather?q=${encodeURIComponent(location)}`);
         
-        if (data.error) {
-            throw new Error(data.error);
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || `Weather API error: ${response.status}`);
         }
+        
+        const data = await response.json();
         
         // Process and display the weather data
         processWeatherData(data);
         
         // Also fetch forecast data if available
-        fetchForecastData(data.lat, data.lon);
+        if (data.coord && data.coord.lat && data.coord.lon) {
+            fetchForecastData(data.coord.lat, data.coord.lon);
+        }
+        
+        // Save location to history
+        saveLocation(location);
+        
+        // Show results and use data button
+        const weatherResults = document.getElementById('weatherResults');
+        if (weatherResults) {
+            weatherResults.style.display = 'block';
+        }
+        
+        const outputSection = document.getElementById('output');
+        if (outputSection) {
+            outputSection.style.display = 'block';
+        }
     } catch (error) {
         console.error('Error fetching weather data:', error);
         alert(`Failed to fetch weather data: ${error.message}`);

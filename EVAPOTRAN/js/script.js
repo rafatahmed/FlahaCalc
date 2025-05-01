@@ -49,44 +49,111 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// Check if there's data from EPW import
-document.addEventListener('DOMContentLoaded', function() {
-    // Check if we're on the calculator page
-    const temperatureElement = document.getElementById("temperature");
-    if (!temperatureElement) return;
-    
-    // Check if there's data from EPW import
-    const storedData = localStorage.getItem('etoCalcData');
-    if (storedData) {
-        try {
-            const data = JSON.parse(storedData);
+// Add this function to debug localStorage on page load
+function debugLocalStorage() {
+    console.log("=== DEBUG: localStorage Content on Calculator Page ===");
+    try {
+        const etoCalcData = localStorage.getItem("etoCalcData");
+        console.log("etoCalcData raw:", etoCalcData);
+        
+        if (etoCalcData) {
+            const parsed = JSON.parse(etoCalcData);
+            console.log("etoCalcData parsed:", parsed);
             
-            // Fill in the form fields
-            document.getElementById('temperature').value = data.temperature;
-            document.getElementById('windSpeed').value = data.windSpeed;
-            document.getElementById('relativeHumidity').value = data.relativeHumidity;
+            // Check each required field
+            const requiredFields = [
+                'temperature', 'windSpeed', 'relativeHumidity', 
+                'latitude', 'dayNumber', 'sunshineDuration'
+            ];
             
-            if (data.atmosphericPressure) {
-                const pressureElement = document.getElementById('atmosphericPressure');
-                if (pressureElement) {
-                    pressureElement.value = data.atmosphericPressure;
-                }
+            console.log("Field validation:");
+            for (const field of requiredFields) {
+                const value = parsed[field];
+                console.log(`${field}: ${value} (${typeof value}) - Valid: ${value !== undefined && value !== null && !isNaN(parseFloat(value))}`);
             }
-            
-            document.getElementById('elevation').value = data.elevation;
-            document.getElementById('latitude').value = data.latitude;
-            document.getElementById('dayNumber').value = data.dayNumber;
-            document.getElementById('sunshineDuration').value = data.sunshineDuration;
-            
-            // Clear the stored data
-            localStorage.removeItem('etoCalcData');
-            
-            // Optionally, automatically calculate ET0
-            calculateET();
-        } catch (e) {
-            console.error('Error loading EPW data:', e);
+        } else {
+            console.log("etoCalcData is null or empty");
+        }
+    } catch (e) {
+        console.error("Error in debugLocalStorage:", e);
+    }
+    console.log("=== END DEBUG ===");
+}
+
+// Add this to your DOMContentLoaded event
+document.addEventListener('DOMContentLoaded', async function() {
+    console.log("Calculator page loaded");
+    
+    // Check if we're coming from the weather page
+    const fromWeatherPage = localStorage.getItem("fromWeatherPage");
+    
+    if (fromWeatherPage === "true") {
+        console.log("Loading data from weather page");
+        
+        // Get individual values from localStorage
+        const temperature = localStorage.getItem("calc_temperature");
+        const windSpeed = localStorage.getItem("calc_windSpeed");
+        const relativeHumidity = localStorage.getItem("calc_relativeHumidity");
+        const atmosphericPressure = localStorage.getItem("calc_atmosphericPressure");
+        const elevation = localStorage.getItem("calc_elevation");
+        const latitude = localStorage.getItem("calc_latitude");
+        const dayNumber = localStorage.getItem("calc_dayNumber");
+        const sunshineDuration = localStorage.getItem("calc_sunshineDuration");
+        const location = localStorage.getItem("calc_location");
+        
+        // Fill in the form fields
+        if (temperature) document.getElementById('temperature').value = temperature;
+        if (windSpeed) document.getElementById('windSpeed').value = windSpeed;
+        if (relativeHumidity) document.getElementById('relativeHumidity').value = relativeHumidity;
+        if (atmosphericPressure) document.getElementById('atmosphericPressure').value = atmosphericPressure;
+        if (elevation) document.getElementById('elevation').value = elevation;
+        if (latitude) document.getElementById('latitude').value = latitude;
+        if (dayNumber) document.getElementById('dayNumber').value = dayNumber;
+        if (sunshineDuration) document.getElementById('sunshineDuration').value = sunshineDuration;
+        if (location) document.getElementById('location').value = location;
+        
+        // Clear the flag
+        localStorage.removeItem("fromWeatherPage");
+    }
+    // Also try the original method as a fallback
+    else {
+        // Check if we have data from the weather page
+        const etoCalcData = localStorage.getItem("etoCalcData");
+        if (etoCalcData && etoCalcData !== "{}") {
+            try {
+                console.log("Found calculator data in localStorage");
+                const data = JSON.parse(etoCalcData);
+                
+                // Fill in the form fields
+                if (data.temperature) document.getElementById('temperature').value = data.temperature;
+                if (data.windSpeed) document.getElementById('windSpeed').value = data.windSpeed;
+                if (data.relativeHumidity) document.getElementById('relativeHumidity').value = data.relativeHumidity;
+                if (data.atmosphericPressure) document.getElementById('atmosphericPressure').value = data.atmosphericPressure;
+                if (data.elevation) document.getElementById('elevation').value = data.elevation;
+                if (data.latitude) document.getElementById('latitude').value = data.latitude;
+                if (data.dayNumber) document.getElementById('dayNumber').value = data.dayNumber;
+                if (data.sunshineDuration) document.getElementById('sunshineDuration').value = data.sunshineDuration;
+                if (data.location) document.getElementById('location').value = data.location;
+            } catch (error) {
+                console.error("Error loading calculator data:", error);
+            }
         }
     }
+    
+    // Test server connection
+    const serverAvailable = await testServerConnection();
+    if (!serverAvailable) {
+        // Show warning about server connection
+        const warningEl = document.createElement("div");
+        warningEl.className = "server-warning";
+        warningEl.innerHTML = `
+            <p class="warning">⚠️ Weather server connection failed. Make sure the server is running at http://localhost:3000.</p>
+            <p>Check the server setup instructions in the README file.</p>
+        `;
+        document.querySelector(".container").prepend(warningEl);
+    }
+    
+    // Rest of your initialization code...
 });
 
 // Add Font Awesome for icons in the head section
@@ -400,6 +467,16 @@ function generateCalcSheet() {
                     </div>
                     <div class="calc-param">
                         <div class="param-name">Reference ET₀</div>
+                        <div class="param-formula">ET₀</div>
+                        <div class="param-value">${calculationResults.ET0.toFixed(2)}</div>
+                        <div class="param-unit">mm/day</div>
+                    </div>
+                </div>
+                
+                <div class="calc-sheet-section">
+                    <h3>Final Result</h3>
+                    <div class="calc-param result-highlight">
+                        <div class="param-name">Reference Evapotranspiration</div>
                         <div class="param-formula">ET₀</div>
                         <div class="param-value">${calculationResults.ET0.toFixed(2)}</div>
                         <div class="param-unit">mm/day</div>
@@ -1052,28 +1129,85 @@ function printCalcSheet() {
         printWindow.document.write('<link rel="stylesheet" href="css/style.css">');
         printWindow.document.write('<style>');
         printWindow.document.write(`
+            @page {
+                size: A4;
+                margin: 1.5cm;
+            }
             body { 
                 font-family: Arial, sans-serif; 
-                padding: 20px; 
+                padding: 0; 
+                margin: 0;
+                position: relative;
+                font-size: 11pt;
+                line-height: 1.3;
+                color: #333;
+            }
+            .report-container {
+                max-width: 100%;
                 position: relative;
             }
+            .report-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding-bottom: 10px;
+                margin-bottom: 15px;
+                border-bottom: 1px solid #43a047;
+                page-break-after: avoid;
+                position: running(header);
+            }
+            .report-header-logo {
+                height: 50px;
+            }
+            .report-header-text {
+                text-align: right;
+            }
+            .report-header-text h1 {
+                margin: 0;
+                font-size: 16pt;
+                color: #43a047;
+            }
+            .report-header-text p {
+                margin: 3px 0;
+                font-size: 9pt;
+                color: #666;
+            }
             .calc-sheet { 
-                max-width: 800px; 
-                margin: 0 auto; 
+                width: 100%;
                 position: relative;
             }
             .calc-sheet-header { 
                 text-align: center; 
-                margin-bottom: 20px; 
+                margin-bottom: 15px; 
+                page-break-after: avoid;
+            }
+            .calc-sheet-header h2 {
+                margin: 0 0 5px 0;
+                font-size: 14pt;
+                color: #1e88e5;
+            }
+            .calc-sheet-header p {
+                margin: 3px 0;
+                font-size: 10pt;
             }
             .calc-sheet-section { 
-                margin-bottom: 30px; 
+                margin-bottom: 20px; 
+                page-break-inside: avoid;
+            }
+            .calc-sheet-section h3 {
+                margin: 0 0 10px 0;
+                font-size: 12pt;
+                color: #43a047;
+                border-bottom: 1px solid #e0e0e0;
+                padding-bottom: 5px;
+                page-break-after: avoid;
             }
             .calc-param { 
                 display: grid; 
-                grid-template-columns: 3fr 4fr 1fr 1fr; 
+                grid-template-columns: 3fr 1fr 1fr 1fr; 
                 gap: 10px; 
-                margin-bottom: 5px; 
+                margin-bottom: 3px; 
+                page-break-inside: avoid;
             }
             .param-name { 
                 font-weight: bold; 
@@ -1088,11 +1222,25 @@ function printCalcSheet() {
             .param-unit { 
                 text-align: left; 
             }
-            .calc-sheet-footer {
-                margin-top: 30px;
-                text-align: center;
-                font-size: 0.8em;
+            .report-footer {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                padding-top: 10px;
+                border-top: 1px solid #43a047;
+                font-size: 8pt;
                 color: #666;
+                text-align: center;
+                display: flex;
+                justify-content: space-between;
+                background-color: white;
+            }
+            .report-footer-left {
+                text-align: left;
+            }
+            .report-footer-right {
+                text-align: right;
             }
             .print-watermark {
                 position: fixed;
@@ -1105,15 +1253,41 @@ function printCalcSheet() {
                 z-index: -1;
                 white-space: nowrap;
             }
+            .result-highlight {
+                background-color: #e8f5e9;
+                padding: 5px;
+                border-radius: 4px;
+                font-weight: bold;
+            }
+            .report-metadata {
+                margin: 15px 0;
+                padding: 10px;
+                background-color: #f5f7fa;
+                border-radius: 4px;
+                font-size: 9pt;
+                page-break-inside: avoid;
+            }
+            .report-metadata p {
+                margin: 3px 0;
+            }
+            .report-content {
+                margin-top: 0;
+                padding-top: 0;
+            }
+            .page-break {
+                page-break-before: always;
+            }
+            
+            /* Repeat header on each page */
+            @page {
+                @top-center {
+                    content: element(header);
+                }
+            }
+            
             @media print {
                 body { 
-                    font-size: 12pt; 
-                }
-                h2 { 
-                    font-size: 16pt; 
-                }
-                h3 { 
-                    font-size: 14pt; 
+                    font-size: 11pt; 
                 }
                 .calc-param { 
                     page-break-inside: avoid; 
@@ -1127,12 +1301,100 @@ function printCalcSheet() {
                     display: block !important;
                     color: rgba(0, 0, 0, 0.05) !important;
                 }
+                .result-highlight {
+                    -webkit-print-color-adjust: exact;
+                    color-adjust: exact;
+                    background-color: #e8f5e9 !important;
+                }
+                .report-metadata {
+                    -webkit-print-color-adjust: exact;
+                    color-adjust: exact;
+                    background-color: #f5f7fa !important;
+                }
+                .report-header {
+                    display: block;
+                    position: running(header);
+                }
+                .report-footer {
+                    display: block;
+                    position: fixed;
+                    bottom: 0;
+                }
+                .report-content {
+                    margin-top: 20px;
+                    margin-bottom: 50px;
+                }
             }
         `);
         printWindow.document.write('</style>');
         printWindow.document.write('</head><body>');
-        printWindow.document.write('<div class="print-watermark">© Flaha Agri Tech</div>');
-        printWindow.document.write(document.getElementById('calcSheetContent').innerHTML);
+        
+        // Get input values for metadata
+        const location = document.getElementById("location") ? document.getElementById("location").value : "Not specified";
+        const date = new Date().toLocaleDateString();
+        const temp = parseFloat(document.getElementById("temperature").value);
+        const windSpeed = parseFloat(document.getElementById("windSpeed").value);
+        const rh = parseFloat(document.getElementById("relativeHumidity").value);
+        
+        // Create report structure with repeating header for all pages
+        printWindow.document.write(`
+            <!-- Main content with proper margins -->
+            <div class="report-content">
+                <div class="report-container">
+                    <!-- This header will repeat on all pages -->
+                    <div class="report-header">
+                        <img src="img/Flaha_logo.svg" alt="Flaha Agri Tech" class="report-header-logo" 
+                             onerror="this.onerror=null; this.src='img/Flaha_logo.png';">
+                        <div class="report-header-text">
+                            <h1>Reference Evapotranspiration Report</h1>
+                            <p>Generated on ${date}</p>
+                            <p>Flaha Agri Tech - Professional Agricultural Solutions</p>
+                        </div>
+                    </div>
+                    
+                    <div class="report-metadata">
+                        <p><strong>Location:</strong> ${location || "Not specified"}</p>
+                        <p><strong>Date of Calculation:</strong> ${date}</p>
+                        <p><strong>Weather Conditions:</strong> Temperature: ${temp.toFixed(1)}°C, Wind Speed: ${windSpeed.toFixed(1)} m/s, Relative Humidity: ${rh.toFixed(0)}%</p>
+                    </div>
+                    
+                    <div class="print-watermark">© Flaha Agri Tech</div>
+                    ${document.getElementById('calcSheetContent').innerHTML}
+                </div>
+            </div>
+            
+            <!-- Fixed footer that appears on all pages -->
+            <div class="report-footer">
+                <div class="report-footer-left">
+                    Report ID: FLH-${Date.now().toString().substring(5)}
+                </div>
+                <div class="report-footer-center">
+                    © ${new Date().getFullYear()} Flaha Agri Tech. All rights reserved.
+                </div>
+                <div class="report-footer-right">
+                    <script>
+                        document.write('Page ' + (parseInt(window.location.hash.replace('#', ''), 10) || 1));
+                    </script>
+                </div>
+            </div>
+            
+            <!-- Script to handle page numbering -->
+            <script>
+                window.onload = function() {
+                    // Count the number of pages (approximate method)
+                    const height = document.body.offsetHeight;
+                    const pageHeight = 1122; // A4 height in pixels at 96 DPI
+                    const totalPages = Math.ceil(height / pageHeight);
+                    
+                    // Update all page number elements
+                    const pageNumbers = document.querySelectorAll('.report-footer-right');
+                    pageNumbers.forEach((el, i) => {
+                        el.textContent = 'Page ' + (i + 1) + ' of ' + totalPages;
+                    });
+                };
+            </script>
+        `);
+        
         printWindow.document.write('</body></html>');
         printWindow.document.close();
         printWindow.focus();
