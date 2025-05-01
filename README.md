@@ -6,6 +6,7 @@
     <h1>Flaha Agri Tech</h1>
     <h3>Flaha Precision Agriculture | FlahaCalc</h3>
     <h2>EVAPOTRAN</h2>
+    <p><strong>Version 0.1.0-alpha</strong></p>
   </div>
 </div>
 
@@ -15,102 +16,31 @@ EVAPOTRAN is a comprehensive calculator designed for professionals in horticultu
 
 ## Key Features
 
-- **Evapotranspiration Calculator:** Calculate water loss through evaporation and transpiration using the industry-standard FAO Penman-Monteith method
-- **Multiple Data Input Options:** Enter climate data manually or import from EPW weather files
-- **Weather Data Visualization:** Generate heatmaps and visual representations of climate data
-- **Live Weather Integration:** Connect to real-time weather data for immediate calculations
+- **Scientific Accuracy**: Implements the FAO Penman-Monteith equation, the international standard for evapotranspiration calculation
+- **Multiple Data Sources**: Manual entry, EPW file import, and live weather API integration
+- **Visual Analysis**: Interactive heatmaps and charts for weather data visualization
+- **Responsive Design**: Optimized for both desktop and mobile devices
+- **Educational Resources**: Comprehensive documentation on evapotranspiration concepts and calculations
 
-## Application Architecture
+## Installation
 
-The application follows a modular structure with specialized components for different calculation needs:
+EVAPOTRAN is a client-side web application that can be run locally or deployed to a web server.
 
-```
-EVAPOTRAN/
-│
-├── index.html           # Main landing page with navigation options
-├── calculator.html      # Manual ET₀ calculator interface
-├── epw-import.html      # EPW weather file import functionality
-├── epw-heatmap.html     # Weather data visualization dashboard
-├── live-weather.html    # Real-time weather data integration
-│
-├── css/
-│   └── style.css        # Unified stylesheet for consistent UI
-│
-├── js/
-│   ├── script.js        # Core calculation engine
-│   ├── epw-import.js    # EPW file parsing utilities
-│   ├── epw-heatmap.js   # Data visualization components
-│   └── live-weather.js  # Weather API integration services
-│
-└── img/
-    ├── Flaha_logo.svg   # Vector logo for high-resolution displays
-    └── Flaha_logo.png   # Raster fallback for legacy browsers
-```
+### Local Installation
 
-## Application Flow
+1. Download the latest release from the [Releases page](https://github.com/flaha-agritech/evapotran/releases)
+2. Extract the files to a local directory
+3. Open `index.html` in a modern web browser
 
-The diagram below illustrates the user journey and data flow through the application:
+### Server Deployment
 
-```
-┌─────────────────┐
-│   index.html    │
-│  (Entry Point)  │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                      User Selects Option                        │
-└───────┬───────────────────┬───────────────────┬─────────────────┘
-        │                   │                   │
-        ▼                   ▼                   ▼
-┌───────────────┐   ┌───────────────┐   ┌───────────────┐   ┌───────────────┐
-│ epw-import.html│   │live-weather.html│   │ calculator.html │   │ epw-heatmap.html│
-└───────┬───────┘   └───────┬───────┘   └───────┬───────┘   └───────┬───────┘
-        │                   │                   │                   │
-        ▼                   ▼                   │                   ▼
-┌───────────────┐   ┌───────────────┐          │           ┌───────────────┐
-│  Upload EPW   │   │  Fetch Live   │          │           │  Generate     │
-│ Weather File  │   │ Weather Data  │          │           │   Heatmaps    │
-└───────┬───────┘   └───────┬───────┘          │           └───────────────┘
-        │                   │                   │                   
-        ▼                   ▼                   │                   
-┌───────────────┐   ┌───────────────┐          │           
-│   Parse EPW   │   │  Process API  │          │           
-│     Data      │   │   Response    │          │           
-└───────┬───────┘   └───────┬───────┘          │           
-        │                   │                   │                   
-        ▼                   ▼                   │                   
-┌───────────────┐   ┌───────────────┐          │           
-│  Select Day   │   │    Display    │          │           
-│ from EPW Data │   │ Weather Info  │          │           
-└───────┬───────┘   └───────┬───────┘          │           
-        │                   │                   │
-        │                   │                   │
-        ▼                   ▼                   ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                   Input Climate Parameters                      │
-└───────────────────────────────┬─────────────────────────────────┘
-                                │
-                                ▼
-┌─────────────────────────────────────────────────────────────────┐
-│              Calculate Reference Evapotranspiration             │
-│                   (FAO Penman-Monteith Method)                  │
-└───────────────────────────────┬─────────────────────────────────┘
-                                │
-                                ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                       Display ET₀ Results                       │
-└─────────────────────────────────────────────────────────────────┘
-```
+1. Upload all files to your web server
+2. Ensure the directory structure is maintained
+3. Access via a web browser
 
-## Technical Implementation
+## Documentation
 
-EVAPOTRAN implements the FAO Penman-Monteith method, widely recognized as the international standard for calculating reference evapotranspiration. The application supports multiple data input methods:
-
-- Manual parameter entry
-- EPW (EnergyPlus Weather) file import
-- Real-time weather data integration via API
-- Historical weather data visualization
+Comprehensive documentation is available in the `docs` directory and online at [https://flaha.org/evapotran/docs](https://flaha.org/evapotran/docs).
 
 ## License
 
