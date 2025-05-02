@@ -30,7 +30,7 @@ chown -R $USER:$USER /var/www/flahacalc
 # Clone the repository
 echo "Cloning repository..."
 cd /var/www/flahacalc
-git clone https://github.com/your-username/flahacalc.git .
+git clone https://github.com/rafatahmed/FlahaCalc.git .
 
 # Install dependencies
 echo "Installing dependencies..."
@@ -90,3 +90,4 @@ echo "Setup completed successfully!"
 echo "Next steps:"
 echo "1. Update the WEATHER_API_KEY in /var/www/flahacalc/EVAPOTRAN/server/.env"
 echo "2. Set up SSL with Let's Encrypt: sudo certbot --nginx -d flaha.org -d www.flaha.org"
+

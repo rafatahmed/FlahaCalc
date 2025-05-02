@@ -34,5 +34,32 @@ jobs:
           key: ${{ secrets.DROPLET_SSH_KEY }}
           port: 22
           script: |
-            bash /var/www/flahacalc/scripts/deploy/production.sh
+            # Check if the repository exists
+            if [ ! -d "/var/www/flahacalc" ]; then
+              echo "Creating application directory..."
+              mkdir -p /var/www/flahacalc
+              cd /var/www/flahacalc
+              git clone https://github.com/rafatahmed/FlahaCalc.git .
+            else
+              # Update the repository
+              cd /var/www/flahacalc
+              git pull
+            fi
+            
+            # Install dependencies
+            npm install
+            cd EVAPOTRAN/server
+            npm install
+            cd ../..
+            
+            # Build application
+            npm run build
+            
+            # Restart server
+            cd EVAPOTRAN/server
+            pm2 restart flahacalc-server || pm2 start server.js --name flahacalc-server
+            
+            echo "Deployment completed successfully!"
+
+
 

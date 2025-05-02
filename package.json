@@ -37,13 +37,14 @@
   "license": "GPL-3.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/flaha-agritech/evapotran.git"
+    "url": "https://github.com/rafatahmed/FlahaCalc.git"
   },
   "bugs": {
-    "url": "https://github.com/flaha-agritech/evapotran/issues"
+    "url": "https://github.com/rafatahmed/FlahaCalc/issues"
   },
   "homepage": "https://flaha.org/evapotran"
 }
+
 
 
 
