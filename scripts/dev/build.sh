@@ -13,9 +13,10 @@ else
   npm install --save-dev webpack webpack-cli
 fi
 
-# Run webpack with verbose output
+# Run webpack with proper flags for webpack 5
 echo "Running webpack..."
-./node_modules/.bin/webpack --config ./EVAPOTRAN/webpack.config.js --display-error-details
+./node_modules/.bin/webpack --config ./EVAPOTRAN/webpack.config.js --stats-error-details
 
 echo "Build completed"
+
 
