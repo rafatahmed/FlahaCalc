@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile - EVAPOTRAN</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body>
+    <div class="header">
+        <div class="header-logo">
+            <a href="index.html">
+                <img src="img/Flaha_logo.png" alt="Flaha Logo" 
+                     onerror="this.onerror=null; this.src='https://via.placeholder.com/40x40?text=Flaha';">
+                <span>EVAPOTRAN</span>
+            </a>
+        </div>
+        <div class="header-actions">
+            <a href="docs/" class="header-action-btn">
+                <i class="fas fa-book"></i> Documentation
+            </a>
+            <a href="login.html" class="header-action-btn" id="loginBtn">
+                <i class="fas fa-user"></i> Login
+            </a>
+            <a href="#" class="header-action-btn" id="logoutBtn" style="display: none;">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </div>
+    </div>
+
+    <div class="nav-bar">
+        <div class="nav-links">
+            <a href="index.html" class="nav-link">
+                <i class="fas fa-home"></i> Home
+            </a>
+            <a href="calculator.html" class="nav-link">
+                <i class="fas fa-calculator"></i> Manual Calculator
+            </a>
+            <a href="epw-import.html" class="nav-link">
+                <i class="fas fa-file-upload"></i> EPW Import
+            </a>
+            <a href="epw-heatmap.html" class="nav-link">
+                <i class="fas fa-chart-area"></i> Weather Visualization
+            </a>
+            <a href="live-weather.html" class="nav-link">
+                <i class="fas fa-cloud-sun"></i> Live Weather
+            </a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="blocks">
+            <h2><i class="fas fa-user-circle"></i> User Profile</h2>
+            <p>Manage your account information and preferences.</p>
+            
+            <div class="form-container">
+                <div id="profileError" class="error-message" style="display: none;"></div>
+                <div id="profileSuccess" class="success-message" style="display: none;"></div>
+                
+                <form id="profileForm">
+                    <div class="form-group">
+                        <label for="name">Full Name</label>
+                        <input type="text" id="name" name="name" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input type="email" id="email" name="email" required readonly>
+                        <small>Email cannot be changed</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="currentPassword">Current Password (required to save changes)</label>
+                        <input type="password" id="currentPassword" name="currentPassword" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="newPassword">New Password (leave blank to keep current)</label>
+                        <input type="password" id="newPassword" name="newPassword">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="confirmPassword">Confirm New Password</label>
+                        <input type="password" id="confirmPassword" name="confirmPassword">
+                    </div>
+                    
+                    <button type="submit" id="saveButton">Save Changes</button>
+                    <div id="profileLoader" class="loader" style="display: none;"></div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="page-footer">
+        <div class="footer-content">
+            <img src="img/Flaha_logo.png" alt="Flaha Logo" class="footer-logo" 
+                 onerror="this.onerror=null; this.src='https://via.placeholder.com/40x40?text=Flaha';">
+            <div class="footer-links">
+                <a href="index.html" class="footer-link">Home</a>
+                <a href="calculator.html" class="footer-link">Manual Calculator</a>
+                <a href="epw-import.html" class="footer-link">EPW Import</a>
+                <a href="epw-heatmap.html" class="footer-link">Weather Visualization</a>
+                <a href="live-weather.html" class="footer-link">Live Weather</a>
+                <a href="docs/" class="footer-link">Documentation</a>
+            </div>
+            <p class="footer-copyright">© 2023 Flaha Agri Tech. All rights reserved.</p>
+            <p class="footer-attribution">Developed by Rafat Al Khashan</p>
+        </div>
+    </div>
+
+    <script src="js/auth.js"></script>
+    <script src="js/auth-ui.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if user is logged in
+            if (!isLoggedIn()) {
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            // Load user data
+            const user = getCurrentUser();
+            if (user) {
+                document.getElementById('name').value = user.name || '';
+                document.getElementById('email').value = user.email || '';
+            }
+            
+            // Handle form submission
+            document.getElementById('profileForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const name = document.getElementById('name').value;
+                const currentPassword = document.getElementById('currentPassword').value;
+                const newPassword = document.getElementById('newPassword').value;
+                const confirmPassword = document.getElementById('confirmPassword').value;
+                const errorElement = document.getElementById('profileError');
+                const successElement = document.getElementById('profileSuccess');
+                const saveButton = document.getElementById('saveButton');
+                const profileLoader = document.getElementById('profileLoader');
+                
+                // Reset messages
+                errorElement.style.display = 'none';
+                successElement.style.display = 'none';
+                
+                // Validate passwords if changing
+                if (newPassword && newPassword !== confirmPassword) {
+                    errorElement.textContent = 'New passwords do not match';
+                    errorElement.style.display = 'block';
+                    return;
+                }
+                
+                // Show loading state
+                saveButton.disabled = true;
+                profileLoader.style.display = 'block';
+                
+                try {
+                    // Call the updateProfile function from auth.js
+                    await updateProfile({
+                        name,
+                        currentPassword,
+                        newPassword: newPassword || null
+                    });
+                    
+                    // Show success message
+                    successElement.textContent = 'Profile updated successfully';
+                    successElement.style.display = 'block';
+                    
+                    // Clear password fields
+                    document.getElementById('currentPassword').value = '';
+                    document.getElementById('newPassword').value = '';
+                    document.getElementById('confirmPassword').value = '';
+                } catch (error) {
+                    // Display error message
+                    errorElement.textContent = error.message || 'Failed to update profile';
+                    errorElement.style.display = 'block';
+                } finally {
+                    // Hide loading state
+                    saveButton.disabled = false;
+                    profileLoader.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

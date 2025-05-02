@@ -42,8 +42,11 @@
                 <a href="docs/" class="header-action-btn">
                     <i class="fas fa-book"></i> Documentation
                 </a>
-                <a href="login.html" class="header-action-btn">
+                <a href="login.html" class="header-action-btn" id="loginBtn">
                     <i class="fas fa-user"></i> Login
+                </a>
+                <a href="#" class="header-action-btn" id="logoutBtn" style="display: none;">
+                    <i class="fas fa-sign-out-alt"></i> Logout
                 </a>
             </div>
         </div>
@@ -247,6 +250,8 @@
             setInterval(updateTestimonial, 5000);
         });
     </script>
+    <script src="js/auth.js"></script>
+    <script src="js/auth-ui.js"></script>
 </body>
 
 </html>
