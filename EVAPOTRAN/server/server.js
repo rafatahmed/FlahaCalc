@@ -1,4 +1,3 @@
-// Comprehensive server that combines auth and weather proxy functionality
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
@@ -20,8 +19,25 @@ if (!WEATHER_API_KEY) {
 
 // Middleware
 app.use(cors({
-  origin: '*', // In production, replace with your specific domain
-  methods: ['GET', 'POST'],
+  origin: function(origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if(!origin) return callback(null, true);
+    
+    // Allow all origins in development
+    if(process.env.NODE_ENV !== 'production') {
+      return callback(null, true);
+    }
+    
+    // In production, check against allowed origins
+    const allowedOrigins = (process.env.CORS_ORIGIN || '').split(',');
+    if(allowedOrigins.indexOf(origin) !== -1 || !origin) {
+      return callback(null, true);
+    } else {
+      return callback(new Error('CORS policy violation'), false);
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 app.use(express.json());
@@ -250,4 +266,5 @@ app.listen(PORT, () => {
   console.log(`Weather API available at: http://localhost:${PORT}/api/weather`);
   console.log(`Auth endpoints available at: http://localhost:${PORT}/api/auth`);
 });
+
 

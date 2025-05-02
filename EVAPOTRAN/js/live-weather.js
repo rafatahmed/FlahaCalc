@@ -17,6 +17,7 @@ async function testServerConnection() {
         const response = await fetch(`${API_BASE_URL}/test`, { 
             method: 'GET',
             mode: 'cors',
+            credentials: 'same-origin',
             headers: {
                 'Content-Type': 'application/json'
             }
@@ -177,6 +178,7 @@ async function fetchWeatherByCoordinates(lat, lon) {
 			{
 				method: 'GET',
 				mode: 'cors',
+				credentials: 'same-origin',
 				headers: {
 					'Content-Type': 'application/json'
 				}
@@ -243,7 +245,15 @@ async function fetchWeatherData() {
 
 		// Fetch data from our proxy server
 		const response = await fetch(
-			`${API_BASE_URL}/weather?q=${encodeURIComponent(location)}`
+			`${API_BASE_URL}/weather?q=${encodeURIComponent(location)}`,
+			{
+				method: 'GET',
+				mode: 'cors',
+				credentials: 'same-origin',
+				headers: {
+					'Content-Type': 'application/json'
+				}
+			}
 		);
 
 		if (!response.ok) {

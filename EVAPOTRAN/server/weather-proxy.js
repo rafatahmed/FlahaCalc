@@ -1,18 +1,21 @@
-// Simple Express server to proxy weather API requests
 const express = require('express');
-const axios = require('axios');
 const cors = require('cors');
+const axios = require('axios');
 const bodyParser = require('body-parser');
 require('dotenv').config();
-const calculationService = require('./calculation-service');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Enable CORS with more specific options
+// Configure CORS to allow requests from any origin
 app.use(cors({
-  origin: '*', // In production, replace with your specific domain
-  methods: ['GET', 'POST'],
+  origin: function(origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if(!origin) return callback(null, true);
+    return callback(null, true);
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
@@ -339,6 +342,7 @@ app.listen(PORT, () => {
   console.log(`Weather proxy server running on port ${PORT}`);
   console.log(`Test the server at: http://localhost:${PORT}/api/test`);
 });
+
 
 
 
