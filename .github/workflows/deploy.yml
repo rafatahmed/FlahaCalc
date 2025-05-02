@@ -41,9 +41,9 @@ jobs:
               cd /var/www/flahacalc
               git clone https://github.com/rafatahmed/FlahaCalc.git .
             else
-              # Update the repository
+              # Update the repository with special handling for local changes
               cd /var/www/flahacalc
-              git pull
+              bash scripts/server/handle-local-changes.sh || git pull
             fi
             
             # Install dependencies
@@ -54,6 +54,9 @@ jobs:
             
             # Build application
             npm run build
+            
+            # Make all scripts executable
+            find scripts -name "*.sh" -exec chmod +x {} \;
             
             # Update Nginx configuration
             echo "Updating Nginx configuration..."
@@ -69,7 +72,11 @@ jobs:
             cd /var/www/flahacalc
             bash scripts/deploy/update-links.sh
             
+            # Run the fix-all script
+            sudo bash scripts/server/fix-all.sh
+            
             echo "Deployment completed successfully!"
+
 
 
 
