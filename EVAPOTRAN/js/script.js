@@ -952,161 +952,141 @@ function netLongwaveRadiation(tMaxC, tMinC, ea, rs, rso) {
 
 // Function to calculate ET0
 async function calculateET() {
-    // Get input values
-    const temperature = parseFloat(document.getElementById('temperature').value);
-    const windSpeed = parseFloat(document.getElementById('windSpeed').value);
-    const relativeHumidity = parseFloat(document.getElementById('relativeHumidity').value);
-    const atmosphericPressure = parseFloat(document.getElementById('atmosphericPressure').value) || null;
-    const elevation = parseFloat(document.getElementById('elevation').value);
-    const latitude = parseFloat(document.getElementById('latitude').value);
-    const dayNumber = parseInt(document.getElementById('dayNumber').value);
-    const sunshineDuration = parseFloat(document.getElementById('sunshineDuration').value);
-
-    // Validate inputs
-    if (isNaN(temperature) || isNaN(windSpeed) || isNaN(relativeHumidity) || 
-        isNaN(elevation) || isNaN(latitude) || isNaN(dayNumber) || isNaN(sunshineDuration)) {
-        alert('Please fill in all required fields with valid numbers.');
-        return;
-    }
-
-    // Prepare data for server
-    const data = {
-        temperature,
-        windSpeed,
-        relativeHumidity,
-        elevation,
-        pressure: atmosphericPressure,
-        latitude,
-        dayOfYear: dayNumber,
-        sunshineDuration
-    };
-
-    console.log('Sending data to server: ', data);
-
+    // Show loading indicator
+    const loadingIndicator = document.createElement('div');
+    loadingIndicator.className = 'loading-indicator';
+    loadingIndicator.innerHTML = '<div class="spinner"></div><p>Calculating...</p>';
+    document.body.appendChild(loadingIndicator);
+    
     try {
-        // Send data to server for calculation
-        const response = await fetch('http://localhost:3000/api/calculate/et0', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data)
-        });
-
-        // Check if response is ok
-        if (!response.ok) {
-            const errorData = await response.json();
-            console.error('Server returned error: ', errorData);
-            throw new Error('Calculation failed');
+        // Gather input data
+        const inputData = {
+            temperature: parseFloat(document.getElementById('temperature').value),
+            windSpeed: parseFloat(document.getElementById('windSpeed').value),
+            relativeHumidity: parseFloat(document.getElementById('relativeHumidity').value),
+            elevation: parseFloat(document.getElementById('elevation').value),
+            atmosphericPressure: parseFloat(document.getElementById('atmosphericPressure').value),
+            latitude: parseFloat(document.getElementById('latitude').value),
+            dayNumber: parseFloat(document.getElementById('dayNumber').value),
+            sunshineDuration: parseFloat(document.getElementById('sunshineDuration').value),
+            location: document.getElementById('location').value
+        };
+        
+        // Validate input data
+        const requiredFields = [
+            'temperature', 'windSpeed', 'relativeHumidity', 
+            'latitude', 'dayNumber', 'sunshineDuration'
+        ];
+        
+        for (const field of requiredFields) {
+            if (isNaN(inputData[field])) {
+                throw new Error(`Please enter a valid value for ${field.replace(/([A-Z])/g, ' $1').toLowerCase()}`);
+            }
         }
-
-        // Parse response
-        const result = await response.json();
-        console.log('Received result from server: ', result);
-
+        
+        // Check if either elevation or atmospheric pressure is provided
+        if (isNaN(inputData.elevation) && isNaN(inputData.atmosphericPressure)) {
+            throw new Error('Please enter either elevation or atmospheric pressure');
+        }
+        
+        console.log('Calculation input data:', inputData);
+        
+        // Use worker for calculation
+        const result = await calculateETWithWorker(inputData);
+        
+        if (result.error) {
+            throw new Error(result.error);
+        }
+        
         // Display results
         displayResults(result.et0);
         
-        // Also update intermediate values if available
+        // Update intermediate values if available
         if (result.intermediateValues) {
             updateIntermediateValues(result.intermediateValues);
-        } else {
-            // If server doesn't return intermediate values, calculate them locally
-            const intermediateValues = calculateIntermediateValues(temperature, windSpeed, relativeHumidity, 
-                                                                 atmosphericPressure || calculateAtmosphericPressure(elevation), 
-                                                                 latitude, dayNumber, sunshineDuration);
-            updateIntermediateValues(intermediateValues);
         }
         
-        // Make sure B2 div is visible
-        const resultsBlock = document.getElementById('B2');
-        if (resultsBlock) {
-            resultsBlock.style.display = 'block';
-        }
-
+        // Show results section
+        document.getElementById('B2').style.display = 'block';
+        
+        // Store calculation result
+        await storeCalculationResult({
+            inputData: inputData,
+            result: result.et0,
+            intermediateValues: result.intermediateValues || {},
+            location: inputData.location || 'Unknown'
+        });
     } catch (error) {
-        console.error('Error calculating ET0:', error);
-        alert(`Calculation failed: ${error.message}`);
+        console.error('Calculation error:', error);
+        alert('Error in calculation: ' + error.message);
+    } finally {
+        // Remove loading indicator
+        if (document.body.contains(loadingIndicator)) {
+            document.body.removeChild(loadingIndicator);
+        }
     }
 }
 
-// Function to calculate intermediate values locally if server doesn't provide them
-function calculateIntermediateValues(temp, windSpeed, rh, pressure, lat, dayOfYear, sunshineDuration) {
-    // Calculate saturation vapor pressure
-    const es = saturationVaporPressure(temp);
-    
-    // Calculate actual vapor pressure
-    const ea = (es * rh) / 100;
-    
-    // Calculate slope of vapor pressure curve
-    const delta = slopeVaporPressureCurve(temp);
-    
-    // Calculate psychrometric constant
-    const gamma = psychrometricConstant(pressure);
-    
-    // Calculate solar radiation components
-    const dr = 1 + 0.033 * Math.cos((2 * Math.PI / 365) * dayOfYear);
-    const delta_solar = 0.409 * Math.sin((2 * Math.PI / 365) * dayOfYear - 1.39);
-    const latRad = (lat * Math.PI) / 180;
-    const ws = Math.acos(-Math.tan(latRad) * Math.tan(delta_solar));
-    
-    // Calculate extraterrestrial radiation
-    const Ra = (24 * 60 / Math.PI) * 0.082 * dr * (
-        ws * Math.sin(latRad) * Math.sin(delta_solar) + 
-        Math.cos(latRad) * Math.cos(delta_solar) * Math.sin(ws)
-    );
-    
-    // Calculate net radiation (simplified)
-    const Rn = 0.77 * Ra * 0.75 - 0.1;
-    
-    return {
-        es,
-        ea,
-        delta,
-        gamma,
-        Ra,
-        Rn
-    };
+// Function to create and use a worker for heavy calculations
+function calculateETWithWorker(inputData) {
+  return new Promise((resolve, reject) => {
+    try {
+      const worker = new Worker('js/calculation-worker.js');
+      
+      worker.onmessage = function(e) {
+        worker.terminate(); // Clean up the worker
+        resolve(e.data);
+      };
+      
+      worker.onerror = function(error) {
+        worker.terminate(); // Clean up the worker
+        reject(new Error(`Worker error: ${error.message}`));
+      };
+      
+      worker.postMessage(inputData);
+    } catch (error) {
+      reject(new Error(`Failed to create worker: ${error.message}`));
+    }
+  });
 }
 
 // Function to update intermediate values
 function updateIntermediateValues(values) {
     console.log("Updating intermediate values:", values);
     
+    if (!values) {
+        console.error("No intermediate values provided");
+        return;
+    }
+    
     // Update saturation vapor pressure
     const satVaporPressureElement = document.getElementById('satVaporPressure');
-    if (satVaporPressureElement && values.es) {
+    if (satVaporPressureElement && values.es !== undefined) {
         satVaporPressureElement.textContent = `Saturation Vapor Pressure (es): ${values.es.toFixed(3)} kPa`;
     }
     
     // Update actual vapor pressure
     const actVaporPressureElement = document.getElementById('actVaporPressure');
-    if (actVaporPressureElement && values.ea) {
+    if (actVaporPressureElement && values.ea !== undefined) {
         actVaporPressureElement.textContent = `Actual Vapor Pressure (ea): ${values.ea.toFixed(3)} kPa`;
     }
     
     // Update slope of vapor pressure curve
     const slopeVPCElement = document.getElementById('slopeVPC');
-    if (slopeVPCElement && values.delta) {
+    if (slopeVPCElement && values.delta !== undefined) {
         slopeVPCElement.textContent = `Slope of Vapour Pressure Curve (Δ): ${values.delta.toFixed(4)} kPa °C⁻¹`;
     }
     
     // Update psychrometric constant
     const psychoCElement = document.getElementById('psychoC');
-    if (psychoCElement && values.gamma) {
+    if (psychoCElement && values.gamma !== undefined) {
         psychoCElement.textContent = `Psychrometric Constant (γ): ${values.gamma.toFixed(4)} kPa °C⁻¹`;
     }
     
     // Update net radiation
     const netRadElement = document.getElementById('netRad');
-    if (netRadElement && values.Rn) {
+    if (netRadElement && values.Rn !== undefined) {
         netRadElement.textContent = `Net Radiation (Rn): ${values.Rn.toFixed(2)} MJ m⁻² d⁻¹`;
-    }
-    
-    // Make sure the intermediate output div is visible
-    const intermediateOutput = document.getElementById('intermediate-output');
-    if (intermediateOutput) {
-        intermediateOutput.style.display = 'block';
     }
 }
 
@@ -1598,6 +1578,30 @@ function secureCalculate(temp, windSpeed, rh, elevation, pressure, lat, dayOfYea
     return calculate(temp, windSpeed, rh, elevation, pressure, lat, dayOfYear, sunshineDuration);
 }
 
+// Add memoization function
+const memoize = (fn) => {
+  const cache = new Map();
+  return (...args) => {
+    const key = JSON.stringify(args);
+    if (cache.has(key)) return cache.get(key);
+    const result = fn(...args);
+    cache.set(key, result);
+    return result;
+  };
+};
+
+// Apply memoization to expensive calculations
+const memoizedSolarDeclination = memoize((dayOfYear) => {
+  return 0.409 * Math.sin(2 * Math.PI * dayOfYear / 365 - 1.39);
+});
+
+const memoizedExtraterrestrialRadiation = memoize((latitude, dayOfYear) => {
+  // Implementation here
+  // ...
+});
+
+// Apply to other suitable functions
+
 // Add watermark to prevent unauthorized copying
 document.addEventListener('DOMContentLoaded', function() {
     const watermarkDiv = document.createElement('div');
@@ -1642,3 +1646,201 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+
+// Add function to get recent calculations
+async function getRecentCalculations(limit = 10) {
+  try {
+    // Get calculation history from localStorage
+    const historyString = localStorage.getItem('calculationHistory');
+    if (!historyString) {
+      return [];
+    }
+    
+    // Parse the history
+    const history = JSON.parse(historyString);
+    
+    // Return the most recent calculations up to the limit
+    return history.slice(0, limit);
+  } catch (error) {
+    console.error('Error retrieving calculation history:', error);
+    return [];
+  }
+}
+
+// Add function to show calculation history
+async function showCalculationHistory() {
+  try {
+    const recentCalculations = await getRecentCalculations(5);
+    
+    if (recentCalculations.length === 0) {
+      alert('No calculation history found');
+      return;
+    }
+    
+    // Create and show history modal
+    const historyModal = document.createElement('div');
+    historyModal.className = 'modal';
+    historyModal.id = 'historyModal';
+    historyModal.innerHTML = `
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Recent Calculations</h2>
+          <span class="close-modal">&times;</span>
+        </div>
+        <div class="modal-body">
+          <table class="history-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Location</th>
+                <th>Temperature</th>
+                <th>Result (ET₀)</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="historyTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    `;
+    
+    document.body.appendChild(historyModal);
+    
+    // Populate table
+    const tableBody = document.getElementById('historyTableBody');
+    recentCalculations.forEach(calc => {
+      const row = document.createElement('tr');
+      const date = new Date(calc.timestamp).toLocaleString();
+      
+      row.innerHTML = `
+        <td>${date}</td>
+        <td>${calc.location || 'Unknown'}</td>
+        <td>${calc.inputData.temperature}°C</td>
+        <td>${parseFloat(calc.result).toFixed(2)} mm/day</td>
+        <td><button class="load-calc-btn" data-id="${calc.id}">Load</button></td>
+      `;
+      
+      tableBody.appendChild(row);
+    });
+    
+    // Show modal
+    historyModal.style.display = 'block';
+    
+    // Add event listeners
+    document.querySelector('.close-modal').addEventListener('click', () => {
+      document.body.removeChild(historyModal);
+    });
+    
+    // Add load button functionality
+    document.querySelectorAll('.load-calc-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const calcId = parseInt(this.getAttribute('data-id'));
+        loadCalculation(calcId);
+        document.body.removeChild(historyModal);
+      });
+    });
+  } catch (error) {
+    console.error('Error showing calculation history:', error);
+    alert('Error loading calculation history');
+  }
+}
+
+// Add function to load a calculation from history
+function loadCalculation(calcId) {
+  try {
+    // Get calculation history
+    const historyString = localStorage.getItem('calculationHistory');
+    if (!historyString) {
+      alert('Calculation history not found');
+      return;
+    }
+    
+    const history = JSON.parse(historyString);
+    
+    // Find the calculation with the given ID
+    const calculation = history.find(calc => calc.id === calcId);
+    if (!calculation) {
+      alert('Calculation not found');
+      return;
+    }
+    
+    // Load the input data into the form
+    const inputData = calculation.inputData;
+    
+    // Set form values
+    document.getElementById('temperature').value = inputData.temperature;
+    document.getElementById('windSpeed').value = inputData.windSpeed;
+    document.getElementById('relativeHumidity').value = inputData.relativeHumidity;
+    
+    if (inputData.atmosphericPressure) {
+      document.getElementById('atmosphericPressure').value = inputData.atmosphericPressure;
+    }
+    
+    if (inputData.elevation) {
+      document.getElementById('elevation').value = inputData.elevation;
+    }
+    
+    document.getElementById('latitude').value = inputData.latitude;
+    document.getElementById('dayNumber').value = inputData.dayNumber;
+    document.getElementById('sunshineDuration').value = inputData.sunshineDuration;
+    
+    if (inputData.location) {
+      document.getElementById('location').value = inputData.location;
+    }
+    
+    // Trigger calculation
+    calculateET();
+  } catch (error) {
+    console.error('Error loading calculation:', error);
+    alert('Error loading calculation: ' + error.message);
+  }
+}
+
+// Add history button to the UI
+document.addEventListener('DOMContentLoaded', function() {
+  const actionButtons = document.querySelector('.action-buttons');
+  
+  if (actionButtons) {
+    const historyButton = document.createElement('button');
+    historyButton.id = 'showHistory';
+    historyButton.className = 'secondary-button';
+    historyButton.innerHTML = '<i class="fas fa-history"></i> Calculation History';
+    historyButton.addEventListener('click', showCalculationHistory);
+    
+    actionButtons.appendChild(historyButton);
+  }
+});
+
+// Add the missing storeCalculationResult function
+async function storeCalculationResult(data) {
+  try {
+    // Get existing calculation history or initialize a new array
+    const historyString = localStorage.getItem('calculationHistory');
+    const history = historyString ? JSON.parse(historyString) : [];
+    
+    // Add timestamp to the calculation data
+    const calculationData = {
+      ...data,
+      timestamp: new Date().toISOString(),
+      id: Date.now() // Use timestamp as unique ID
+    };
+    
+    // Add to history (limit to last 20 calculations)
+    history.unshift(calculationData);
+    if (history.length > 20) {
+      history.pop();
+    }
+    
+    // Store back to localStorage
+    localStorage.setItem('calculationHistory', JSON.stringify(history));
+    
+    // Also store the most recent calculation separately
+    localStorage.setItem('lastCalculation', JSON.stringify(calculationData));
+    
+    console.log('Calculation result stored successfully');
+    return true;
+  } catch (error) {
+    console.error('Error storing calculation result:', error);
+    return false;
+  }
+}

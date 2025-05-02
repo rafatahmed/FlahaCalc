@@ -17,6 +17,25 @@
 let selectedFile = null;
 let epwData = [];
 
+// Function to check if D3.js is loaded
+function checkD3Loaded() {
+    if (typeof d3 === 'undefined') {
+        const heatmapContainer = document.getElementById("heatmapContainer");
+        if (heatmapContainer) {
+            heatmapContainer.innerHTML = `
+                <div class="error-message">
+                    <h3>Error: D3.js Library Not Loaded</h3>
+                    <p>The D3.js visualization library could not be loaded. This is required for creating the weather heatmaps.</p>
+                    <p>Please check your internet connection and try refreshing the page.</p>
+                </div>
+            `;
+            heatmapContainer.style.display = "block";
+        }
+        return false;
+    }
+    return true;
+}
+
 // Initialize when DOM is ready
 document.addEventListener("DOMContentLoaded", function () {
 	console.log("EPW Heatmap page loaded, checking for stored EPW data...");
@@ -305,6 +324,11 @@ function parseEpwFile(content) {
 
 // Generate all heatmaps
 function generateAllHeatmaps(data) {
+	// Check if D3.js is loaded
+	if (!checkD3Loaded()) {
+		return;
+	}
+	
 	// Validate data with more detailed logging
 	if (!data) {
 		console.error("Data is null or undefined");
@@ -390,6 +414,12 @@ function generateHeatmap(data, parameter) {
 		return;
 	}
 
+	// Calculate statistics for this parameter
+	const stats = calculateStats(data, parameter);
+	
+	// Update the statistics display
+	updateStats(parameter, stats);
+	
 	// Create the heatmap
 	createHeatmap(data, parameter, containerId);
 }
@@ -422,6 +452,13 @@ function createHeatmap(data, parameter, containerId) {
 	container.innerHTML = "";
 	
 	try {
+		// Check if d3 is available
+		if (typeof d3 === 'undefined') {
+			console.error('D3.js library is not loaded. Please include the D3.js script in your HTML.');
+			container.innerHTML = "<p class='error-message'>Error: D3.js library is not loaded. Cannot create visualization.</p>";
+			return;
+		}
+		
 		// Define color scales based on parameter
 		let colorScale;
 		
@@ -527,7 +564,7 @@ function createHeatmap(data, parameter, containerId) {
 		}
 	} catch (error) {
 		console.error(`Error creating heatmap for ${parameter}:`, error);
-		container.innerHTML = `<p class="error">Error creating visualization: ${error.message}</p>`;
+		container.innerHTML = `<p class='error-message'>Error creating visualization: ${error.message}</p>`;
 	}
 }
 
@@ -1007,6 +1044,73 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 });
+
+// Function to calculate statistics for a parameter
+function calculateStats(data, parameter) {
+    // Filter out undefined or null values
+    const validValues = data
+        .map(d => d[parameter])
+        .filter(value => value !== undefined && value !== null && !isNaN(value));
+    
+    if (validValues.length === 0) {
+        return { min: '-', max: '-', avg: '-' };
+    }
+    
+    const min = Math.min(...validValues);
+    const max = Math.max(...validValues);
+    const sum = validValues.reduce((acc, val) => acc + val, 0);
+    const avg = sum / validValues.length;
+    
+    return {
+        min: min.toFixed(1),
+        max: max.toFixed(1),
+        avg: avg.toFixed(1)
+    };
+}
+
+// Function to update statistics display
+function updateStats(parameter, stats) {
+    const minElement = document.getElementById(`${parameter}-stat-min`);
+    const maxElement = document.getElementById(`${parameter}-stat-max`);
+    const avgElement = document.getElementById(`${parameter}-stat-avg`);
+    
+    if (minElement) minElement.textContent = stats.min;
+    if (maxElement) maxElement.textContent = stats.max;
+    if (avgElement) avgElement.textContent = stats.avg;
+}
+
+// Add units to the stats display
+function getParameterUnit(parameter) {
+    switch (parameter) {
+        case 'dryBulbTemp':
+            return '°C';
+        case 'relativeHumidity':
+            return '%';
+        case 'windSpeed':
+            return 'm/s';
+        case 'globalHorizontalRadiation':
+        case 'directNormalRadiation':
+        case 'diffuseHorizontalRadiation':
+            return 'Wh/m²';
+        default:
+            return '';
+    }
+}
+
+// Update the updateStats function to include units
+function updateStats(parameter, stats) {
+    const unit = getParameterUnit(parameter);
+    const minElement = document.getElementById(`${parameter}-stat-min`);
+    const maxElement = document.getElementById(`${parameter}-stat-max`);
+    const avgElement = document.getElementById(`${parameter}-stat-avg`);
+    
+    if (minElement) minElement.textContent = stats.min !== '-' ? `${stats.min} ${unit}` : '-';
+    if (maxElement) maxElement.textContent = stats.max !== '-' ? `${stats.max} ${unit}` : '-';
+    if (avgElement) avgElement.textContent = stats.avg !== '-' ? `${stats.avg} ${unit}` : '-';
+}
+
+
+
 
 
 

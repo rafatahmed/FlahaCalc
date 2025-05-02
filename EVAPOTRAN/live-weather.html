@@ -3,24 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live Weather Data - Evapotranspiration Calculator</title>
+    <title>Live Weather Data - Evapotranspiration Calculator | Flaha Agri Tech</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" href="img/favicon.ico" type="image/x-icon">
     <script src="js/live-weather.js" defer></script>
 </head>
 <body>
     <div class="header">
-        <img src="img/Flaha_logo.svg" alt="Flaha Logo" class="header-logo"
-             onerror="this.onerror=null; this.src='img/Flaha_logo.png';">
-        <h1>Flaha Calc - Live Weather Data</h1>
+        <div class="header-overlay"></div>
+        <div class="header-top">
+            <div class="header-brand">
+                <img src="img/Flaha_logo.png" alt="Flaha Logo" class="header-logo" 
+                     onerror="this.onerror=null; this.src='https://via.placeholder.com/80x80?text=Flaha';">
+                <div class="header-title">
+                    <h1>Flaha Calc</h1>
+                    <span>Precision Agriculture Solutions</span>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button class="header-action-btn">
+                    <i class="fas fa-book"></i> Documentation
+                </button>
+                <button class="header-action-btn">
+                    <i class="fas fa-user"></i> Login
+                </button>
+            </div>
+        </div>
         <div class="nav-bar">
-            <a href="index.html" class="nav-link">Home</a>
-            <a href="calculator.html" class="nav-link">Manual Calculator</a>
-            <a href="epw-import.html" class="nav-link">EPW Import</a>
-            <a href="epw-heatmap.html" class="nav-link">Weather Visualization</a>
-            <a href="live-weather.html" class="nav-link active">Live Weather</a>
+            <a href="index.html" class="nav-link">
+                <i class="fas fa-home"></i> Home
+            </a>
+            <a href="calculator.html" class="nav-link">
+                <i class="fas fa-calculator"></i> Manual Calculator
+            </a>
+            <a href="epw-import.html" class="nav-link">
+                <i class="fas fa-file-import"></i> EPW Import
+            </a>
+            <a href="epw-heatmap.html" class="nav-link">
+                <i class="fas fa-chart-area"></i> Weather Visualization
+            </a>
+            <a href="live-weather.html" class="nav-link active">
+                <i class="fas fa-cloud-sun"></i> Live Weather
+            </a>
         </div>
     </div>
 
@@ -70,8 +98,8 @@
     
     <div class="page-footer">
         <div class="footer-content">
-            <img src="img/Flaha_logo.svg" alt="Flaha Logo" class="footer-logo"
-                 onerror="this.onerror=null; this.src='img/Flaha_logo.png';">
+            <img src="img/Flaha_logo.png" alt="Flaha Logo" class="footer-logo"
+                 onerror="this.onerror=null; this.src='https://via.placeholder.com/80x80?text=Flaha';">
             <div class="footer-links">
                 <a href="index.html" class="footer-link">Home</a>
                 <a href="calculator.html" class="footer-link">Manual Calculator</a>
@@ -85,6 +113,9 @@
     </div>
 </body>
 </html>
+
+
+
 
 
 
