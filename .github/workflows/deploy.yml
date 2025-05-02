@@ -17,9 +17,9 @@ jobs:
           
       - name: Install dependencies
         run: |
-          npm ci
+          npm install
           cd EVAPOTRAN/server
-          npm ci
+          npm install
           
       - name: Build application
         run: npm run build
@@ -37,14 +37,15 @@ jobs:
             # Pull the latest changes
             git pull
             
-            # Install dependencies
-            npm ci
+            # Install dependencies (using npm install instead of npm ci)
+            npm install
             cd EVAPOTRAN/server
-            npm ci
+            npm install
             
             # Build the application
             cd ../..
             npm run build
             
             # Restart the server
-            pm2 restart flahacalc-server
+            pm2 restart flahacalc-server || pm2 start EVAPOTRAN/server/server.js --name flahacalc-server
+

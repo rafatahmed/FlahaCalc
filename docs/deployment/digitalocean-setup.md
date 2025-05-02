@@ -42,9 +42,9 @@
 
 3. Install dependencies and build the application:
    ```bash
-   npm ci
+   npm install
    cd EVAPOTRAN/server
-   npm ci
+   npm install
    cd ../..
    npm run build
    ```
@@ -52,7 +52,7 @@
 4. Set up environment variables:
    ```bash
    cd EVAPOTRAN/server
-   cp .env.example .env
+   cp .env.example .env  # If .env.example exists
    nano .env
    ```
    Add your environment variables:
@@ -110,3 +110,4 @@
    ```bash
    certbot --nginx -d your-domain.com -d www.your-domain.com
    ```
+

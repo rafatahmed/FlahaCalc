@@ -7,21 +7,23 @@ echo "Deploying FlahaCalc to production..."
 
 # Build the application
 echo "Building application..."
-npm run build
+npm run build || { echo "Build failed"; exit 1; }
 
 # Deploy to server
 echo "Deploying to server..."
 rsync -avz --exclude 'node_modules' --exclude '.git' \
     --exclude '.env' --exclude '.github' \
-    ./ $DROPLET_USERNAME@$DROPLET_HOST:/var/www/flahacalc/
+    ./ $DROPLET_USERNAME@$DROPLET_HOST:/var/www/flahacalc/ || { echo "Rsync failed"; exit 1; }
 
 # SSH into server and restart
 echo "Restarting server..."
-ssh $DROPLET_USERNAME@$DROPLET_HOST << 'EOF'
+ssh $DROPLET_USERNAME@$DROPLET_HOST << 'EOF' || { echo "Server restart failed"; exit 1; }
 cd /var/www/flahacalc/EVAPOTRAN/server
-npm ci
-pm2 restart flahacalc-server
+npm install
+pm2 restart flahacalc-server || pm2 start server.js --name flahacalc-server
 EOF
 
 echo "Deployment completed successfully!"
+
+
 
