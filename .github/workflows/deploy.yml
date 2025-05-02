@@ -37,7 +37,7 @@ jobs:
             # Pull the latest changes
             git pull
             
-            # Install dependencies (using npm install instead of npm ci)
+            # Install dependencies
             npm install
             cd EVAPOTRAN/server
             npm install
@@ -46,6 +46,11 @@ jobs:
             cd ../..
             npm run build
             
+            # Update HTML links for production (remove .html extensions)
+            bash update_links.sh
+            bash update_js_links.sh
+            
             # Restart the server
             pm2 restart flahacalc-server || pm2 start EVAPOTRAN/server/server.js --name flahacalc-server
+
 

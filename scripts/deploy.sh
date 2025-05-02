@@ -3,6 +3,9 @@
 # Exit on error
 set -e
 
+# Run pre-deployment checks
+bash scripts/pre-deploy-check.sh
+
 echo "Deploying FlahaCalc to production..."
 
 # Build the application
@@ -21,9 +24,15 @@ ssh $DROPLET_USERNAME@$DROPLET_HOST << 'EOF' || { echo "Server restart failed"; 
 cd /var/www/flahacalc/EVAPOTRAN/server
 npm install
 pm2 restart flahacalc-server || pm2 start server.js --name flahacalc-server
+
+# Update HTML links for production (remove .html extensions)
+cd /var/www/flahacalc
+bash update_links.sh
+bash update_js_links.sh
 EOF
 
 echo "Deployment completed successfully!"
+
 
 
 
