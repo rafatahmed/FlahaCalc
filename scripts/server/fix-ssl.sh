@@ -1,3 +1,17 @@
+#!/bin/bash
+
+echo "Fixing SSL configuration and routing issues..."
+
+# Check SSL certificates
+echo "Checking SSL certificates..."
+if [ ! -f /etc/letsencrypt/live/flaha.org/fullchain.pem ] || [ ! -f /etc/letsencrypt/live/flaha.org/privkey.pem ]; then
+    echo "SSL certificates not found. Renewing with Certbot..."
+    certbot renew --force-renewal
+fi
+
+# Update Nginx configuration
+echo "Updating Nginx configuration..."
+cat > /etc/nginx/sites-available/flahacalc << 'EOF'
 server {
     listen 80;
     server_name flaha.org www.flaha.org;
@@ -42,6 +56,29 @@ server {
         try_files $uri $uri/ /index.html;
     }
 }
+EOF
 
+# Test and reload Nginx
+echo "Testing Nginx configuration..."
+nginx -t
 
+if [ $? -eq 0 ]; then
+    echo "Reloading Nginx..."
+    systemctl reload nginx
+else
+    echo "Nginx configuration test failed. Please check the errors above."
+    exit 1
+fi
 
+echo "Checking Node.js server status..."
+if ! pm2 status | grep -q "flahacalc-server"; then
+    echo "Starting Node.js server..."
+    cd /var/www/flahacalc/EVAPOTRAN/server
+    pm2 start server.js --name flahacalc-server
+    pm2 save
+else
+    echo "Restarting Node.js server..."
+    pm2 restart flahacalc-server
+fi
+
+echo "Fix completed. Please check the website now."
