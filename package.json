@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "docs": "mkdocs serve",
     "build-docs": "mkdocs build",
-    "build": "npx webpack --config webpack.config.js",
+    "build": "npx webpack --config ./EVAPOTRAN/webpack.config.js",
     "obfuscate": "javascript-obfuscator ./dist/bundle.js --output ./dist/bundle.min.js --compact true --self-defending true",
     "deploy": "bash scripts/deploy.sh",
     "deploy:manual": "npm run build && npm run deploy"
@@ -35,5 +35,7 @@
   },
   "homepage": "https://flaha.org/evapotran"
 }
+
+
 
 
