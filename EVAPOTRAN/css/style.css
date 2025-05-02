@@ -132,14 +132,25 @@ body {
   display: flex;
   align-items: center;
   gap: 5px;
+  text-decoration: none; /* Add this to remove underline from links */
+  font-family: 'Roboto', Arial, sans-serif; /* Ensure consistent font */
+  font-weight: 500; /* Add consistent font weight */
 }
 
 .header-action-btn:hover {
   background-color: rgba(255, 255, 255, 0.25);
+  transform: translateY(-2px); /* Add subtle hover effect */
 }
 
 .header-action-btn i {
   font-size: 1rem;
+}
+
+/* Ensure consistent spacing in header actions */
+.header-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
 }
 
 .nav-bar {
