@@ -9,7 +9,7 @@
 // API configuration
 const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
     ? "http://localhost:3000/api" 
-    : "https://flaha.org/api"; // Automatically use the right endpoint based on environment
+    : `https://${window.location.hostname}/api`; // Use the current domain for production
 
 // Test server connection
 async function testServerConnection() {
@@ -65,7 +65,8 @@ document.addEventListener("DOMContentLoaded", async function () {
 		warningEl.className = "server-warning";
 		warningEl.innerHTML = `
 			<p class="warning">⚠️ Weather server connection failed. Make sure the server is running at ${API_BASE_URL}.</p>
-			<p>Check the server setup instructions in the README file.</p>
+			<p>If you're running locally, check the server setup instructions in the README file.</p>
+			<p>If you're using the production site, please contact the administrator.</p>
 		`;
 		document.querySelector(".container").prepend(warningEl);
 	}
