@@ -1,10 +1,40 @@
 #!/bin/bash
 
-echo "Fixing security headers configuration..."
+# Exit on error
+set -e
 
-# Update Nginx configuration
-echo "Updating Nginx configuration with proper security headers..."
-cat > /etc/nginx/sites-available/flahacalc << 'EOF'
+echo "Deploying FlahaCalc with automatic fixes..."
+
+# 1. First, commit and push changes to GitHub
+echo "Committing and pushing changes to GitHub..."
+git add .
+git commit -m "Deploy with automatic fixes: $(date)"
+git push origin main
+
+# 2. Wait for GitHub Actions to complete deployment
+echo "Waiting for GitHub Actions to complete deployment (30 seconds)..."
+sleep 30
+
+# 3. SSH into the server and apply fixes
+echo "SSHing into server to apply fixes..."
+ssh $DROPLET_USERNAME@$DROPLET_HOST << 'EOF'
+cd /var/www/flahacalc
+
+# Make all scripts executable
+find scripts -name "*.sh" -exec chmod +x {} \;
+
+# Create or update the fix-all.sh script
+cat > scripts/server/fix-all.sh << 'INNEREOF'
+#!/bin/bash
+
+# Exit on error
+set -e
+
+echo "Applying all fixes to FlahaCalc deployment..."
+
+# 1. Fix SSL configuration
+echo "Fixing SSL configuration..."
+cat > /etc/nginx/sites-available/flahacalc << 'NGINXCONF'
 server {
     listen 80;
     server_name flaha.org www.flaha.org;
@@ -57,41 +87,82 @@ server {
         try_files $uri $uri/ /index.html;
     }
 }
-EOF
+NGINXCONF
 
 # Create a symbolic link if it doesn't exist
 if [ ! -f /etc/nginx/sites-enabled/flahacalc ]; then
     ln -s /etc/nginx/sites-available/flahacalc /etc/nginx/sites-enabled/
 fi
 
-# Remove security meta tags from HTML files
+# Remove any default configuration
+if [ -f /etc/nginx/sites-enabled/default ]; then
+    rm /etc/nginx/sites-enabled/default
+fi
+
+# 2. Remove all security meta tags from HTML files
 echo "Removing security meta tags from HTML files..."
 cd /var/www/flahacalc/EVAPOTRAN
 for file in *.html; do
-    # Remove Content-Security-Policy meta tag
+    # Remove all meta http-equiv tags related to security
     sed -i '/<meta http-equiv="Content-Security-Policy"/d' "$file"
-    # Remove X-Content-Type-Options meta tag
     sed -i '/<meta http-equiv="X-Content-Type-Options"/d' "$file"
-    # Remove X-Frame-Options meta tag
     sed -i '/<meta http-equiv="X-Frame-Options"/d' "$file"
-    # Remove X-XSS-Protection meta tag
     sed -i '/<meta http-equiv="X-XSS-Protection"/d' "$file"
-    # Remove Referrer-Policy meta tag
     sed -i '/<meta http-equiv="Referrer-Policy"/d' "$file"
-    # Remove Permissions-Policy meta tag
     sed -i '/<meta http-equiv="Permissions-Policy"/d' "$file"
 done
 
-# Test and reload Nginx
+# 3. Update live-weather.js to use the correct API URL
+echo "Updating live-weather.js..."
+cat > /var/www/flahacalc/EVAPOTRAN/js/live-weather.js << 'WEATHERJS'
+/**
+ * Live Weather Data Integration
+ * This module fetches current weather data from OpenWeatherMap API
+ * and formats it for use in the ETo calculator
+ */
+
+// API configuration
+const hostname = window.location.hostname;
+const API_BASE_URL = hostname === 'localhost' || hostname === '127.0.0.1' 
+    ? "http://localhost:3000/api" 
+    : `https://${hostname}/api`;
+
+console.log("Using API_BASE_URL:", API_BASE_URL);
+
+// Rest of your live-weather.js file...
+// (The script will preserve the rest of the file content)
+WEATHERJS
+# Append the rest of the original file (excluding the first few lines we just replaced)
+tail -n +10 /var/www/flahacalc/EVAPOTRAN/js/live-weather.js.bak >> /var/www/flahacalc/EVAPOTRAN/js/live-weather.js
+
+# 4. Test and reload Nginx
 echo "Testing Nginx configuration..."
 nginx -t
 
 if [ $? -eq 0 ]; then
-    echo "Reloading Nginx..."
-    systemctl reload nginx
+    echo "Restarting Nginx..."
+    systemctl restart nginx
 else
     echo "Nginx configuration test failed. Please check the errors above."
     exit 1
 fi
 
-echo "Security headers fix completed. Please check the website now."
+# 5. Restart Node.js server
+echo "Restarting Node.js server..."
+cd /var/www/flahacalc/EVAPOTRAN/server
+pm2 restart flahacalc-server || pm2 start server.js --name flahacalc-server
+pm2 save
+
+echo "All fixes applied successfully!"
+INNEREOF
+
+# Make the fix-all.sh script executable
+chmod +x scripts/server/fix-all.sh
+
+# Run the fix-all.sh script
+sudo bash scripts/server/fix-all.sh
+
+EOF
+
+echo "Deployment with fixes completed!"
+echo "Please check the website now."

@@ -1,9 +1,8 @@
 #!/bin/bash
 
-echo "Fixing security headers configuration..."
+echo "Resetting Nginx configuration..."
 
-# Update Nginx configuration
-echo "Updating Nginx configuration with proper security headers..."
+# Create a fresh Nginx configuration
 cat > /etc/nginx/sites-available/flahacalc << 'EOF'
 server {
     listen 80;
@@ -64,34 +63,21 @@ if [ ! -f /etc/nginx/sites-enabled/flahacalc ]; then
     ln -s /etc/nginx/sites-available/flahacalc /etc/nginx/sites-enabled/
 fi
 
-# Remove security meta tags from HTML files
-echo "Removing security meta tags from HTML files..."
-cd /var/www/flahacalc/EVAPOTRAN
-for file in *.html; do
-    # Remove Content-Security-Policy meta tag
-    sed -i '/<meta http-equiv="Content-Security-Policy"/d' "$file"
-    # Remove X-Content-Type-Options meta tag
-    sed -i '/<meta http-equiv="X-Content-Type-Options"/d' "$file"
-    # Remove X-Frame-Options meta tag
-    sed -i '/<meta http-equiv="X-Frame-Options"/d' "$file"
-    # Remove X-XSS-Protection meta tag
-    sed -i '/<meta http-equiv="X-XSS-Protection"/d' "$file"
-    # Remove Referrer-Policy meta tag
-    sed -i '/<meta http-equiv="Referrer-Policy"/d' "$file"
-    # Remove Permissions-Policy meta tag
-    sed -i '/<meta http-equiv="Permissions-Policy"/d' "$file"
-done
+# Remove any default configuration
+if [ -f /etc/nginx/sites-enabled/default ]; then
+    rm /etc/nginx/sites-enabled/default
+fi
 
 # Test and reload Nginx
 echo "Testing Nginx configuration..."
 nginx -t
 
 if [ $? -eq 0 ]; then
-    echo "Reloading Nginx..."
-    systemctl reload nginx
+    echo "Restarting Nginx..."
+    systemctl restart nginx
 else
     echo "Nginx configuration test failed. Please check the errors above."
     exit 1
 fi
 
-echo "Security headers fix completed. Please check the website now."
+echo "Nginx configuration reset completed. Please check the website now."

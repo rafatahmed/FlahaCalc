@@ -14,6 +14,7 @@
     "deploy": "npm run pre-deploy && bash scripts/deploy/production.sh",
     "deploy:local": "bash scripts/deploy/local.sh",
     "deploy:production": "git push origin main",
+    "deploy:with-fixes": "bash scripts/deploy/deploy-with-fixes.sh",
     "security:audit": "bash scripts/security/audit.sh",
     "security:harden": "bash scripts/security/server-hardening.sh",
     "security:env": "bash scripts/security/setup-env.sh",
@@ -44,6 +45,7 @@
   },
   "homepage": "https://flaha.org/evapotran"
 }
+
 
 
 
