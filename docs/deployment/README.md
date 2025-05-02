@@ -22,7 +22,7 @@ The application is automatically deployed when changes are pushed to the `main` 
 1. Push changes to GitHub
 2. GitHub Actions workflow is triggered
 3. Application is built and tested
-4. Changes are deployed to the DigitalOcean Droplet
+4. Changes are deployed to the DigitalOcean Droplet via SSH
 5. Server is restarted
 
 ### Manual Deployment
@@ -30,21 +30,36 @@ The application is automatically deployed when changes are pushed to the `main` 
 For manual deployment:
 
 ```bash
-npm run deploy:manual
+# Deploy from your local machine
+npm run deploy:production
+
+# Or SSH into the server and run
+ssh -i ~/.ssh/rafat root@207.154.202.6
+cd /var/www/flahacalc
+bash scripts/deploy/production.sh
 ```
+
+## Scripts Organization
+
+All deployment scripts are organized in the `scripts/` directory:
+
+- `scripts/deploy/` - Deployment scripts
+- `scripts/security/` - Security-related scripts
+- `scripts/server/` - Server management scripts
+- `scripts/dev/` - Development scripts
 
 ## Monitoring and Maintenance
 
-- **Logs**: Available via PM2 (`pm2 logs evapotran-server`)
-- **Performance Monitoring**: DigitalOcean Monitoring dashboard
-- **Backups**: Automated weekly backups via DigitalOcean
+- **Logs**: Available via PM2 (`pm2 logs flahacalc-server`)
+- **Performance Monitoring**: Run `npm run server:monitor`
+- **Backups**: Run `npm run server:backup`
 
 ## Troubleshooting
 
 If the deployment fails:
 
 1. Check GitHub Actions logs for build errors
-2. Check server logs: `pm2 logs evapotran-server`
+2. Check server logs: `pm2 logs flahacalc-server`
 3. Verify Nginx configuration: `nginx -t`
 4. Check application status: `pm2 status`
 
@@ -54,6 +69,7 @@ To rollback to a previous version:
 
 1. Find the commit hash of the stable version
 2. SSH into the server
-3. Navigate to the application directory: `cd /var/www/evapotran`
+3. Navigate to the application directory: `cd /var/www/flahacalc`
 4. Checkout the stable version: `git checkout <commit-hash>`
-5. Rebuild and restart: `npm ci && npm run build && cd EVAPOTRAN/server && npm ci && pm2 restart evapotran-server`
+5. Rebuild and restart: `npm ci && npm run build && cd EVAPOTRAN/server && npm ci && pm2 restart flahacalc-server`
+

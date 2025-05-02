@@ -7,11 +7,19 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "docs": "mkdocs serve",
     "build-docs": "mkdocs build",
-    "build": "npx webpack --config ./EVAPOTRAN/webpack.config.js",
+    "build": "bash scripts/dev/build.sh",
+    "clean": "bash scripts/dev/clean.sh",
     "obfuscate": "javascript-obfuscator ./dist/bundle.js --output ./dist/bundle.min.js --compact true --self-defending true",
-    "pre-deploy": "bash scripts/pre-deploy-check.sh",
-    "deploy": "npm run pre-deploy && bash scripts/deploy.sh",
-    "deploy:manual": "npm run build && npm run deploy"
+    "pre-deploy": "bash scripts/deploy/pre-deploy-check.sh",
+    "deploy": "npm run pre-deploy && bash scripts/deploy/production.sh",
+    "deploy:local": "bash scripts/deploy/local.sh",
+    "deploy:production": "git push origin main",
+    "security:audit": "bash scripts/security/audit.sh",
+    "security:harden": "bash scripts/security/server-hardening.sh",
+    "security:env": "bash scripts/security/setup-env.sh",
+    "server:setup": "bash scripts/server/droplet-setup.sh",
+    "server:monitor": "bash scripts/server/monitor.sh",
+    "server:backup": "bash scripts/server/backup.sh"
   },
   "devDependencies": {
     "webpack": "^5.75.0",
@@ -36,6 +44,10 @@
   },
   "homepage": "https://flaha.org/evapotran"
 }
+
+
+
+
 
 
 

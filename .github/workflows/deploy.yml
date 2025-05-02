@@ -26,28 +26,13 @@ jobs:
       - name: Build application
         run: npm run build
         
-      - name: Set up SSH key
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.DROPLET_SSH_KEY }}" > ~/.ssh/rafat
-          chmod 600 ~/.ssh/rafat
-          ssh-keyscan -H 207.154.202.6 >> ~/.ssh/known_hosts
-      
       - name: Deploy to DigitalOcean
-        run: |
-          ssh -i ~/.ssh/rafat root@207.154.202.6 << 'EOF'
-            cd /var/www/flahacalc
-            git pull
-            npm install
-            cd EVAPOTRAN/server
-            npm install
-            cd ../..
-            npm run build
-            cd EVAPOTRAN/server
-            pm2 restart flahacalc-server || pm2 start server.js --name flahacalc-server
-          EOF
-
-
-
-
+        uses: appleboy/ssh-action@master
+        with:
+          host: 207.154.202.6
+          username: root
+          key: ${{ secrets.DROPLET_SSH_KEY }}
+          port: 22
+          script: |
+            bash /var/www/flahacalc/scripts/deploy/production.sh
 
