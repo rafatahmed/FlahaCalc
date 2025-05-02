@@ -7,10 +7,15 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "docs": "mkdocs serve",
     "build-docs": "mkdocs build",
-    "build": "webpack --config webpack.config.js",
+    "build": "npx webpack --config webpack.config.js",
     "obfuscate": "javascript-obfuscator ./dist/bundle.js --output ./dist/bundle.min.js --compact true --self-defending true",
     "deploy": "bash scripts/deploy.sh",
     "deploy:manual": "npm run build && npm run deploy"
+  },
+  "devDependencies": {
+    "webpack": "^5.75.0",
+    "webpack-cli": "^5.0.1",
+    "javascript-obfuscator": "^4.0.0"
   },
   "keywords": [
     "evapotranspiration",
@@ -30,3 +35,5 @@
   },
   "homepage": "https://flaha.org/evapotran"
 }
+
+
