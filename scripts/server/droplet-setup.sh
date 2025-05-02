@@ -49,30 +49,7 @@ npm run build
 
 # Set up Nginx
 echo "Setting up Nginx..."
-cat > /etc/nginx/sites-available/flahacalc << EOF
-server {
-    listen 80;
-    server_name flaha.org www.flaha.org;
-    
-    location / {
-        root /var/www/flahacalc/EVAPOTRAN;
-        index index.html;
-        try_files \$uri \$uri/ /index.html;
-    }
-    
-    location /api/ {
-        proxy_pass http://localhost:3000/api/;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade \$http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host \$host;
-        proxy_cache_bypass \$http_upgrade;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto \$scheme;
-    }
-}
-EOF
+cp scripts/server/nginx/flahacalc.conf /etc/nginx/sites-available/flahacalc
 
 # Enable the site
 ln -s /etc/nginx/sites-available/flahacalc /etc/nginx/sites-enabled/

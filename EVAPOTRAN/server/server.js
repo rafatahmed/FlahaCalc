@@ -51,7 +51,7 @@ app.get('/api/protected', auth, (req, res) => {
 });
 
 // Add a test endpoint to verify server connectivity
-app.get('/api/test', (req, res) => {
+app.get('/test', (req, res) => {
   res.json({ 
     status: 'ok', 
     message: 'Server is running correctly',
@@ -266,5 +266,7 @@ app.listen(PORT, () => {
   console.log(`Weather API available at: http://localhost:${PORT}/api/weather`);
   console.log(`Auth endpoints available at: http://localhost:${PORT}/api/auth`);
 });
+
+
 
 

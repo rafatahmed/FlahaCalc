@@ -24,6 +24,11 @@ cd ../..
 echo "Building application..."
 npm run build
 
+# Update Nginx configuration
+echo "Updating Nginx configuration..."
+sudo cp scripts/server/nginx/flahacalc.conf /etc/nginx/sites-available/flahacalc
+sudo nginx -t && sudo systemctl reload nginx
+
 # Restart server
 echo "Restarting server..."
 cd EVAPOTRAN/server
@@ -34,4 +39,6 @@ cd /var/www/flahacalc
 bash scripts/deploy/update-links.sh
 
 echo "Deployment completed successfully!"
+
+
 

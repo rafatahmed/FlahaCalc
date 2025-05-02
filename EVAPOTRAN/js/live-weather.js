@@ -6,10 +6,12 @@
  * @format
  */
 
-// API configuration
+// API configuration - Fix to properly detect production environment
 const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
     ? "http://localhost:3000/api" 
     : `https://${window.location.hostname}/api`; // Use the current domain for production
+
+console.log("Current API_BASE_URL:", API_BASE_URL);
 
 // Test server connection
 async function testServerConnection() {

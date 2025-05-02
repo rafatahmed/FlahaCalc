@@ -55,11 +55,23 @@ jobs:
             # Build application
             npm run build
             
+            # Update Nginx configuration
+            echo "Updating Nginx configuration..."
+            cp scripts/server/nginx/flahacalc.conf /etc/nginx/sites-available/flahacalc
+            ln -sf /etc/nginx/sites-available/flahacalc /etc/nginx/sites-enabled/
+            nginx -t && systemctl reload nginx
+            
             # Restart server
             cd EVAPOTRAN/server
             pm2 restart flahacalc-server || pm2 start server.js --name flahacalc-server
             
+            # Update HTML links for production
+            cd /var/www/flahacalc
+            bash scripts/deploy/update-links.sh
+            
             echo "Deployment completed successfully!"
+
+
 
 
 
