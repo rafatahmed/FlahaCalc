@@ -26,23 +26,28 @@ jobs:
       - name: Build application
         run: npm run build
         
-      - name: Install doctl
-        uses: digitalocean/action-doctl@v2
-        with:
-          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
-      
       - name: Set up SSH key
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.DROPLET_SSH_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keygen -y -f ~/.ssh/id_rsa || echo "Failed to generate public key"
-          ssh-keyscan -H ${{ secrets.DROPLET_HOST }} >> ~/.ssh/known_hosts
+          echo "${{ secrets.DROPLET_SSH_KEY }}" > ~/.ssh/rafat
+          chmod 600 ~/.ssh/rafat
+          ssh-keyscan -H 207.154.202.6 >> ~/.ssh/known_hosts
       
-      - name: Deploy to DigitalOcean Droplet
+      - name: Deploy to DigitalOcean
         run: |
-          doctl compute ssh ${{ secrets.DROPLET_NAME }} \
-            --ssh-key-path ~/.ssh/id_rsa \
-            --ssh-command "cd /var/www/flahacalc && git pull && npm install && cd EVAPOTRAN/server && npm install && cd ../.. && npm run build && cd EVAPOTRAN/server && pm2 restart flahacalc-server || pm2 start server.js --name flahacalc-server"
+          ssh -i ~/.ssh/rafat root@207.154.202.6 << 'EOF'
+            cd /var/www/flahacalc
+            git pull
+            npm install
+            cd EVAPOTRAN/server
+            npm install
+            cd ../..
+            npm run build
+            cd EVAPOTRAN/server
+            pm2 restart flahacalc-server || pm2 start server.js --name flahacalc-server
+          EOF
+
+
+
 
 
