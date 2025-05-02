@@ -26,7 +26,16 @@ git stash
 
 # Pull latest changes
 echo "Pulling latest changes from repository..."
-git pull
+git pull || {
+    echo "Pull failed, attempting to resolve conflicts..."
+    # If there are conflicts, accept remote versions for deployment scripts
+    git checkout --theirs scripts/server/fix-deployment.sh 2>/dev/null || true
+    git checkout --theirs scripts/server/nginx/flahacalc.conf 2>/dev/null || true
+    git add scripts/server/fix-deployment.sh scripts/server/nginx/flahacalc.conf 2>/dev/null || true
+    git commit -m "Merge origin/main, accepting remote changes for deployment scripts" || true
+    # Try pulling again
+    git pull
+}
 
 # Apply local changes from backup
 echo "Applying important local changes..."
@@ -42,3 +51,4 @@ fi
 
 echo "Local changes handled. Backup stored in: $BACKUP_DIR"
 echo "You may need to manually merge some changes."
+
