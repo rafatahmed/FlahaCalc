@@ -1,4 +1,6 @@
 
+name: Deploy to DigitalOcean
+
 on:
   push:
     branches: [ main ]
@@ -7,38 +9,35 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      # Step 1: Check out the code
       - name: Checkout code
         uses: actions/checkout@v3
       
-      # Step 2: Set up Node.js environment
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18'
           
-      # Step 3: Install dependencies
       - name: Install dependencies
         run: |
           npm install
           cd EVAPOTRAN/server
           npm install
           
-      # Step 4: Build the application
       - name: Build application
         run: npm run build
         
-      # Step 5: Deploy to your DigitalOcean droplet
-      - name: Deploy to DigitalOcean Droplet
-        uses: appleboy/ssh-action@master
+      - name: Install doctl
+        uses: digitalocean/action-doctl@v2
         with:
-          host: ${{ secrets.DROPLET_HOST }}
-          username: ${{ secrets.DROPLET_USERNAME }}
-          key: ${{ secrets.DROPLET_SSH_KEY }}
-          script: |
-            # Commands to run on your server
-            cd /var/www/flahacalc
-            git pull
-            npm install
-            # ... more commands ...
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+          
+      - name: Deploy to DigitalOcean Droplet
+        run: |
+          doctl compute ssh ${{ secrets.DROPLET_NAME }} --ssh-command "cd /var/www/flahacalc && git pull && npm install && cd EVAPOTRAN/server && npm install && cd ../.. && npm run build && cd EVAPOTRAN/server && pm2 restart flahacalc-server || pm2 start server.js --name flahacalc-server"
+
+
+
+
+
+
 
