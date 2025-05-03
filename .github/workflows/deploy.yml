@@ -122,5 +122,6 @@ jobs:
           SLACK_CHANNEL: deployments
           SLACK_COLOR: ${{ job.status }}
           SLACK_TITLE: Deployment Complete
-          SLACK_MESSAGE: 'FlahaCalc has been deployed to production'
+          SLACK_MESSAGE: 'FlahaCalc has been deployed to production. Commit message: ${{ github.event.head_commit.message }}'
+          SLACK_FOOTER: 'Deployed by: ${{ github.actor }}'
         if: env.SLACK_WEBHOOK != ''
