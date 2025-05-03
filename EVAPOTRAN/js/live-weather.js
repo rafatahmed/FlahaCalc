@@ -2,16 +2,15 @@
  * Live Weather Data Integration
  * This module fetches current weather data from OpenWeatherMap API
  * and formats it for use in the ETo calculator
- *
- * @format
  */
 
-// API configuration - Fix to properly detect production environment
-const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+// API configuration
+const hostname = window.location.hostname;
+const API_BASE_URL = hostname === 'localhost' || hostname === '127.0.0.1' 
     ? "http://localhost:3000/api" 
-    : `https://${window.location.hostname}/api`; // Use the current domain for production
+    : `https://${hostname}/api`;
 
-console.log("Current API_BASE_URL:", API_BASE_URL);
+console.log("Using API_BASE_URL:", API_BASE_URL);
 
 // Test server connection
 async function testServerConnection() {
