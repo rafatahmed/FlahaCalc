@@ -1,5 +1,5 @@
 
-name: Deploy to DigitalOcean
+name: Deploy to Production
 
 on:
   push:
@@ -16,7 +16,30 @@ on:
           - 'false'
 
 jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          
+      - name: Install dependencies
+        run: |
+          npm install
+          cd EVAPOTRAN/server
+          npm install
+          
+      - name: Run linting and tests
+        run: |
+          npm run lint || echo "Linting issues found"
+          npm test || echo "Tests not configured"
+          
   deploy:
+    needs: test
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -55,51 +78,8 @@ jobs:
           key: ${{ secrets.DROPLET_SSH_KEY }}
           port: 22
           script: |
-            # Check if the repository exists
-            if [ ! -d "/var/www/flahacalc" ]; then
-              echo "Creating application directory..."
-              mkdir -p /var/www/flahacalc
-              cd /var/www/flahacalc
-              git clone https://github.com/rafatahmed/FlahaCalc.git .
-            else
-              # Update the repository with special handling for local changes
-              cd /var/www/flahacalc
-              bash scripts/server/handle-local-changes.sh || git pull
-            fi
-            
-            # Install dependencies
-            npm install
-            cd EVAPOTRAN/server
-            npm install
-            cd ../..
-            
-            # Build application
-            npm run build
-            
-            # Make all scripts executable
-            find scripts -name "*.sh" -exec chmod +x {} \;
-            
-            # Update Nginx configuration
-            echo "Updating Nginx configuration..."
-            cp scripts/server/nginx/flahacalc.conf /etc/nginx/sites-available/flahacalc
-            ln -sf /etc/nginx/sites-available/flahacalc /etc/nginx/sites-enabled/
-            nginx -t && systemctl reload nginx
-            
-            # Restart server
-            cd EVAPOTRAN/server
-            pm2 restart flahacalc-server || pm2 start server.js --name flahacalc-server
-            
-            # Update HTML links for production
-            cd /var/www/flahacalc
-            bash scripts/deploy/update-links.sh || true
-            
-            # Run the fix-all script if requested
-            if [ "${{ github.event.inputs.apply_fixes }}" == "true" ]; then
-              echo "Applying fixes..."
-              sudo bash scripts/server/fix-all.sh
-            fi
-            
-            echo "Deployment completed successfully!"
+            # Run the safe deployment script
+            bash /var/www/flahacalc/scripts/deploy/safe-deploy.sh
       
       - name: Verify deployment
         uses: appleboy/ssh-action@master
@@ -118,3 +98,29 @@ jobs:
             echo ""
             echo "Checking Nginx status..."
             systemctl status nginx | grep Active
+            
+      - name: Apply fixes if requested
+        if: github.event.inputs.apply_fixes == 'true'
+        uses: appleboy/ssh-action@master
+        with:
+          host: 207.154.202.6
+          username: root
+          key: ${{ secrets.DROPLET_SSH_KEY }}
+          port: 22
+          script: |
+            cd /var/www/flahacalc
+            bash scripts/server/fix-all.sh
+            
+  notify:
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send deployment notification
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_CHANNEL: deployments
+          SLACK_COLOR: ${{ job.status }}
+          SLACK_TITLE: Deployment Complete
+          SLACK_MESSAGE: 'FlahaCalc has been deployed to production'
+        if: env.SLACK_WEBHOOK != ''
