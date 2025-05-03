@@ -15,6 +15,8 @@
     "deploy:local": "bash scripts/deploy/local.sh",
     "deploy:production": "git push origin main",
     "deploy:with-fixes": "bash scripts/deploy/deploy-with-fixes.sh",
+    "release:notes": "bash scripts/release/generate-release-notes.sh",
+    "release:create": "bash scripts/release/create-release.sh",
     "fix:master": "bash scripts/deploy/master-fix.sh",
     "fix:deploy": "bash scripts/deploy/deploy-with-fixes.sh",
     "security:audit": "bash scripts/security/audit.sh",
@@ -55,6 +57,7 @@
   },
   "homepage": "https://flaha.org/evapotran"
 }
+
 
 
 

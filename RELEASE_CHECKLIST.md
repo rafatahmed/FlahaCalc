@@ -2,31 +2,49 @@
 
 ## Pre-Release Tasks
 
-- [ ] Update version number in:
-  - [ ] VERSION file
-  - [ ] package.json (if exists)
-  - [ ] README.md
-- [ ] Update CHANGELOG.md with all notable changes
-- [ ] Create RELEASE_NOTES.md with release highlights
-- [ ] Ensure all documentation is up-to-date
+- [ ] Ensure all features for this release are complete
+- [ ] Run all tests and fix any failures
+- [ ] Update documentation for new features
 - [ ] Run final tests on all major browsers
 - [ ] Check mobile responsiveness
 - [ ] Verify all links work correctly
 - [ ] Optimize images and assets
 
-## Release Tasks
+## Release Preparation
 
-- [ ] Commit all changes with message "Prepare X.Y.Z release"
-- [ ] Create an annotated Git tag: `git tag -a vX.Y.Z -m "EVAPOTRAN X.Y.Z release"`
-- [ ] Push the tag: `git push origin vX.Y.Z`
-- [ ] Create GitHub release using the tag
-- [ ] Upload release assets (if applicable)
-- [ ] Publish release
+- [ ] Generate release notes:
+  ```bash
+  npm run release:notes 0.2.0  # Replace with your version
+  ```
+- [ ] Edit RELEASE_NOTES.md to add detailed information
+- [ ] Update CHANGELOG.md with all notable changes
+- [ ] Review and finalize release notes
+
+## Creating the Release
+
+- [ ] Create the release:
+  ```bash
+  npm run release:create 0.2.0  # Replace with your version
+  ```
+  This will:
+  - Update version numbers in all files
+  - Commit the changes
+  - Create an annotated Git tag
+  - Push changes and tag to GitHub
+
+- [ ] Create a GitHub release:
+  - Go to https://github.com/rafatahmed/FlahaCalc/releases/new
+  - Select the tag you just created
+  - Add the release title (e.g., "EVAPOTRAN 0.2.0")
+  - Copy content from RELEASE_NOTES.md
+  - Publish the release
 
 ## Post-Release Tasks
 
-- [ ] Verify the release is accessible
-- [ ] Update documentation website (if separate)
+- [ ] Deploy the release to production:
+  ```bash
+  npm run deploy:production
+  ```
+- [ ] Verify the release is accessible and functioning correctly
 - [ ] Announce release on relevant channels
 - [ ] Update roadmap with next development priorities
-- [ ] Create milestone for next version

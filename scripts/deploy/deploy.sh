@@ -20,19 +20,12 @@ rsync -avz --exclude 'node_modules' --exclude '.git' \
     ./ $DROPLET_USERNAME@$DROPLET_HOST:/var/www/flahacalc/ || { echo "Rsync failed"; exit 1; }
 
 # SSH into server and restart
-echo "Restarting server..."
+echo "Restarting server and applying optimizations..."
 ssh $DROPLET_USERNAME@$DROPLET_HOST << 'EOF_SSH' || { echo "Server restart failed"; exit 1; }
 cd /var/www/flahacalc
 
 # Make all scripts executable
 find scripts -name "*.sh" -exec chmod +x {} \;
-
-# Check if .env file exists
-if [ ! -f "EVAPOTRAN/server/.env" ]; then
-  echo "WARNING: No .env file found in EVAPOTRAN/server/"
-  echo "Creating a placeholder .env file - YOU MUST UPDATE THIS WITH YOUR ACTUAL API KEY"
-  cp EVAPOTRAN/server/.env.example EVAPOTRAN/server/.env
-fi
 
 # Update Nginx configuration
 echo "Updating Nginx configuration..."
@@ -46,7 +39,12 @@ npm install
 pm2 restart flahacalc-server || pm2 start server.js --name flahacalc-server
 pm2 save
 
-echo "Deployment completed successfully!"
+# Apply performance optimizations
+echo "Applying performance optimizations..."
+cd /var/www/flahacalc
+bash scripts/server/optimize-server.sh
+
+echo "Deployment and optimization completed successfully!"
 EOF_SSH
 
-echo "Deployment completed successfully!"
+echo "Deployment and optimization completed successfully!"
