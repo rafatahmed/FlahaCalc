@@ -4,6 +4,12 @@ const axios = require('axios');
 const dotenv = require('dotenv');
 const path = require('path');
 const { router: authRoutes, auth } = require('./auth');
+const compression = require('compression');
+const morgan = require('morgan');
+const fs = require('fs');
+const rateLimit = require('express-rate-limit');
+const NodeCache = require('node-cache');
+const weatherCache = new NodeCache({ stdTTL: 600 }); // 10-minute cache
 
 // Load environment variables
 require('dotenv').config();
@@ -20,6 +26,18 @@ console.log('WEATHER_API_KEY status:', WEATHER_API_KEY ? 'Set' : 'Not set');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Use compression for all responses
+app.use(compression());
+
+// Create a write stream for access logs
+const accessLogStream = fs.createWriteStream(
+  path.join(__dirname, 'access.log'), 
+  { flags: 'a' }
+);
+
+// Setup request logging
+app.use(morgan('combined', { stream: accessLogStream }));
 
 // Middleware
 app.use(cors({
@@ -46,6 +64,18 @@ app.use(cors({
 }));
 app.use(express.json());
 
+// Apply rate limiting to API routes
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests, please try again later.' }
+});
+
+// Apply to all API routes
+app.use('/api', apiLimiter);
+
 // Authentication routes
 app.use('/api/auth', authRoutes);
 
@@ -59,6 +89,15 @@ app.get('/test', (req, res) => {
   res.json({ 
     status: 'ok', 
     message: 'Server is running correctly',
+    timestamp: new Date().toISOString()
+  });
+});
+
+// Add a simple health check endpoint
+app.get('/health', (req, res) => {
+  res.json({
+    status: 'ok',
+    uptime: process.uptime(),
     timestamp: new Date().toISOString()
   });
 });
@@ -81,6 +120,15 @@ app.get('/api/health', (req, res) => {
 app.get('/api/weather', async (req, res) => {
   try {
     const { lat, lon, q } = req.query;
+    const cacheKey = q ? `weather_q_${q}` : `weather_coord_${lat}_${lon}`;
+    
+    // Check cache first
+    const cachedData = weatherCache.get(cacheKey);
+    if (cachedData) {
+      console.log(`Serving cached weather data for ${cacheKey}`);
+      return res.json(cachedData);
+    }
+    
     let url;
     
     console.log(`Fetching weather data from: https://api.openweathermap.org/data/2.5/weather?units=metric&appid=[MASKED]&${q ? 'q=' + q : `lat=${lat}&lon=${lon}`}`);
@@ -94,6 +142,10 @@ app.get('/api/weather', async (req, res) => {
     }
     
     const response = await axios.get(url);
+    
+    // Cache the response
+    weatherCache.set(cacheKey, response.data);
+    
     res.json(response.data);
   } catch (error) {
     console.error('Error fetching weather data:', error.message);
@@ -279,6 +331,16 @@ app.listen(PORT, () => {
   console.log(`Weather API available at: http://localhost:${PORT}/api/weather`);
   console.log(`Auth endpoints available at: http://localhost:${PORT}/api/auth`);
 });
+
+
+
+
+
+
+
+
+
+
 
 
 

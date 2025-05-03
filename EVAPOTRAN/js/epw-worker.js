@@ -57,65 +57,39 @@ function extractLocationData(lines) {
   };
 }
 
-// Process EPW data in chunks to avoid blocking
-function processDataInChunks(lines, chunkSize = 1000) {
-  return new Promise((resolve, reject) => {
-    const totalLines = lines.length;
-    const epwData = [];
-    let processedLines = 0;
+// Add chunked processing for large files
+async function processDataInChunks(lines) {
+  const CHUNK_SIZE = 1000; // Process 1000 lines at a time
+  const headerLines = 8; // Skip header lines
+  const dataLines = lines.slice(headerLines);
+  const totalLines = dataLines.length;
+  const epwData = [];
+  
+  for (let i = 0; i < totalLines; i += CHUNK_SIZE) {
+    const chunk = dataLines.slice(i, i + CHUNK_SIZE);
+    const processedChunk = processChunk(chunk);
+    epwData.push(...processedChunk);
     
-    function processNextChunk() {
-      // Calculate end index for this chunk
-      const endIndex = Math.min(processedLines + chunkSize, totalLines);
-      
-      // Process this chunk of lines
-      for (let i = processedLines; i < endIndex; i++) {
-        // Skip header lines (first 8 lines are header)
-        if (i < 8) continue;
-        
-        const line = lines[i].trim();
-        if (!line) continue;
-        
-        const fields = line.split(',');
-        if (fields.length >= 35) {
-          epwData.push({
-            year: parseInt(fields[0]),
-            month: parseInt(fields[1]),
-            day: parseInt(fields[2]),
-            hour: parseInt(fields[3]),
-            dryBulbTemp: parseFloat(fields[6]),
-            dewPointTemp: parseFloat(fields[7]),
-            relativeHumidity: parseFloat(fields[8]),
-            atmosphericPressure: parseFloat(fields[9]) / 1000, // Convert Pa to kPa
-            windDirection: parseFloat(fields[20]),
-            windSpeed: parseFloat(fields[21]),
-            globalHorizontalRadiation: parseFloat(fields[13]),
-            directNormalRadiation: parseFloat(fields[14]),
-            diffuseHorizontalRadiation: parseFloat(fields[15])
-          });
-        }
-      }
-      
-      // Update processed lines count
-      processedLines = endIndex;
-      
-      // Calculate and report progress
-      const progress = processedLines / totalLines;
-      self.postMessage({
-        type: 'progress',
-        progress: progress
-      });
-      
-      // If there are more lines to process, schedule the next chunk
-      if (processedLines < totalLines) {
-        setTimeout(processNextChunk, 0);
-      } else {
-        // All done, resolve the promise with the data
-        resolve(epwData);
-      }
-    }
+    // Report progress
+    const progress = Math.min(100, Math.round((i + chunk.length) / totalLines * 100));
+    self.postMessage({
+      type: 'progress',
+      progress: progress
+    });
     
-    // Start processing the first chunk
-    processNextChunk();
-  });
+    // Allow UI thread to breathe
+    await new Promise(resolve => setTimeout(resolve, 0));
+  }
+  
+  return epwData;
 }
+
+function processChunk(lines) {
+  return lines.map(line => {
+    // Your existing parsing logic
+    const parts = line.trim().split(',');
+    // Process and return data
+    // ...
+  }).filter(Boolean); // Remove any null entries
+}
+

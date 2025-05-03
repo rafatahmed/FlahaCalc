@@ -72,3 +72,24 @@ EVAPOTRAN is a static web application with no build process required. To deploy:
 3. Access via a web browser
 
 For local development, simply open any HTML file in a web browser.
+
+## Server Components
+
+### Performance Optimization
+
+The server implements several performance optimization techniques:
+
+- **server.js**: Core server with performance optimizations
+  - API response caching using `node-cache`
+  - Rate limiting with `express-rate-limit`
+  - Response compression with `compression`
+  - Request logging with `morgan`
+
+### Scripts
+
+The `scripts/server/` directory contains server management scripts:
+
+- **optimize-server.sh**: Installs and configures performance optimization dependencies
+- **restart-server.sh**: Safely restarts the server while preserving sessions
+- **fix-api-key.sh**: Updates API keys and ensures proper configuration
+- **debug-api-key.sh**: Diagnoses API key configuration issues

@@ -84,6 +84,48 @@ In case of emergency, you can make changes directly on the server:
 
 3. **Follow the prompts to make, commit, and apply your changes**
 
+## Performance Optimization Workflow
+
+When implementing performance improvements:
+
+1. **Measure current performance**
+   ```bash
+   # Run performance benchmark
+   bash scripts/dev/benchmark.sh
+   ```
+
+2. **Implement optimizations**
+   - Follow the guidelines in `docs/technical/performance-optimization.md`
+   - Use the optimization scripts in `scripts/server/`
+
+3. **Test optimizations**
+   ```bash
+   # Run optimization script
+   bash scripts/server/optimize-server.sh
+   
+   # Verify optimizations
+   bash scripts/dev/benchmark.sh
+   ```
+
+4. **Monitor in production**
+   - Check server logs for performance metrics
+   - Monitor response times and resource usage
+   - Adjust optimizations based on real-world usage patterns
+
+### Performance Testing
+
+Before deploying major changes, run performance tests:
+
+```bash
+# Run load test (simulates 100 concurrent users)
+bash scripts/dev/load-test.sh 100
+
+# Run stress test (gradually increases load until failure)
+bash scripts/dev/stress-test.sh
+```
+
+These tests help identify potential bottlenecks before they affect users in production.
+
 ## Deployment Options
 
 ### Automatic Deployment
