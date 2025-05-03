@@ -6,16 +6,20 @@ const path = require('path');
 const { router: authRoutes, auth } = require('./auth');
 
 // Load environment variables
-dotenv.config();
+require('dotenv').config();
+const WEATHER_API_KEY = process.env.WEATHER_API_KEY;
+
+if (!WEATHER_API_KEY) {
+  console.error('ERROR: WEATHER_API_KEY is not set in .env file');
+  console.error('Please create a .env file in the server directory with your OpenWeatherMap API key:');
+  console.error('WEATHER_API_KEY=your_api_key_here');
+}
+
+// Log the API key status (but not the key itself for security)
+console.log('WEATHER_API_KEY status:', WEATHER_API_KEY ? 'Set' : 'Not set');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-
-// Environment variables
-const WEATHER_API_KEY = process.env.WEATHER_API_KEY;
-if (!WEATHER_API_KEY) {
-  console.error('ERROR: WEATHER_API_KEY is not set in .env file');
-}
 
 // Middleware
 app.use(cors({
@@ -280,6 +284,7 @@ app.listen(PORT, () => {
   console.log(`Weather API available at: http://localhost:${PORT}/api/weather`);
   console.log(`Auth endpoints available at: http://localhost:${PORT}/api/auth`);
 });
+
 
 
 
