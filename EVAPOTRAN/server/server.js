@@ -83,7 +83,7 @@ app.get('/api/weather', async (req, res) => {
     const { lat, lon, q } = req.query;
     let url;
     
-    console.log(`Fetching weather data from: https://api.openweathermap.org/data/2.5/weather?units=metric&appid=API_KEY&${q ? 'q=' + q : `lat=${lat}&lon=${lon}`}`);
+    console.log(`Fetching weather data from: https://api.openweathermap.org/data/2.5/weather?units=metric&appid=[MASKED]&${q ? 'q=' + q : `lat=${lat}&lon=${lon}`}`);
     
     if (q) {
       url = `https://api.openweathermap.org/data/2.5/weather?units=metric&appid=${WEATHER_API_KEY}&q=${q}`;
@@ -279,6 +279,7 @@ app.listen(PORT, () => {
   console.log(`Weather API available at: http://localhost:${PORT}/api/weather`);
   console.log(`Auth endpoints available at: http://localhost:${PORT}/api/auth`);
 });
+
 
 
 
