@@ -81,32 +81,27 @@ app.get('/api/health', (req, res) => {
 app.get('/api/weather', async (req, res) => {
   try {
     const { lat, lon, q } = req.query;
-    let url = 'https://api.openweathermap.org/data/2.5/weather?units=metric&appid=' + WEATHER_API_KEY;
+    let url;
     
-    // Add either coordinates or city name
-    if (lat && lon) {
-      url += `&lat=${lat}&lon=${lon}`;
-    } else if (q) {
-      url += `&q=${encodeURIComponent(q)}`;
+    console.log(`Fetching weather data from: https://api.openweathermap.org/data/2.5/weather?units=metric&appid=API_KEY&${q ? 'q=' + q : `lat=${lat}&lon=${lon}`}`);
+    
+    if (q) {
+      url = `https://api.openweathermap.org/data/2.5/weather?units=metric&appid=${WEATHER_API_KEY}&q=${q}`;
+    } else if (lat && lon) {
+      url = `https://api.openweathermap.org/data/2.5/weather?units=metric&appid=${WEATHER_API_KEY}&lat=${lat}&lon=${lon}`;
     } else {
-      return res.status(400).json({ error: 'Missing location parameters' });
+      return res.status(400).json({ error: 'Missing required parameters' });
     }
     
-    console.log(`Fetching weather data from: ${url.replace(WEATHER_API_KEY, 'API_KEY')}`);
     const response = await axios.get(url);
-    console.log('Weather API response received');
     res.json(response.data);
   } catch (error) {
     console.error('Error fetching weather data:', error.message);
     if (error.response) {
       console.error('API response:', error.response.data);
-      res.status(error.response.status).json({ 
-        error: error.response.data.message || 'Failed to fetch weather data' 
-      });
+      res.status(error.response.status).json(error.response.data);
     } else {
-      res.status(500).json({ 
-        error: error.message || 'Failed to fetch weather data' 
-      });
+      res.status(500).json({ error: 'Failed to fetch weather data' });
     }
   }
 });
@@ -284,6 +279,7 @@ app.listen(PORT, () => {
   console.log(`Weather API available at: http://localhost:${PORT}/api/weather`);
   console.log(`Auth endpoints available at: http://localhost:${PORT}/api/auth`);
 });
+
 
 
 

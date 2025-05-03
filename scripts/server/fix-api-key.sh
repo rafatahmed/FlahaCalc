@@ -26,13 +26,7 @@ EOF
 # Ensure server.js is loading dotenv
 if ! grep -q "require('dotenv').config()" /var/www/flahacalc/EVAPOTRAN/server/server.js; then
     echo "Adding dotenv configuration to server.js..."
-    sed -i '1s/^/const dotenv = require(\'dotenv\');\nrequire(\'dotenv\').config();\n\n/' /var/www/flahacalc/EVAPOTRAN/server/server.js
-fi
-
-# Ensure server.js is using the API key
-if ! grep -q "WEATHER_API_KEY = process.env.WEATHER_API_KEY" /var/www/flahacalc/EVAPOTRAN/server/server.js; then
-    echo "Adding API key configuration to server.js..."
-    sed -i '/const express/i // Environment variables\nconst WEATHER_API_KEY = process.env.WEATHER_API_KEY;\n\nif (!WEATHER_API_KEY) {\n  console.error(\'ERROR: WEATHER_API_KEY is not set in .env file\');\n}\n' /var/www/flahacalc/EVAPOTRAN/server/server.js
+    sed -i '1s/^/const dotenv = require("dotenv");\nrequire("dotenv").config();\n\n/' /var/www/flahacalc/EVAPOTRAN/server/server.js
 fi
 
 # Install dotenv if not already installed
@@ -62,3 +56,4 @@ else
     echo "Response: $RESPONSE"
     echo "Please test the weather functionality manually."
 fi
+

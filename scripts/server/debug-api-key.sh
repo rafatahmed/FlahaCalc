@@ -58,13 +58,10 @@ if [ -f "/var/www/flahacalc/EVAPOTRAN/server/.env" ]; then
     
     if echo "$RESPONSE" | grep -q "Invalid API key"; then
         echo "✗ API key test FAILED: The key is invalid"
-        echo "Response: $RESPONSE"
     elif echo "$RESPONSE" | grep -q "name"; then
         echo "✓ API key test PASSED: The key is valid"
-    else
-        echo "? API key test INCONCLUSIVE"
-        echo "Response: $RESPONSE"
     fi
 fi
 
 echo "Debug complete. Please check the results above."
+
