@@ -59,6 +59,20 @@ app.get('/test', (req, res) => {
   });
 });
 
+// Add a comprehensive health check endpoint
+app.get('/api/health', (req, res) => {
+  const health = {
+    status: 'ok',
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString(),
+    memory: process.memoryUsage(),
+    cpu: process.cpuUsage(),
+    env: process.env.NODE_ENV
+  };
+  
+  res.json(health);
+});
+
 // Proxy endpoint for current weather
 app.get('/api/weather', async (req, res) => {
   try {
@@ -266,6 +280,8 @@ app.listen(PORT, () => {
   console.log(`Weather API available at: http://localhost:${PORT}/api/weather`);
   console.log(`Auth endpoints available at: http://localhost:${PORT}/api/auth`);
 });
+
+
 
 
 
