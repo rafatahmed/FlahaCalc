@@ -70,12 +70,14 @@ jobs:
             
             # Update HTML links for production
             cd /var/www/flahacalc
-            bash scripts/deploy/update-links.sh
+            bash scripts/deploy/update-links.sh || true
             
             # Run the fix-all script
             sudo bash scripts/server/fix-all.sh
             
             echo "Deployment completed successfully!"
+
+
 
 
 
