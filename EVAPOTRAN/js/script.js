@@ -1430,37 +1430,58 @@ function displayResults(et0Value) {
 
 // Function to test server connection
 async function testServerConnection() {
-  const SERVER_URL = 'http://localhost:3000';
-  try {
-    const response = await fetch(`${SERVER_URL}/api/test`);
-    if (response.ok) {
-      const data = await response.json();
-      console.log('Server connection test successful:', data);
-      return true;
+    // Use the same API_BASE_URL logic as in live-weather.js
+    const hostname = window.location.hostname;
+    const API_BASE_URL = hostname === 'localhost' || hostname === '127.0.0.1' 
+        ? "http://localhost:3000/api" 
+        : `https://${hostname}/api`;
+    
+    try {
+        const response = await fetch(`${API_BASE_URL}/test`, { 
+            method: 'GET',
+            mode: 'cors',
+            credentials: 'same-origin',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (response.ok) {
+            console.log("Server connection successful");
+            return true;
+        } else {
+            console.error("Server connection failed:", response.status);
+            return false;
+        }
+    } catch (error) {
+        console.error("Server connection error:", error);
+        return false;
     }
-    return false;
-  } catch (error) {
-    console.error('Server connection test failed:', error);
-    return false;
-  }
 }
 
 // Add this to your DOMContentLoaded event
 document.addEventListener('DOMContentLoaded', async function() {
-  // Test server connection
-  const serverAvailable = await testServerConnection();
-  if (!serverAvailable) {
-    // Show warning about server connection
-    const warningEl = document.createElement("div");
-    warningEl.className = "server-warning";
-    warningEl.innerHTML = `
-      <p class="warning">⚠️ Weather server connection failed. Make sure the server is running at http://localhost:3000.</p>
-      <p>Check the server setup instructions in the README file.</p>
-    `;
-    document.querySelector(".container").prepend(warningEl);
-  }
-  
-  // Rest of your initialization code...
+    // Test server connection
+    const serverAvailable = await testServerConnection();
+    if (!serverAvailable) {
+        // Get the dynamic API URL
+        const hostname = window.location.hostname;
+        const API_BASE_URL = hostname === 'localhost' || hostname === '127.0.0.1' 
+            ? "http://localhost:3000/api" 
+            : `https://${hostname}/api`;
+            
+        // Show warning about server connection with correct URL
+        const warningEl = document.createElement("div");
+        warningEl.className = "server-warning";
+        warningEl.innerHTML = `
+            <p class="warning">⚠️ Weather server connection failed. Make sure the server is running at ${API_BASE_URL}.</p>
+            <p>If you're running locally, check the server setup instructions in the README file.</p>
+            <p>If you're using the production site, please contact the administrator.</p>
+        `;
+        document.querySelector(".container").prepend(warningEl);
+    }
+    
+    // Rest of your initialization code...
 });
 
 // Secure calculation function - obfuscated implementation
