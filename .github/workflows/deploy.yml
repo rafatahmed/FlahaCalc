@@ -4,6 +4,16 @@ name: Deploy to DigitalOcean
 on:
   push:
     branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      apply_fixes:
+        description: 'Apply fixes after deployment'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
 
 jobs:
   deploy:
@@ -11,20 +21,32 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
       
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18'
+          cache: 'npm'
           
       - name: Install dependencies
         run: |
-          npm install
+          npm ci
           cd EVAPOTRAN/server
-          npm install
+          npm ci
           
       - name: Build application
         run: npm run build
+        
+      - name: Run pre-deployment checks
+        run: bash scripts/deploy/pre-deploy-check.sh
+        
+      - name: Get changed files
+        id: changed-files
+        run: |
+          echo "CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD | tr '\n' ' ')" >> $GITHUB_ENV
+          echo "Changed files: $(git diff --name-only HEAD~1 HEAD | tr '\n' ' ')"
         
       - name: Deploy to DigitalOcean
         uses: appleboy/ssh-action@master
@@ -47,9 +69,9 @@ jobs:
             fi
             
             # Install dependencies
-            npm install
+            npm ci
             cd EVAPOTRAN/server
-            npm install
+            npm ci
             cd ../..
             
             # Build application
@@ -72,15 +94,28 @@ jobs:
             cd /var/www/flahacalc
             bash scripts/deploy/update-links.sh || true
             
-            # Run the fix-all script
-            sudo bash scripts/server/fix-all.sh
+            # Run the fix-all script if requested
+            if [ "${{ github.event.inputs.apply_fixes }}" == "true" ]; then
+              echo "Applying fixes..."
+              sudo bash scripts/server/fix-all.sh
+            fi
             
             echo "Deployment completed successfully!"
-
-
-
-
-
-
-
-
+      
+      - name: Verify deployment
+        uses: appleboy/ssh-action@master
+        with:
+          host: 207.154.202.6
+          username: root
+          key: ${{ secrets.DROPLET_SSH_KEY }}
+          port: 22
+          script: |
+            cd /var/www/flahacalc
+            echo "Verifying API endpoint..."
+            curl -s http://localhost:3000/test
+            echo ""
+            echo "Checking Node.js server status..."
+            pm2 status flahacalc-server
+            echo ""
+            echo "Checking Nginx status..."
+            systemctl status nginx | grep Active

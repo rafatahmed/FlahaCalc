@@ -22,7 +22,15 @@
     "security:env": "bash scripts/security/setup-env.sh",
     "server:setup": "bash scripts/server/droplet-setup.sh",
     "server:monitor": "bash scripts/server/monitor.sh",
-    "server:backup": "bash scripts/server/backup.sh"
+    "server:backup": "bash scripts/server/backup.sh",
+    "dev": "bash scripts/dev/workflow.sh",
+    "dev:server": "cd EVAPOTRAN/server && node server.js",
+    "dev:build": "npm run build && npm run dev:server",
+    "deploy:manual": "git push origin main && echo 'Deployment triggered. Check GitHub Actions.'",
+    "server:status": "ssh root@207.154.202.6 'cd /var/www/flahacalc && pm2 status flahacalc-server'",
+    "server:logs": "ssh root@207.154.202.6 'cd /var/www/flahacalc && pm2 logs flahacalc-server'",
+    "server:restart": "ssh root@207.154.202.6 'cd /var/www/flahacalc/EVAPOTRAN/server && pm2 restart flahacalc-server'",
+    "server:fix": "ssh root@207.154.202.6 'cd /var/www/flahacalc && bash scripts/server/fix-all.sh'"
   },
   "devDependencies": {
     "webpack": "^5.75.0",
@@ -47,6 +55,7 @@
   },
   "homepage": "https://flaha.org/evapotran"
 }
+
 
 
 
