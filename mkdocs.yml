@@ -98,3 +98,8 @@ nav:
 
 plugins:
   - search
+
+extra:
+  analytics:
+    provider: google
+    property: G-XXXXXXXXXX  # Replace with your Google Analytics tracking ID

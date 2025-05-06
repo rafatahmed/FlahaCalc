@@ -1,3 +1,3 @@
 # EVAPOTRAN
 
-[![Documentation Status](https://img.shields.io/badge/docs-latest-brightgreen.svg)](https://flaha.org/evapotran/docs)
+[![Documentation Status](https://readthedocs.org/projects/evapotran/badge/?version=latest)](https://EVAPOTRAN_Doc.flaha.org/en/latest/?badge=latest)

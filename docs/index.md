@@ -32,8 +32,8 @@ New to EVAPOTRAN? Start here:
 
 This documentation is available in multiple formats:
 
-- **Web**: Browse online at [https://flaha.org/evapotran/docs](https://flaha.org/evapotran/docs)
-- **PDF**: Download complete documentation as [PDF](https://flaha.org/evapotran/docs/pdf/evapotran-docs.pdf)
+- **Web**: Browse online at [https://EVAPOTRAN_Doc.flaha.org](https://EVAPOTRAN_Doc.flaha.org)
+- **PDF**: Download complete documentation as [PDF](https://EVAPOTRAN_Doc.flaha.org/_/downloads/en/latest/pdf/)
 - **GitHub**: View source files in our [GitHub repository](https://github.com/flaha-agritech/evapotran)
 
 ## Support
@@ -66,5 +66,6 @@ Where:
 - $\gamma$ = psychrometric constant [kPa °C⁻¹]
 
 This internationally recognized method provides a standardized approach to estimating evapotranspiration, enabling accurate water management decisions across different climates and regions.
+
 
 
