@@ -5,41 +5,48 @@
   <p><em>Professional Evapotranspiration Calculator for Agricultural Applications</em></p>
 </div>
 
-## Overview
+# EVAPOTRAN Documentation
+
+Welcome to the official documentation for EVAPOTRAN, a professional evapotranspiration calculator for agricultural applications developed by Flaha Agri Tech.
+
+## About EVAPOTRAN
 
 EVAPOTRAN is a comprehensive calculator designed for professionals in horticulture, agronomy, landscaping, and agricultural engineering. This web application provides essential tools for precise calculations of evapotranspiration using the FAO Penman-Monteith method, supporting irrigation management and water resource planning.
 
-## What is Evapotranspiration?
-
-Evapotranspiration (ET) is the combined process of water evaporation from soil and plant surfaces and transpiration from plants. Reference evapotranspiration (ET₀) represents the evapotranspiration rate from a reference surface, not short of water. Understanding ET₀ is crucial for:
-
-- Determining crop water requirements
-- Designing efficient irrigation systems
-- Managing water resources sustainably
-- Planning agricultural operations
-
 ## Key Features
 
-- **Evapotranspiration Calculator:** Calculate water loss through evaporation and transpiration using the industry-standard FAO Penman-Monteith method
-- **Multiple Data Input Options:** Enter climate data manually or import from EPW weather files
-- **Weather Data Visualization:** Generate heatmaps and visual representations of climate data
-- **Live Weather Integration:** Connect to real-time weather data for immediate calculations
+- **Manual Calculator**: Enter climate data directly to calculate reference evapotranspiration
+- **EPW Import**: Upload EnergyPlus Weather files to extract climate data
+- **Weather Visualization**: Generate heatmaps and visualize weather patterns
+- **Live Weather**: Connect to real-time weather data for immediate calculations
 
-## Quick Start
+## Getting Started
 
-1. **Manual Calculator**: Enter climate data directly to calculate reference evapotranspiration
-2. **EPW Import**: Upload EnergyPlus Weather files to extract climate data
-3. **Weather Visualization**: Generate heatmaps and visualize weather patterns
-4. **Live Weather**: Connect to real-time weather data for immediate calculations
+New to EVAPOTRAN? Start here:
 
-## Documentation Structure
+- [Introduction](getting-started/introduction.md) - Learn what EVAPOTRAN is and why it's useful
+- [Installation](getting-started/installation.md) - Set up EVAPOTRAN on your system
+- [Quick Start Guide](getting-started/quick-start.md) - Make your first calculations
 
-This documentation is organized into the following sections:
+## Documentation Formats
 
-- **User Guide**: Step-by-step instructions for using EVAPOTRAN
-- **Technical Documentation**: Detailed information about the implementation
-- **Development**: Guidelines for contributing to the project
-- **About**: License information and contact details
+This documentation is available in multiple formats:
+
+- **Web**: Browse online at [https://flaha.org/evapotran/docs](https://flaha.org/evapotran/docs)
+- **PDF**: Download complete documentation as [PDF](https://flaha.org/evapotran/docs/pdf/evapotran-docs.pdf)
+- **GitHub**: View source files in our [GitHub repository](https://github.com/flaha-agritech/evapotran)
+
+## Support
+
+Need help? Check these resources:
+
+- [Frequently Asked Questions](faq/general.md)
+- [Troubleshooting Guide](user-guide/troubleshooting.md)
+- [Contact Support](about/contact.md)
+
+## License
+
+EVAPOTRAN is licensed under the GNU General Public License v3.0. See the [License](about/license.md) page for details.
 
 ## The Science Behind EVAPOTRAN
 
@@ -59,3 +66,5 @@ Where:
 - $\gamma$ = psychrometric constant [kPa °C⁻¹]
 
 This internationally recognized method provides a standardized approach to estimating evapotranspiration, enabling accurate water management decisions across different climates and regions.
+
+
