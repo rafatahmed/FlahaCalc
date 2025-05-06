@@ -1865,3 +1865,53 @@ async function storeCalculationResult(data) {
     return false;
   }
 }
+
+// Wait for DOM to be fully loaded
+document.addEventListener('DOMContentLoaded', function() {
+    // Track calculator form submissions
+    const calculatorForm = document.getElementById('calculatorForm');
+    if (calculatorForm) {
+        calculatorForm.addEventListener('submit', function(event) {
+            trackEvent('Calculator', 'submit', 'Manual Calculation');
+        });
+    }
+    
+    // Track EPW file imports
+    const epwImportBtn = document.getElementById('epwImportBtn');
+    if (epwImportBtn) {
+        epwImportBtn.addEventListener('click', function() {
+            trackEvent('Data Import', 'click', 'EPW Import');
+        });
+    }
+    
+    // Track live weather data requests
+    const fetchWeatherBtn = document.getElementById('fetchWeatherBtn');
+    if (fetchWeatherBtn) {
+        fetchWeatherBtn.addEventListener('click', function() {
+            trackEvent('Weather Data', 'fetch', 'Live Weather');
+        });
+    }
+    
+    // Track documentation link clicks
+    const docLinks = document.querySelectorAll('a[href*="docs"]');
+    docLinks.forEach(function(link) {
+        link.addEventListener('click', function() {
+            trackEvent('Navigation', 'click', 'Documentation Link');
+        });
+    });
+    
+    // Track login/register actions
+    const loginForm = document.getElementById('loginForm');
+    if (loginForm) {
+        loginForm.addEventListener('submit', function() {
+            trackEvent('User', 'login', 'User Login');
+        });
+    }
+    
+    const registerForm = document.getElementById('registerForm');
+    if (registerForm) {
+        registerForm.addEventListener('submit', function() {
+            trackEvent('User', 'register', 'User Registration');
+        });
+    }
+});

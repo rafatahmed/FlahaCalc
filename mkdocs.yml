@@ -6,6 +6,7 @@ copyright: '&copy; 2023 Flaha Agri Tech'
 
 theme:
   name: material
+  custom_dir: docs/overrides
   palette:
     primary: green
     accent: light green
@@ -79,6 +80,7 @@ nav:
     - Data: faq/data.md
     - Technical Issues: faq/technical-issues.md
   - Release Notes: releases/index.md
+  - Privacy Policy: privacy.md
 
 plugins:
   - search
@@ -86,6 +88,6 @@ plugins:
 extra:
   analytics:
     provider: google
-    property: G-XXXXXXXXXX  # Replace with your Google Analytics tracking ID
+    property: G-JC1KFBL60W  # Your Google Analytics tracking ID
   extra_css:
     - css/extra.css
