@@ -30,6 +30,11 @@ jobs:
           # Clone wiki repository
           git clone https://x-access-token:${GH_TOKEN}@github.com/rafatahmed/FlahaCalc.wiki.git wiki-temp
           
+          # Pull latest changes
+          cd wiki-temp
+          git pull origin master || echo "Could not pull, continuing with local copy"
+          cd ..
+          
           # Create Home page from index.md
           if [ -f "docs/index.md" ]; then
             cp docs/index.md wiki-temp/Home.md
@@ -99,7 +104,18 @@ jobs:
           # Commit and push changes
           git add .
           git commit -m "Update wiki documentation from GitHub Action" || echo "No changes to commit"
-          git push || echo "Nothing to push"
+          
+          # Force push with lease (safer than force push)
+          git push --force-with-lease origin master || {
+            echo "Force push failed, trying regular push..."
+            git push origin master || {
+              echo "Regular push failed. Trying to push to main branch..."
+              git push origin main || {
+                echo "All push attempts failed."
+              }
+            }
+          }
           
           cd ..
           rm -rf wiki-temp
+

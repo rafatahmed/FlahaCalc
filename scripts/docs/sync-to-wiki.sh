@@ -29,6 +29,12 @@ git clone $WIKI_REPO $TEMP_DIR || {
   cd ..
 }
 
+# Pull latest changes if the wiki already exists
+echo "Pulling latest changes from wiki..."
+cd $TEMP_DIR
+git pull origin master || echo "Could not pull, continuing with local copy"
+cd ..
+
 # Create Home page from index.md
 echo "Creating Home page..."
 if [ -f "$DOCS_DIR/index.md" ]; then
@@ -106,7 +112,19 @@ EOL
 echo "Committing and pushing changes..."
 git add .
 git commit -m "$COMMIT_MSG" || echo "No changes to commit"
-git push || echo "Nothing to push. You may need to manually push the first time: git push -u origin master"
+
+# Force push with lease (safer than force push)
+echo "Pushing changes to wiki repository..."
+git push --force-with-lease origin master || {
+  echo "Force push failed, trying regular push..."
+  git push origin master || {
+    echo "Regular push failed. Trying to push to main branch..."
+    git push origin main || {
+      echo "All push attempts failed. You may need to manually resolve conflicts."
+      echo "Try: cd $TEMP_DIR && git push -u origin master"
+    }
+  }
+}
 
 # Clean up
 cd ..
@@ -114,4 +132,5 @@ rm -rf $TEMP_DIR
 
 echo "Wiki documentation updated successfully!"
 echo "Visit https://github.com/rafatahmed/FlahaCalc/wiki to see the changes."
+
 
