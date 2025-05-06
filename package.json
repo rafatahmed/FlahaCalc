@@ -1,6 +1,6 @@
 {
   "name": "evapotran",
-  "version": "0.1.0-alpha",
+  "version": "0.2.0",
   "description": "Professional Evapotranspiration Calculator for Agricultural Applications",
   "main": "index.html",
   "scripts": {
@@ -57,6 +57,7 @@
   },
   "homepage": "https://flaha.org/evapotran"
 }
+
 
 
 
