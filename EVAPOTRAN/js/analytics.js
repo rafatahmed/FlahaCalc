@@ -35,3 +35,13 @@ function trackPageView(pagePath) {
     });
   }
 }
+
+// Track documentation link clicks with the custom domain
+document.addEventListener('DOMContentLoaded', function() {
+    const docLinks = document.querySelectorAll('a[href*="evapotran-docs.flaha.org"]');
+    docLinks.forEach(function(link) {
+        link.addEventListener('click', function() {
+            trackEvent('Navigation', 'click', 'Documentation Link');
+        });
+    });
+});

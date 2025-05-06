@@ -1,8 +1,9 @@
+# @format
 
 site_name: EVAPOTRAN Documentation
 site_description: Documentation for the EVAPOTRAN Evapotranspiration Calculator
 site_author: Flaha Agri Tech
-copyright: '&copy; 2023 Flaha Agri Tech'
+copyright: "&copy; 2023 Flaha Agri Tech"
 
 theme:
   name: material
@@ -39,46 +40,46 @@ extra_javascript:
 nav:
   - Home: index.md
   - Getting Started:
-    - Introduction: getting-started/introduction.md
-    - Installation: getting-started/installation.md
-    - Quick Start: getting-started/quick-start.md
+      - Introduction: getting-started/introduction.md
+      - Installation: getting-started/installation.md
+      - Quick Start: getting-started/quick-start.md
   - User Guide:
-    - Overview: user-guide/overview.md
-    - Manual Calculator: user-guide/manual-calculator.md
-    - EPW Import: user-guide/epw-import.md
-    - Weather Visualization: user-guide/weather-visualization.md
-    - Live Weather: user-guide/live-weather.md
-    - Troubleshooting: user-guide/troubleshooting.md
+      - Overview: user-guide/overview.md
+      - Manual Calculator: user-guide/manual-calculator.md
+      - EPW Import: user-guide/epw-import.md
+      - Weather Visualization: user-guide/weather-visualization.md
+      - Live Weather: user-guide/live-weather.md
+      - Troubleshooting: user-guide/troubleshooting.md
   - Technical Reference:
-    - Architecture: technical/architecture.md
-    - Calculation Methods: technical/calculation-methods.md
-    - Data Processing: technical/data-processing.md
-    - Visualization: technical/visualization.md
-    - Performance: technical/performance-optimization.md
-    - Browser Compatibility: technical/browser-compatibility.md
+      - Architecture: technical/architecture.md
+      - Calculation Methods: technical/calculation-methods.md
+      - Data Processing: technical/data-processing.md
+      - Visualization: technical/visualization.md
+      - Performance: technical/performance-optimization.md
+      - Browser Compatibility: technical/browser-compatibility.md
   - API Documentation:
-    - Overview: api/overview.md
-    - Core Functions: api/core-functions.md
-    - Data Handling: api/data-handling.md
-    - Visualization API: api/visualization.md
+      - Overview: api/overview.md
+      - Core Functions: api/core-functions.md
+      - Data Handling: api/data-handling.md
+      - Visualization API: api/visualization.md
   - Development:
-    - Contributing: development/contributing.md
-    - Code Guidelines: development/code-guidelines.md
-    - Project Structure: development/project-structure.md
-    - Testing: development/testing.md
+      - Contributing: development/contributing.md
+      - Code Guidelines: development/code-guidelines.md
+      - Project Structure: development/project-structure.md
+      - Testing: development/testing.md
   - Deployment:
-    - Server Setup: deployment/server-setup.md
-    - Configuration: deployment/configuration.md
-    - Optimization: deployment/optimization.md
+      - Server Setup: deployment/server-setup.md
+      - Configuration: deployment/configuration.md
+      - Optimization: deployment/optimization.md
   - Case Studies:
-    - Vineyard Irrigation: case-studies/vineyard-irrigation.md
-    - Greenhouse Management: case-studies/greenhouse-management.md
-    - Urban Landscaping: case-studies/urban-landscaping.md
+      - Vineyard Irrigation: case-studies/vineyard-irrigation.md
+      - Greenhouse Management: case-studies/greenhouse-management.md
+      - Urban Landscaping: case-studies/urban-landscaping.md
   - FAQ:
-    - General: faq/general.md
-    - Calculations: faq/calculations.md
-    - Data: faq/data.md
-    - Technical Issues: faq/technical-issues.md
+      - General: faq/general.md
+      - Calculations: faq/calculations.md
+      - Data: faq/data.md
+      - Technical Issues: faq/technical-issues.md
   - Release Notes: releases/index.md
   - Privacy Policy: privacy.md
 
@@ -88,6 +89,12 @@ plugins:
 extra:
   analytics:
     provider: google
-    property: G-JC1KFBL60W  # Your Google Analytics tracking ID
+    property: G-JC1KFBL60W # Your Google Analytics tracking ID
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/flaha-agritech/evapotran
+    - icon: fontawesome/brands/twitter
+      link: https://twitter.com/FlahaAgriTech
+  homepage: https://evapotran-doc.flaha.org
   extra_css:
     - css/extra.css
