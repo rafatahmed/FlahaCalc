@@ -7,7 +7,7 @@
 COMMIT_MSG=${1:-"Update wiki documentation"}
 
 # Configuration
-WIKI_REPO="https://github.com/flaha-agritech/evapotran.wiki.git"
+WIKI_REPO="https://github.com/rafatahmed/FlahaCalc.wiki.git"
 TEMP_DIR="wiki-temp"
 DOCS_DIR="docs"
 
@@ -15,27 +15,47 @@ echo "Starting documentation sync to GitHub Wiki..."
 
 # Clone the wiki repository
 echo "Cloning wiki repository..."
-git clone $WIKI_REPO $TEMP_DIR
+git clone $WIKI_REPO $TEMP_DIR || {
+  echo "Failed to clone wiki repository. Creating wiki first..."
+  mkdir -p $TEMP_DIR
+  cd $TEMP_DIR
+  git init
+  echo "# FlahaCalc Documentation" > Home.md
+  echo "" >> Home.md
+  echo "Welcome to the FlahaCalc Wiki!" >> Home.md
+  git add Home.md
+  git commit -m "Initial wiki setup"
+  git remote add origin $WIKI_REPO
+  cd ..
+}
 
 # Create Home page from index.md
 echo "Creating Home page..."
-cp $DOCS_DIR/index.md $TEMP_DIR/Home.md
+if [ -f "$DOCS_DIR/index.md" ]; then
+  cp $DOCS_DIR/index.md $TEMP_DIR/Home.md
+else
+  echo "# FlahaCalc Documentation" > $TEMP_DIR/Home.md
+  echo "" >> $TEMP_DIR/Home.md
+  echo "Welcome to the FlahaCalc Wiki!" >> $TEMP_DIR/Home.md
+fi
 
 # Copy documentation files to wiki
 echo "Copying documentation files to wiki..."
-find $DOCS_DIR -name "*.md" -not -path "$DOCS_DIR/index.md" | while read file; do
-    # Get relative path without docs/ prefix and .md suffix
-    rel_path=${file#$DOCS_DIR/}
-    rel_path=${rel_path%.md}
-    
-    # Replace directory separators with hyphens
-    wiki_name=$(echo $rel_path | sed 's/\//-/g')
-    
-    # Copy the file with the new name
-    cp "$file" "$TEMP_DIR/$wiki_name.md"
-    
-    echo "  Copied $file to $wiki_name.md"
-done
+if [ -d "$DOCS_DIR" ]; then
+  find $DOCS_DIR -name "*.md" -not -path "$DOCS_DIR/index.md" | while read file; do
+      # Get relative path without docs/ prefix and .md suffix
+      rel_path=${file#$DOCS_DIR/}
+      rel_path=${rel_path%.md}
+      
+      # Replace directory separators with hyphens
+      wiki_name=$(echo $rel_path | sed 's/\//-/g')
+      
+      # Copy the file with the new name
+      cp "$file" "$TEMP_DIR/$wiki_name.md"
+      
+      echo "  Copied $file to $wiki_name.md"
+  done
+fi
 
 # Fix links for wiki format
 echo "Fixing links for wiki format..."
@@ -85,12 +105,13 @@ EOL
 # Commit and push changes
 echo "Committing and pushing changes..."
 git add .
-git commit -m "$COMMIT_MSG"
-git push
+git commit -m "$COMMIT_MSG" || echo "No changes to commit"
+git push || echo "Nothing to push. You may need to manually push the first time: git push -u origin master"
 
 # Clean up
 cd ..
 rm -rf $TEMP_DIR
 
 echo "Wiki documentation updated successfully!"
-echo "Visit https://github.com/flaha-agritech/evapotran/wiki to see the changes."
+echo "Visit https://github.com/rafatahmed/FlahaCalc/wiki to see the changes."
+

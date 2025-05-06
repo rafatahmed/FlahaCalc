@@ -28,25 +28,33 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           # Clone wiki repository
-          git clone https://x-access-token:${GH_TOKEN}@github.com/flaha-agritech/evapotran.wiki.git wiki-temp
+          git clone https://x-access-token:${GH_TOKEN}@github.com/rafatahmed/FlahaCalc.wiki.git wiki-temp
           
           # Create Home page from index.md
-          cp docs/index.md wiki-temp/Home.md
+          if [ -f "docs/index.md" ]; then
+            cp docs/index.md wiki-temp/Home.md
+          else
+            echo "# FlahaCalc Documentation" > wiki-temp/Home.md
+            echo "" >> wiki-temp/Home.md
+            echo "Welcome to the FlahaCalc Wiki!" >> wiki-temp/Home.md
+          fi
           
           # Copy documentation files to wiki
-          find docs -name "*.md" -not -path "docs/index.md" | while read file; do
-              # Get relative path without docs/ prefix and .md suffix
-              rel_path=${file#docs/}
-              rel_path=${rel_path%.md}
-              
-              # Replace directory separators with hyphens
-              wiki_name=$(echo $rel_path | sed 's/\//-/g')
-              
-              # Copy the file with the new name
-              cp "$file" "wiki-temp/$wiki_name.md"
-              
-              echo "Copied $file to $wiki_name.md"
-          done
+          if [ -d "docs" ]; then
+            find docs -name "*.md" -not -path "docs/index.md" | while read file; do
+                # Get relative path without docs/ prefix and .md suffix
+                rel_path=${file#docs/}
+                rel_path=${rel_path%.md}
+                
+                # Replace directory separators with hyphens
+                wiki_name=$(echo $rel_path | sed 's/\//-/g')
+                
+                # Copy the file with the new name
+                cp "$file" "wiki-temp/$wiki_name.md"
+                
+                echo "Copied $file to $wiki_name.md"
+            done
+          fi
           
           # Fix links for wiki format
           cd wiki-temp
@@ -90,8 +98,8 @@ jobs:
           
           # Commit and push changes
           git add .
-          git commit -m "Update wiki documentation from GitHub Action"
-          git push
+          git commit -m "Update wiki documentation from GitHub Action" || echo "No changes to commit"
+          git push || echo "Nothing to push"
           
           cd ..
           rm -rf wiki-temp

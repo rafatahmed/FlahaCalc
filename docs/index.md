@@ -32,10 +32,10 @@ New to EVAPOTRAN? Start here:
 
 This documentation is available in multiple formats:
 
-- **Web**: Browse online at [https://evapotran-doc.flaha.org](https:/-evapotran-doc.flaha.org)
-- **GitHub Wiki**: View on [GitHub Wiki](https://github.com/flaha-agritech/evapotran-wiki)
-- **PDF**: Download complete documentation as [PDF](https://evapotran-doc.flaha.org/_/downloads/en/latest/pdf-)
-- **GitHub**: View source files in our [GitHub repository](https://github.com/flaha-agritech-evapotran)
+- **Web**: Browse online at [https://evapotran-doc.flaha.org](https://evapotran-doc.flaha.org)
+- **GitHub Wiki**: View on [GitHub Wiki](https://github.com/rafatahmed/FlahaCalc/wiki)
+- **PDF**: Download complete documentation as [PDF](https://evapotran-doc.flaha.org/_/downloads/en/latest/pdf/)
+- **GitHub**: View source files in our [GitHub repository](https://github.com/rafatahmed/FlahaCalc)
 
 ## Support
 
@@ -67,6 +67,7 @@ Where:
 - $\gamma$ = psychrometric constant [kPa °C⁻¹]
 
 This internationally recognized method provides a standardized approach to estimating evapotranspiration, enabling accurate water management decisions across different climates and regions.
+
 
 
 
