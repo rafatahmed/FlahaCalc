@@ -24,7 +24,7 @@ This guide explains the climate parameters used in evapotranspiration calculatio
 
 **How it affects ET₀**: Provides the energy that drives evaporation; higher radiation leads to higher evapotranspiration rates.
 
-**Measurement units**: Megajoules per square meter per day (MJ/m²/day) or Watts per square meter (W/m²)
+**Measurement units**: Megajoules per square meter per day (MJ/m²-day) or Watts per square meter (W-m²)
 
 **Data sources**:
 - Pyranometers at weather stations
@@ -50,7 +50,7 @@ This guide explains the climate parameters used in evapotranspiration calculatio
 
 **How it affects ET₀**: Wind removes humid air near plant and soil surfaces, replacing it with drier air that can accept more moisture.
 
-**Measurement units**: Meters per second (m/s) or kilometers per hour (km/h)
+**Measurement units**: Meters per second (m-s) or kilometers per hour (km-h)
 
 **Data sources**:
 - Anemometers at weather stations

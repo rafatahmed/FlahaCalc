@@ -4,9 +4,9 @@ This section documents the JavaScript API for EVAPOTRAN, useful for developers w
 
 ## Contents
 
-1. [Core API](core-api.md) - Core calculation functions
-2. [Weather Data API](weather-api.md) - Weather data handling functions
-3. [Visualization API](visualization-api.md) - Data visualization functions
-4. [Utility Functions](utility-functions.md) - Helper functions
-5. [Events](events.md) - Event system documentation
-6. [Integration Examples](integration-examples.md) - Examples of API usage
+1. [Core API](core-api) - Core calculation functions
+2. [Weather Data API](weather-api) - Weather data handling functions
+3. [Visualization API](visualization-api) - Data visualization functions
+4. [Utility Functions](utility-functions) - Helper functions
+5. [Events](events) - Event system documentation
+6. [Integration Examples](integration-examples) - Examples of API usage

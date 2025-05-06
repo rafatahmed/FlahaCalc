@@ -19,7 +19,7 @@ We welcome contributions to the EVAPOTRAN project! This document provides guidel
 
 ## Code Guidelines
 
-Please follow our [Code Guidelines](code-guidelines.md) when contributing code to EVAPOTRAN.
+Please follow our [Code Guidelines](code-guidelines) when contributing code to EVAPOTRAN.
 
 ## Documentation
 

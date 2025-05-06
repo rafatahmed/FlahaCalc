@@ -12,7 +12,7 @@ This guide provides a quick overview of how to deploy FlahaCalc to production.
 
 1. Log in to DigitalOcean
 2. Create a new Droplet with Ubuntu 22.04 LTS
-3. Choose the Basic plan ($5-$10/month)
+3. Choose the Basic plan ($5-$10-month)
 4. Add your SSH key
 5. Create the Droplet
 

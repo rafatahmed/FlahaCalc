@@ -80,7 +80,7 @@ The visualization tools in EVAPOTRAN played a crucial role in the success of thi
 3. **Comparison Tools**: Side-by-side comparison of different irrigation strategies helped optimize scheduling
 4. **Public Portal**: Simplified visualizations for public education increased community support
 
-![Urban ET₀ Heatmap Example](../img/urban-heatmap-example.png)
+![Urban ET₀ Heatmap Example](../img-urban-heatmap-example.png)
 
 ## Implementation Challenges
 

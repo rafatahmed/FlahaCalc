@@ -4,11 +4,11 @@ This section presents real-world applications of EVAPOTRAN in various agricultur
 
 ## Available Case Studies
 
-1. [Vineyard Irrigation Optimization](vineyard-irrigation.md)
-2. [Greenhouse Water Management](greenhouse-management.md)
-3. [Urban Landscape Planning](urban-landscape.md)
-4. [Drought Response Planning](drought-response.md)
-5. [Seasonal Crop Water Requirements](seasonal-crop-water.md)
+1. [Vineyard Irrigation Optimization](vineyard-irrigation)
+2. [Greenhouse Water Management](greenhouse-management)
+3. [Urban Landscape Planning](urban-landscape)
+4. [Drought Response Planning](drought-response)
+5. [Seasonal Crop Water Requirements](seasonal-crop-water)
 
 Each case study includes:
 
@@ -30,4 +30,4 @@ These case studies can serve as:
 
 ## Contributing a Case Study
 
-We welcome contributions of new case studies from users. If you have used EVAPOTRAN in your work and would like to share your experience, please see our [contribution guidelines](../development/contributing.md) for information on how to submit your case study.
+We welcome contributions of new case studies from users. If you have used EVAPOTRAN in your work and would like to share your experience, please see our [contribution guidelines](../development-contributing) for information on how to submit your case study.

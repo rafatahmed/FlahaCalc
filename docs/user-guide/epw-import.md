@@ -19,9 +19,9 @@ EPW files are widely used in building energy simulation and are available for th
 
 You can download EPW files from several sources:
 
-1. [EnergyPlus Weather Data](https://energyplus.net/weather) (official repository)
-2. [Climate.OneBuilding.Org](https://climate.onebuilding.org/) (comprehensive collection)
-3. [EPW Map](https://www.ladybug.tools/epwmap/) (interactive map interface)
+1. [EnergyPlus Weather Data](https://energyplus.net-weather) (official repository)
+2. [Climate.OneBuilding.Org](https://climate.onebuilding.org-) (comprehensive collection)
+3. [EPW Map](https://www.ladybug.tools/epwmap-) (interactive map interface)
 
 ## Uploading an EPW File
 

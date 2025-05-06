@@ -11,7 +11,7 @@ From the EVAPOTRAN home page, click on the "Live Weather" option or navigate dir
 The Live Weather feature uses the OpenWeatherMap API to fetch current weather data. To use this feature:
 
 1. **Get an API Key**:
-   - Register for a free account at [OpenWeatherMap](https://openweathermap.org/)
+   - Register for a free account at [OpenWeatherMap](https://openweathermap.org-)
    - Navigate to your account page and copy your API key
 
 2. **Enter API Key**:

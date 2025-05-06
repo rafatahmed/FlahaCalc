@@ -24,29 +24,30 @@ EVAPOTRAN is a comprehensive calculator designed for professionals in horticultu
 
 New to EVAPOTRAN? Start here:
 
-- [Introduction](getting-started/introduction.md) - Learn what EVAPOTRAN is and why it's useful
-- [Installation](getting-started/installation.md) - Set up EVAPOTRAN on your system
-- [Quick Start Guide](getting-started/quick-start.md) - Make your first calculations
+- [Introduction](getting-started-introduction) - Learn what EVAPOTRAN is and why it's useful
+- [Installation](getting-started-installation) - Set up EVAPOTRAN on your system
+- [Quick Start Guide](getting-started-quick-start) - Make your first calculations
 
 ## Documentation Formats
 
 This documentation is available in multiple formats:
 
-- **Web**: Browse online at [https://EVAPOTRAN_Doc.flaha.org](https://EVAPOTRAN_Doc.flaha.org)
-- **PDF**: Download complete documentation as [PDF](https://EVAPOTRAN_Doc.flaha.org/_/downloads/en/latest/pdf/)
-- **GitHub**: View source files in our [GitHub repository](https://github.com/flaha-agritech/evapotran)
+- **Web**: Browse online at [https://evapotran-doc.flaha.org](https:/-evapotran-doc.flaha.org)
+- **GitHub Wiki**: View on [GitHub Wiki](https://github.com/flaha-agritech/evapotran-wiki)
+- **PDF**: Download complete documentation as [PDF](https://evapotran-doc.flaha.org/_/downloads/en/latest/pdf-)
+- **GitHub**: View source files in our [GitHub repository](https://github.com/flaha-agritech-evapotran)
 
 ## Support
 
 Need help? Check these resources:
 
-- [Frequently Asked Questions](faq/general.md)
-- [Troubleshooting Guide](user-guide/troubleshooting.md)
-- [Contact Support](about/contact.md)
+- [Frequently Asked Questions](faq-general)
+- [Troubleshooting Guide](user-guide-troubleshooting)
+- [Contact Support](about-contact)
 
 ## License
 
-EVAPOTRAN is licensed under the GNU General Public License v3.0. See the [License](about/license.md) page for details.
+EVAPOTRAN is licensed under the GNU General Public License v3.0. See the [License](about-license) page for details.
 
 ## The Science Behind EVAPOTRAN
 
@@ -66,6 +67,7 @@ Where:
 - $\gamma$ = psychrometric constant [kPa °C⁻¹]
 
 This internationally recognized method provides a standardized approach to estimating evapotranspiration, enabling accurate water management decisions across different climates and regions.
+
 
 
 

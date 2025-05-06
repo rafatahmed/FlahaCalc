@@ -70,7 +70,7 @@ function processEpwFile() {
     const rawEpwContent = e.target.result;
     
     // Create a worker
-    const worker = new Worker('js/epw-worker.js');
+    const worker = new Worker('js-epw-worker.js');
     
     // Handle worker messages
     worker.onmessage = function(e) {
@@ -335,13 +335,13 @@ async function loadVisualizationLibraries() {
   try {
     // Load D3.js only when needed
     if (!window.d3) {
-      await loadScript('https://d3js.org/d3.v7.min.js');
+      await loadScript('https://d3js.org-d3.v7.min.js');
       console.log('D3.js loaded dynamically');
     }
     
     // Load Chart.js only when needed
     if (!window.Chart) {
-      await loadScript('https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js');
+      await loadScript('https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist-chart.min.js');
       console.log('Chart.js loaded dynamically');
     }
     
@@ -520,7 +520,7 @@ function processEpwFile() {
   progressBar.value = 0;
   
   // Create a worker
-  const worker = new Worker('js/epw-worker.js');
+  const worker = new Worker('js-epw-worker.js');
   
   // Handle worker messages
   worker.onmessage = function(e) {

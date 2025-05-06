@@ -11,13 +11,13 @@ For questions, support, or feedback regarding EVAPOTRAN, please contact us:
 
 ### Social Media
 
-- Twitter: [@FlahaAgriTech](https://twitter.com/FlahaAgriTech)
-- LinkedIn: [Flaha Agri Tech](https://www.linkedin.com/company/flaha-agri-tech)
+- Twitter: [@FlahaAgriTech](https://twitter.com-FlahaAgriTech)
+- LinkedIn: [Flaha Agri Tech](https://www.linkedin.com/company-flaha-agri-tech)
 
 ### Website
 
 Visit our website for more information about our products and services:
-[https://flaha.org](https://flaha.org)
+[https://flaha.org](https:/-flaha.org)
 
 ## Development Team
 
@@ -29,8 +29,8 @@ EVAPOTRAN was developed by:
 ## Reporting Issues
 
 If you encounter any issues with EVAPOTRAN, please report them on our GitHub repository:
-[https://github.com/flaha-agritech/evapotran/issues](https://github.com/flaha-agritech/evapotran/issues)
+[https://github.com/flaha-agritech/evapotran/issues](https://github.com/flaha-agritech/evapotran-issues)
 
 ## Contributing
 
-We welcome contributions to EVAPOTRAN! Please see our [Contributing Guidelines](../development/contributing.md) for more information.
+We welcome contributions to EVAPOTRAN! Please see our [Contributing Guidelines](../development-contributing) for more information.

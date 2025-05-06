@@ -11,7 +11,7 @@ Evapotranspiration (ET) is the combined process of water evaporation from soil a
 EVAPOTRAN is a web-based application that runs in your browser. You can access it by:
 
 1. Opening the `index.html` file in your web browser
-2. Navigating to the hosted version at [https://flaha.org/evapotran](https://flaha.org/evapotran) (if available)
+2. Navigating to the hosted version at [https://flaha.org/evapotran](https://flaha.org-evapotran) (if available)
 
 ## Navigation
 
@@ -54,7 +54,7 @@ Fetch current weather data for a specific location:
 
 ## Next Steps
 
-- Learn how to use the [Manual Calculator](manual-calculator.md)
-- Understand how to [import EPW files](epw-import.md)
-- Explore [weather visualization](weather-visualization.md) features
-- Try the [live weather](live-weather.md) integration
+- Learn how to use the [Manual Calculator](manual-calculator)
+- Understand how to [import EPW files](epw-import)
+- Explore [weather visualization](weather-visualization) features
+- Try the [live weather](live-weather) integration

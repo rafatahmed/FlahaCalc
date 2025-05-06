@@ -24,6 +24,6 @@ EVAPOTRAN provides:
 
 ## Next Steps
 
-- [Installation](installation.md) - Set up EVAPOTRAN on your system
-- [Quick Start Guide](quick-start.md) - Make your first calculations
+- [Installation](installation) - Set up EVAPOTRAN on your system
+- [Quick Start Guide](quick-start) - Make your first calculations
 

@@ -75,4 +75,4 @@ For handling large datasets and complex calculations, EVAPOTRAN implements:
 - Optimized calculation algorithms
 - Efficient data visualization techniques
 
-See [Performance Optimization](performance-optimization.md) for more details.
+See [Performance Optimization](performance-optimization) for more details.

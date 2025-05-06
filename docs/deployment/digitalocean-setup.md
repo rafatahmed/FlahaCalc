@@ -4,7 +4,7 @@
 
 1. Create a new Droplet with the following specifications:
    - Ubuntu 22.04 LTS
-   - Basic plan ($5-$10/month depending on your needs)
+   - Basic plan ($5-$10-month depending on your needs)
    - Choose a datacenter region close to your target users
    - Add your SSH key for secure access
 

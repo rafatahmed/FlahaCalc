@@ -75,7 +75,7 @@ FlahaCalc offers three methods for data input:
 FlahaCalc implements the FAO Penman-Monteith equation for calculating reference evapotranspiration (ET₀):
 
 ```
-ET₀ = (0.408 × Δ × (Rn - G) + γ × (900 / (T + 273)) × u₂ × (es - ea)) / (Δ + γ × (1 + 0.34 × u₂))
+ET₀ = (0.408 × Δ × (Rn - G) + γ × (900 - (T + 273)) × u₂ × (es - ea)) / (Δ + γ × (1 + 0.34 × u₂))
 ```
 
 Where:
@@ -187,4 +187,4 @@ When contributing to the technical aspects of FlahaCalc:
 4. Ensure accessibility compliance for UI components
 5. Optimize for performance, especially for large datasets
 
-For more information on contributing, see [CONTRIBUTING.md](CONTRIBUTING.md).
+For more information on contributing, see [CONTRIBUTING.md](CONTRIBUTING).

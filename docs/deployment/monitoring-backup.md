@@ -45,5 +45,5 @@
    chmod +x /usr/local/bin/backup-evapotran.sh
    
    # Add to crontab to run daily
-   (crontab -l 2>/dev/null; echo "0 2 * * * /usr/local/bin/backup-evapotran.sh") | crontab -
+   (crontab -l 2>/dev/null; echo "0 2 * * * /usr/local/bin-backup-evapotran.sh") | crontab -
    ```

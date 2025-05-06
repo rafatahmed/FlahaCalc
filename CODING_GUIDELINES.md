@@ -27,7 +27,7 @@ Welcome to FlahaCalc! To ensure that our codebase remains clean, readable, and m
 
 ## Version Control and Pull Requests
 
-- Always create a new branch for each new feature or bug fix. Name your branches descriptively (e.g., `feature/evapotranspiration-calculator`).
+- Always create a new branch for each new feature or bug fix. Name your branches descriptively (e.g., `feature-evapotranspiration-calculator`).
 - Keep pull requests focused on a single feature or fix. Avoid combining multiple unrelated changes into a single pull request.
 - Write clear and detailed pull request descriptions, explaining the purpose of the changes and any considerations for reviewers.
 
@@ -38,6 +38,6 @@ Welcome to FlahaCalc! To ensure that our codebase remains clean, readable, and m
 
 ## License
 
-By contributing to FlahaCalc, you agree that your contributions will be licensed under the [GNU General Public License (GPL) version 3.0](https://www.gnu.org/licenses/gpl-3.0.en.html).
+By contributing to FlahaCalc, you agree that your contributions will be licensed under the [GNU General Public License (GPL) version 3.0](https://www.gnu.org/licenses-gpl-3.0.en.html).
 
 Thank you for following these coding guidelines and contributing to FlahaCalc! Together, we can build an efficient and collaborative open-source project.

@@ -35,7 +35,7 @@
   cd /var/www/flahacalc
   git clone https://github.com/your-username/flahacalc.git .
   ```
-- [ ] Set up Nginx (see nginx-config.md)
+- [ ] Set up Nginx (see nginx-config)
 - [ ] Set up SSL with Let's Encrypt
 
 ## Deployment Process
