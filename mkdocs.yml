@@ -48,26 +48,37 @@ nav:
     - Weather Visualization: user-guide/weather-visualization.md
     - Live Weather: user-guide/live-weather.md
     - Troubleshooting: user-guide/troubleshooting.md
-  - Technical:
+  - Technical Reference:
     - Architecture: technical/architecture.md
-    - Algorithms: technical/algorithms.md
+    - Calculation Methods: technical/calculation-methods.md
+    - Data Processing: technical/data-processing.md
+    - Visualization: technical/visualization.md
     - Performance: technical/performance-optimization.md
-    - API Reference: technical/api-reference.md
+    - Browser Compatibility: technical/browser-compatibility.md
+  - API Documentation:
+    - Overview: api/overview.md
+    - Core Functions: api/core-functions.md
+    - Data Handling: api/data-handling.md
+    - Visualization API: api/visualization.md
   - Development:
     - Contributing: development/contributing.md
     - Code Guidelines: development/code-guidelines.md
     - Project Structure: development/project-structure.md
+    - Testing: development/testing.md
+  - Deployment:
+    - Server Setup: deployment/server-setup.md
+    - Configuration: deployment/configuration.md
+    - Optimization: deployment/optimization.md
   - Case Studies:
     - Vineyard Irrigation: case-studies/vineyard-irrigation.md
     - Greenhouse Management: case-studies/greenhouse-management.md
     - Urban Landscaping: case-studies/urban-landscaping.md
   - FAQ:
     - General: faq/general.md
-    - Technical: faq/technical.md
-  - About:
-    - Contact: about/contact.md
-    - License: about/license.md
-    - Changelog: about/changelog.md
+    - Calculations: faq/calculations.md
+    - Data: faq/data.md
+    - Technical Issues: faq/technical-issues.md
+  - Release Notes: releases/index.md
 
 plugins:
   - search
