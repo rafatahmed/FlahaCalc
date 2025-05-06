@@ -34,67 +34,40 @@ extra_javascript:
   - https://polyfill.io/v3/polyfill.min.js?features=es6
   - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
 
+# Define the navigation structure
 nav:
   - Home: index.md
   - Getting Started:
     - Introduction: getting-started/introduction.md
     - Installation: getting-started/installation.md
-    - Quick Start Guide: getting-started/quick-start.md
-    - Key Concepts: getting-started/key-concepts.md
+    - Quick Start: getting-started/quick-start.md
   - User Guide:
-    - UI Overview: user-guide/ui-overview.md
+    - Overview: user-guide/overview.md
     - Manual Calculator: user-guide/manual-calculator.md
     - EPW Import: user-guide/epw-import.md
     - Weather Visualization: user-guide/weather-visualization.md
     - Live Weather: user-guide/live-weather.md
-    - Data Export: user-guide/data-export.md
     - Troubleshooting: user-guide/troubleshooting.md
-  - Technical Reference:
+  - Technical:
     - Architecture: technical/architecture.md
-    - Calculation Methods: technical/calculation-methods.md
-    - Data Processing: technical/data-processing.md
-    - Visualization: technical/visualization.md
-    - Performance Optimization: technical/performance-optimization.md
-    - Browser Compatibility: technical/browser-compatibility.md
-  - API Documentation:
-    - Core API: api/core-api.md
-    - Weather Data API: api/weather-api.md
-    - Visualization API: api/visualization-api.md
-    - Utility Functions: api/utility-functions.md
-    - Events: api/events.md
-    - Integration Examples: api/integration-examples.md
+    - Algorithms: technical/algorithms.md
+    - Performance: technical/performance-optimization.md
+    - API Reference: technical/api-reference.md
   - Development:
     - Contributing: development/contributing.md
     - Code Guidelines: development/code-guidelines.md
     - Project Structure: development/project-structure.md
-    - Build Process: development/build-process.md
-    - Testing: development/testing.md
-    - Release Process: development/release-process.md
-    - Workflow: development/workflow.md
-  - Deployment:
-    - Overview: deployment/README.md
-    - Local Deployment: deployment/local-deployment.md
-    - Web Server: deployment/web-server.md
-    - Production Checklist: deployment/production-checklist.md
-    - Security: deployment/security.md
-    - Performance: deployment/performance.md
-    - Monitoring: deployment/monitoring.md
   - Case Studies:
-    - Overview: case-studies/README.md
     - Vineyard Irrigation: case-studies/vineyard-irrigation.md
     - Greenhouse Management: case-studies/greenhouse-management.md
     - Urban Landscaping: case-studies/urban-landscaping.md
-    - Drought Response: case-studies/drought-response.md
   - FAQ:
     - General: faq/general.md
-    - Calculations: faq/calculations.md
-    - Data: faq/data.md
-    - Technical Issues: faq/technical-issues.md
-  - Release Notes:
-    - Version History: releases/version-history.md
-    - Latest Release: releases/v0.2.0.md
-    - Previous Releases: releases/previous-releases.md
-    - Roadmap: releases/roadmap.md
+    - Technical: faq/technical.md
+  - About:
+    - Contact: about/contact.md
+    - License: about/license.md
+    - Changelog: about/changelog.md
 
 plugins:
   - search
@@ -103,3 +76,5 @@ extra:
   analytics:
     provider: google
     property: G-XXXXXXXXXX  # Replace with your Google Analytics tracking ID
+  extra_css:
+    - css/extra.css
