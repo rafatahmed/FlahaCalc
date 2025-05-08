@@ -53,18 +53,40 @@ app.get('/api/forecast', async (req, res) => {
     const { lat, lon } = req.query;
     
     if (!lat || !lon) {
-      return res.status(400).json({ error: 'Missing required parameters (lat, lon)' });
+      return res.status(400).json({ error: "Latitude and longitude are required" });
     }
-
-    const url = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&units=metric&appid=${process.env.WEATHER_API_KEY}`;
+    
+    const apiKey = process.env.WEATHER_API_KEY;
+    if (!apiKey) {
+      return res.status(500).json({ error: 'API key not configured' });
+    }
+    
+    // Create a cache key based on coordinates
+    const cacheKey = `forecast_${lat}_${lon}`;
+    
+    // Check if we have cached data
+    if (weatherCache.has(cacheKey)) {
+      console.log('Returning cached forecast data');
+      return res.json(weatherCache.get(cacheKey));
+    }
+    
+    // No cached data, make API call
+    const url = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`;
+    
+    console.log(`Fetching forecast data from: ${url.replace(apiKey, 'API_KEY_HIDDEN')}`);
     const response = await axios.get(url);
-    res.json(response.data);
+    
+    // Return the full response data
+    const forecastData = response.data;
+    
+    // Cache the response
+    weatherCache.set(cacheKey, forecastData);
+    
+    console.log('Returning forecast data');
+    res.json(forecastData);
   } catch (error) {
     console.error('Forecast API error:', error.message);
-    res.status(error.response?.status || 500).json({
-      error: error.message,
-      details: error.response?.data || 'Unknown error'
-    });
+    res.status(500).json({ error: error.message });
   }
 });
 
