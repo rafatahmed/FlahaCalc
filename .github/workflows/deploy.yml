@@ -1,8 +1,10 @@
+# @format
+
 name: Deploy to DigitalOcean
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   workflow_dispatch:
 
 jobs:
@@ -11,21 +13,21 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-      
+
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18'
-          
+          node-version: "18"
+
       - name: Install dependencies
         run: |
           npm install
           cd EVAPOTRAN/server
           npm install
-          
+
       - name: Build application
         run: npm run build
-        
+
       - name: Ensure assets exist
         run: |
           mkdir -p public/img
@@ -48,7 +50,7 @@ jobs:
           </svg>
           EOF
           fi
-        
+
       - name: Deploy to DigitalOcean
         uses: appleboy/ssh-action@master
         with:
@@ -60,27 +62,27 @@ jobs:
             # Create application directory if it doesn't exist
             mkdir -p /var/www/flahacalc/public
             mkdir -p /var/www/flahacalc/EVAPOTRAN/server
-            
+
             # Install dependencies
             cd /var/www/flahacalc/EVAPOTRAN/server
             npm install dotenv express cors axios
-            
+
             # Make all scripts executable
             cd /var/www/flahacalc
             find scripts -name "*.sh" -exec chmod +x {} \; 2>/dev/null || true
-            
+
             # Update Nginx configuration
             cp /etc/nginx/sites-available/flahacalc /etc/nginx/sites-available/flahacalc.bak.$(date +%Y%m%d%H%M%S)
             cp scripts/server/nginx/flahacalc.conf /etc/nginx/sites-available/flahacalc
             nginx -t && systemctl reload nginx
-            
+
             # Restart server
             cd /var/www/flahacalc/EVAPOTRAN/server
             pm2 restart flahacalc-server || pm2 start server.js --name flahacalc-server
             pm2 save
-            
+
             echo "Deployment completed successfully!"
-      
+
       - name: Deploy files via rsync
         uses: burnett01/rsync-deployments@5.2.1
         with:
@@ -90,7 +92,7 @@ jobs:
           remote_host: 207.154.202.6
           remote_user: root
           remote_key: ${{ secrets.DROPLET_SSH_KEY }}
-          
+
       - name: Deploy server files via rsync
         uses: burnett01/rsync-deployments@5.2.1
         with:
@@ -100,7 +102,7 @@ jobs:
           remote_host: 207.154.202.6
           remote_user: root
           remote_key: ${{ secrets.DROPLET_SSH_KEY }}
-          
+
       - name: Verify deployment
         uses: appleboy/ssh-action@master
         with:
@@ -117,7 +119,7 @@ jobs:
               echo "❌ API routing not configured correctly"
               exit 1
             fi
-            
+
             # Verify server is running
             echo "Verifying server is running..."
             if pm2 list | grep -q "flahacalc-server"; then
@@ -126,7 +128,7 @@ jobs:
               echo "❌ Server is not running"
               exit 1
             fi
-            
+
             # Test API endpoint
             echo "Testing API endpoint..."
             if curl -s http://localhost:3000/api/test | grep -q "status"; then
@@ -135,21 +137,21 @@ jobs:
               echo "❌ API endpoint is not working"
               exit 1
             fi
-            
+
             echo "Verification completed successfully!"
-      
+
       - name: Notify on success
         if: success()
         run: |
           echo "Deployment completed successfully!"
           curl -X POST -H 'Content-type: application/json' \
           --data '{"text":"✅ *DEPLOYMENT SUCCESSFUL* ✅\n*Repository:* ${{ github.repository }}\n*Branch:* ${{ github.ref_name }}\n*Commit:* ${{ github.sha }}\n*Deployed by:* ${{ github.actor }}\n*Time:* $(date)"}' \
-          ${{ secrets.SLACK_WEBHOOK_URL }}
-      
+          ${{ secrets.SLACK_WEBHOOK }}
+
       - name: Notify on failure
         if: failure()
         run: |
           echo "Deployment failed!"
           curl -X POST -H 'Content-type: application/json' \
           --data '{"text":"🚨 *DEPLOYMENT FAILED* 🚨\n*Repository:* ${{ github.repository }}\n*Branch:* ${{ github.ref_name }}\n*Commit:* ${{ github.sha }}\n*Deployed by:* ${{ github.actor }}\n*Time:* $(date)"}' \
-          ${{ secrets.SLACK_WEBHOOK_URL }}
+          ${{ secrets.SLACK_WEBHOOK}}
