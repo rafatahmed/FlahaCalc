@@ -1,0 +1,28 @@
+/* Extra styles for EVAPOTRAN documentation */
+
+/* Improve code block readability */
+.md-typeset pre {
+  border-radius: 4px;
+}
+
+/* Enhance table styling */
+.md-typeset table:not([class]) {
+  border-radius: 4px;
+  box-shadow: 0 2px 2px 0 rgba(0,0,0,.14), 0 1px 5px 0 rgba(0,0,0,.12), 0 3px 1px -2px rgba(0,0,0,.2);
+}
+
+/* Custom admonition for EVAPOTRAN-specific notes */
+.md-typeset .admonition.evapotran,
+.md-typeset details.evapotran {
+  border-color: #4caf50;
+}
+
+.md-typeset .evapotran > .admonition-title,
+.md-typeset .evapotran > summary {
+  background-color: rgba(76, 175, 80, 0.1);
+}
+
+.md-typeset .evapotran > .admonition-title::before,
+.md-typeset .evapotran > summary::before {
+  background-color: #4caf50;
+}
