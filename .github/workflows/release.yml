@@ -22,7 +22,7 @@ jobs:
       - name: Install dependencies
         run: |
           npm install
-          cd EVAPOTRAN/server
+          cd server
           npm install
           
       - name: Build application
@@ -36,3 +36,51 @@ jobs:
           prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Deploy to production
+        uses: appleboy/ssh-action@master
+        with:
+          host: 207.154.202.6
+          username: root
+          key: ${{ secrets.DROPLET_SSH_KEY }}
+          port: 22
+          script: |
+            # Pull latest changes
+            cd /var/www/flahacalc
+            git fetch --tags
+            git checkout $(git describe --tags $(git rev-list --tags --max-count=1))
+            
+            # Install dependencies
+            npm install
+            cd server
+            npm install
+            cd ..
+            
+            # Build application
+            npm run build
+            
+            # Deploy public files
+            rsync -avz --delete ./public/ /var/www/flahacalc/
+            
+            # Deploy server files
+            rsync -avz ./server/ /var/www/flahacalc/EVAPOTRAN/server/
+            
+            # Make all scripts executable
+            find scripts -name "*.sh" -exec chmod +x {} \;
+            
+            # Update Nginx configuration
+            cp scripts/server/nginx/flahacalc.conf /etc/nginx/sites-available/flahacalc
+            nginx -t && systemctl reload nginx
+            
+            # Restart server
+            cd EVAPOTRAN/server
+            pm2 restart flahacalc-server || pm2 start server.js --name flahacalc-server
+            pm2 save
+            
+            # Update HTML links for production
+            cd /var/www/flahacalc
+            bash scripts/deploy/update-links.sh
+            
+            echo "Release $(git describe --tags) deployed successfully!"
+
+

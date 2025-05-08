@@ -87,7 +87,11 @@ done
 
 # Copy the built application to the production directory
 log "Deploying to production directory..."
-rsync -av --delete --exclude='.git' --exclude='node_modules' "$TEMP_DIR/" "$PROD_DIR/" >> "$LOG_FILE" 2>&1
+# Deploy public files
+rsync -av --delete --exclude='.git' --exclude='node_modules' "$TEMP_DIR/public/" "$PROD_DIR/" >> "$LOG_FILE" 2>&1
+
+# Deploy server files separately
+rsync -av "$TEMP_DIR/server/" "$PROD_DIR/EVAPOTRAN/server/" >> "$LOG_FILE" 2>&1
 
 # Set proper permissions
 log "Setting proper permissions..."

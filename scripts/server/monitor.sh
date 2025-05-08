@@ -1,47 +1,47 @@
 #!/bin/bash
 
-echo "===== FlahaCalc Monitoring ====="
-echo "Date: $(date)"
-echo ""
+# Exit on error
+set -e
 
-echo "===== PM2 Status ====="
-pm2 status
+echo "Monitoring server health..."
 
-echo ""
-echo "===== Server Memory Usage ====="
-free -h
+# 1. Check system resources
+echo "System resources:"
+echo "----------------"
+echo "CPU usage:"
+top -bn1 | grep "Cpu(s)" | sed "s/.*, *\([0-9.]*\)%* id.*/\1/" | awk '{print 100 - $1"%"}'
 
-echo ""
-echo "===== Disk Usage ====="
-df -h /var/www/flahacalc
+echo "Memory usage:"
+free -m | awk 'NR==2{printf "%.2f%%\n", $3*100/$2}'
 
-echo ""
-echo "===== Recent Nginx Access Logs ====="
-tail -n 20 /var/log/nginx/access.log
+echo "Disk usage:"
+df -h | grep '/dev/vda1'
 
-echo ""
-echo "===== Recent Nginx Error Logs ====="
+# 2. Check Node.js server status
+echo "Node.js server status:"
+echo "---------------------"
+pm2 status flahacalc-server
+
+# 3. Check Nginx status
+echo "Nginx status:"
+echo "------------"
+systemctl status nginx | grep Active
+
+# 4. Check recent logs
+echo "Recent server logs:"
+echo "-----------------"
+tail -n 20 /var/www/flahacalc/EVAPOTRAN/server/access.log
+
+echo "Recent error logs:"
+echo "----------------"
 tail -n 20 /var/log/nginx/error.log
 
-echo ""
-echo "===== Recent Application Logs ====="
-pm2 logs flahacalc-server --lines 20 --nostream
+# 5. Check server response time
+echo "Server response time:"
+echo "------------------"
+curl -s -w "\nDNS: %{time_namelookup}s\nConnect: %{time_connect}s\nTTFB: %{time_starttransfer}s\nTotal: %{time_total}s\n" -o /dev/null https://flaha.org
 
-echo ""
-echo "===== API Endpoint Test ====="
-curl -s http://localhost:3000/test
+echo "Server monitoring completed!"
 
-echo ""
-echo "===== File Permissions ====="
-ls -la /var/www/flahacalc/EVAPOTRAN/
 
-echo ""
-echo "===== SSL Certificate Status ====="
-echo "Certificate expiration:"
-openssl x509 -enddate -noout -in /etc/letsencrypt/live/flaha.org/fullchain.pem 2>/dev/null || echo "Certificate not found"
-
-echo ""
-echo "===== Network Connections ====="
-apt install -y net-tools > /dev/null 2>&1
-netstat -tulpn | grep 3000
 

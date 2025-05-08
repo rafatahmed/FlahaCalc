@@ -3,18 +3,25 @@
 # Exit on error
 set -e
 
-echo "Starting build process..."
+echo "Building project..."
 
-# Check if webpack is installed
-if [ -f "./node_modules/.bin/webpack" ]; then
-  echo "Webpack found in node_modules"
-else
-  echo "Webpack not found in node_modules, installing..."
-  npm install --save-dev webpack webpack-cli
-fi
+# Clean build directory
+rm -rf build
+mkdir -p build
 
-# Run webpack with verbose output
-echo "Running webpack..."
-./node_modules/.bin/webpack --config webpack.config.js --display-error-details
+# Copy public files to build directory
+cp -r public/* build/
 
-echo "Build completed"
+# Copy EVAPOTRAN to build/pa/evapotran
+mkdir -p build/pa/evapotran
+cp -r EVAPOTRAN/* build/pa/evapotran/
+
+# Fix paths in all files
+./scripts/dev/fix-paths.sh
+
+# Minify CSS and JS files
+echo "Minifying CSS and JS files..."
+find build -type f -name "*.css" | xargs -I{} npx cleancss -o {} {}
+find build -type f -name "*.js" | xargs -I{} npx uglify-js -o {} {}
+
+echo "Build completed successfully!"

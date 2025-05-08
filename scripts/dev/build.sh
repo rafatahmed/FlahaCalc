@@ -3,20 +3,36 @@
 # Exit on error
 set -e
 
-echo "Starting build process..."
+echo "Building FlahaCalc..."
 
-# Check if webpack is installed
-if [ -f "./node_modules/.bin/webpack" ]; then
-  echo "Webpack found in node_modules"
-else
-  echo "Webpack not found in node_modules, installing..."
-  npm install --save-dev webpack webpack-cli
-fi
+# Create build directory if it doesn't exist
+mkdir -p build
 
-# Run webpack with proper flags for webpack 5
-echo "Running webpack..."
-./node_modules/.bin/webpack --config ./EVAPOTRAN/webpack.config.js --stats-error-details
+# Clean previous build
+rm -rf build/*
 
-echo "Build completed"
+# Copy public files to build directory
+cp -r public/* build/
+
+# Process CSS files
+echo "Processing CSS files..."
+for file in $(find build -name "*.css"); do
+  # Minify CSS
+  npx clean-css-cli $file -o $file
+done
+
+# Process JS files
+echo "Processing JavaScript files..."
+for file in $(find build -name "*.js" -not -path "*/node_modules/*"); do
+  # Minify JS
+  npx uglify-js $file -o $file
+done
+
+# Copy build to public directory
+echo "Copying build to public directory..."
+cp -r build/* public/
+
+echo "Build completed successfully!"
+
 
 

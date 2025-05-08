@@ -1,53 +1,57 @@
 
-# VS Code
-.vs
-.git
+# Dependencies
+node_modules/
+npm-debug.log
+yarn-error.log
+yarn-debug.log
+package-lock.json
 
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
-!.vscode/*.code-snippets
-
-# Local History for Visual Studio Code
-.history/
-
-# Built Visual Studio Code Extensions
-*.vsix
+# Build output
+EVAPOTRAN/dist/
+build/
+dist/
 
 # Environment variables
 .env
-.env.*
+.env.local
+.env.development
+.env.test
+.env.production
 
-# Node.js
-node_modules/
+# IDE and editor files
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Server logs
-EVAPOTRAN/server/logs/
-*.log
+# Testing
+coverage/
+.nyc_output/
 
-# mkdocs documentation
-/site
-/rcs
-/test
-/test/EVAPO
-/EVAPOTRAN/calc.html
-/EVAPOTRAN/script00.js
-/EVAPOTRAN/script000.js
-/EVAPOTRAN/style00.css
-/EVAPOTRAN/test.html
-/EVAPOTRAN/myd3.js
-/EVAPOTRAN/soilTRI.html
-/EVAPOTRAN/stylesoil.css
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.bak
+*.swp
 
-# Mac files
-.DS_Store
+# Debug files
+*.debug.js
+*.debug.log
 
-# Windows files
-Thumbs.db
-ehthumbs.db
-Desktop.ini
+# Large media files
+*.mp4
+*.tiff
+*.avi
+*.flv
+*.mov
+*.wmv

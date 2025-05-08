@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - EVAPOTRAN</title>
+    
+    <!-- Google Analytics -->
+    <script src="js/analytics.js"></script>
+    
+    <!-- Other head content -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .error-message {
+            background-color: #ffebee;
+            color: #c62828;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            border-left: 4px solid #c62828;
+        }
+        
+        .loader {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--primary-color);
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            margin: 10px auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-overlay"></div>
+        <div class="header-top">
+            <div class="header-brand">
+                <img src="img/Flaha_logo.png" alt="Flaha Logo" class="header-logo" 
+                     onerror="this.onerror=null; this.src='https://via.placeholder.com/80x80?text=Flaha';">
+                <div class="header-title">
+                    <h1>Flaha Calc</h1>
+                    <span>Precision Agriculture Solutions</span>
+                </div>
+            </div>
+            <div class="header-actions">
+                <a href="docs/" class="header-action-btn">
+                    <i class="fas fa-book"></i> Documentation
+                </a>
+                <a href="login.html" class="header-action-btn">
+                    <i class="fas fa-user"></i> Login
+                </a>
+            </div>
+        </div>
+        <div class="nav-bar">
+            <a href="index.html" class="nav-link">
+                <i class="fas fa-home"></i> Home
+            </a>
+            <a href="calculator.html" class="nav-link">
+                <i class="fas fa-calculator"></i> Manual Calculator
+            </a>
+            <a href="epw-import.html" class="nav-link">
+                <i class="fas fa-file-upload"></i> EPW Import
+            </a>
+            <a href="epw-heatmap.html" class="nav-link">
+                <i class="fas fa-chart-area"></i> Weather Visualization
+            </a>
+            <a href="live-weather.html" class="nav-link">
+                <i class="fas fa-cloud-sun"></i> Live Weather
+            </a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="blocks">
+            <h2><i class="fas fa-sign-in-alt"></i> Login to Flaha Calc</h2>
+            <p>Access your account to save calculations and manage your data.</p>
+            
+            <div class="form-container">
+                <div id="loginError" class="error-message" style="display: none;"></div>
+                
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="email">Email Address:</label>
+                        <input type="email" id="email" name="email" placeholder="Enter your email" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password">Password:</label>
+                        <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                    </div>
+
+                    <div class="form-group" style="display: flex; align-items: center;">
+                        <input type="checkbox" id="rememberMe" name="rememberMe" style="width: auto; margin-right: 10px;">
+                        <label for="rememberMe">Remember me</label>
+                    </div>
+
+                    <div style="text-align: right; margin-bottom: 20px;">
+                        <a href="#" id="forgotPassword" style="color: var(--primary-color); text-decoration: none;">Forgot password?</a>
+                    </div>
+                    
+                    <button type="submit" id="loginButton">Login</button>
+                </form>
+                
+                <div id="loginLoader" class="loader" style="display: none;"></div>
+                
+                <div style="text-align: center; margin-top: 30px;">
+                    <p>Don't have an account? <a href="register.html" style="color: var(--primary-color); text-decoration: none;">Sign up</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="page-footer">
+        <div class="footer-content">
+            <img src="img/Flaha_logo.png" alt="Flaha Logo" class="footer-logo" 
+                 onerror="this.onerror=null; this.src='https://via.placeholder.com/40x40?text=Flaha';">
+            <div class="footer-links">
+                <a href="index.html" class="footer-link">Home</a>
+                <a href="calculator.html" class="footer-link">Manual Calculator</a>
+                <a href="epw-import.html" class="footer-link">EPW Import</a>
+                <a href="epw-heatmap.html" class="footer-link">Weather Visualization</a>
+                <a href="live-weather.html" class="footer-link">Live Weather</a>
+                <a href="docs/" class="footer-link">Documentation</a>
+            </div>
+            <p class="footer-copyright">© 2023 Flaha Agri Tech. All rights reserved.</p>
+            <p class="footer-attribution">Developed by Rafat Al Khashan</p>
+        </div>
+    </div>
+
+    <script src="js/auth.js"></script>
+    <script>
+        // Check if user is already logged in
+        document.addEventListener('DOMContentLoaded', function() {
+            if (isLoggedIn()) {
+                window.location.href = 'index.html'; // Redirect to home or dashboard
+            }
+        });
+
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const rememberMe = document.getElementById('rememberMe').checked;
+            const errorElement = document.getElementById('loginError');
+            const loginButton = document.getElementById('loginButton');
+            const loginLoader = document.getElementById('loginLoader');
+            
+            // Reset error message
+            errorElement.style.display = 'none';
+            errorElement.textContent = '';
+            
+            // Show loading state
+            loginButton.disabled = true;
+            loginLoader.style.display = 'block';
+            
+            try {
+                // Call the login function from auth.js
+                await loginUser({ email, password, rememberMe });
+                
+                // If successful, redirect to home page or dashboard
+                window.location.href = 'index.html';
+            } catch (error) {
+                // Display error message
+                errorElement.textContent = error.message || 'Login failed. Please check your credentials.';
+                errorElement.style.display = 'block';
+            } finally {
+                // Hide loading state
+                loginButton.disabled = false;
+                loginLoader.style.display = 'none';
+            }
+        });
+
+        document.getElementById('forgotPassword').addEventListener('click', function(e) {
+            e.preventDefault();
+            alert('Password reset functionality will be implemented in a future update.');
+        });
+    </script>
+</body>
+</html>
+
+
+
+

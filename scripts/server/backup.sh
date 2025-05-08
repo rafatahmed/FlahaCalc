@@ -36,3 +36,4 @@ find $BACKUP_DIR -name "env-*.backup" -type f -mtime +30 -delete
 find $BACKUP_DIR -name "pm2-dump-*.pm2" -type f -mtime +30 -delete
 
 echo "Backup completed successfully!"
+

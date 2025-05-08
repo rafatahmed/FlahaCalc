@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EPW Import - EVAPOTRAN</title>
+    
+    <!-- Google Analytics -->
+    <script src="js/analytics.js"></script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" href="img/favicon.ico" type="image/x-icon">
+    <script src="js/epw-import.js" defer></script>
+    <style>
+        /* Fix the transform property that's causing the error */
+        .heatmap-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <div class="header-overlay"></div>
+        <div class="header-top">
+            <div class="header-brand">
+                <img src="img/Flaha_logo.png" alt="Flaha Logo" class="header-logo" 
+                     onerror="this.onerror=null; this.src='https://via.placeholder.com/80x80?text=Flaha';">
+                <div class="header-title">
+                    <h1>Flaha Calc</h1>
+                    <span>Precision Agriculture Solutions</span>
+                </div>
+            </div>
+            <div class="header-actions">
+                <a href="docs/" class="header-action-btn">
+                    <i class="fas fa-book"></i> Documentation
+                </a>
+                <a href="login.html" class="header-action-btn">
+                    <i class="fas fa-user"></i> Login
+                </a>
+            </div>
+        </div>
+        <div class="nav-bar">
+            <a href="index.html" class="nav-link">
+                <i class="fas fa-home"></i> Home
+            </a>
+            <a href="calculator.html" class="nav-link">
+                <i class="fas fa-calculator"></i> Manual Calculator
+            </a>
+            <a href="epw-import.html" class="nav-link active">
+                <i class="fas fa-file-import"></i> EPW Import
+            </a>
+            <a href="epw-heatmap.html" class="nav-link">
+                <i class="fas fa-chart-area"></i> Weather Visualization
+            </a>
+            <a href="live-weather.html" class="nav-link">
+                <i class="fas fa-cloud-sun"></i> Live Weather
+            </a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="blocks" id="B1">
+            <h2>Import EPW Weather File</h2>
+            <p>Upload an EPW (EnergyPlus Weather) file to extract climate data for evapotranspiration calculations.</p>
+
+            <div id="SBlock1A">
+                <h3>File Upload</h3>
+                <div class="form-group">
+                    <label for="epwFile">Select EPW File:</label>
+                    <input type="file" id="epwFile" accept=".epw" required>
+                    <div class="validation-message" id="epwFileValidation"></div>
+                </div>
+            </div>
+
+            <button id="processEpwBtn" disabled>Process EPW File</button>
+
+            <!-- Add progress indicator for EPW parsing -->
+            <div id="progressContainer" class="progress-container" style="display: none;">
+                <h3>Processing EPW File</h3>
+                <progress id="progressBar" value="0" max="100"></progress>
+                <p id="progressText">Parsing EPW file...</p>
+            </div>
+
+            <div id="epwOptions" style="display: none;">
+                <h3>Choose Your Next Step</h3>
+                <div class="action-buttons">
+                    <button id="selectDayBtn">Select a Day for ET₀ Calculation</button>
+                </div>
+                <p class="note">You can either select a specific day for ET₀ calculation or visualize the entire EPW
+                    file as heatmaps.</p>
+            </div>
+
+            <div id="daySelectionSection" style="display: none;">
+                <div class="form-group">
+                    <label for="daySelect">Select Day:</label>
+                    <select id="daySelect">
+                        <option value="">-- Select a day --</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="locationInfo" class="info-box" style="display: none;">
+                <h3>Location Information</h3>
+                <p id="locationName">Location: --</p>
+                <p id="locationLat">Latitude: -- degrees</p>
+                <p id="locationLon">Longitude: -- degrees</p>
+                <p id="locationElev">Elevation: -- m</p>
+                <p id="locationTimeZone">Time Zone: -- hours</p>
+            </div>
+        </div>
+
+        <div class="blocks" id="B2">
+            <h2>Extracted Weather Data</h2>
+            <div id="weatherData" class="data-table" style="display: none;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Parameter</th>
+                            <th>Value</th>
+                            <th>Unit</th>
+                        </tr>
+                    </thead>
+                    <tbody id="weatherDataBody">
+                        <!-- Data will be inserted here by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="output" style="display: none;">
+                <h3>Choose Your Next Step</h3>
+                <div class="action-buttons">
+                    <button id="useDataBtn">Use Selected Day for ET₀ Calculation</button>
+                    <button id="viewHeatmapsBtn">Generate Heatmaps from EPW Data</button>
+                </div>
+                <p class="note">You can either use the selected day's data for ET₀ calculation or visualize the entire
+                    EPW file as heatmaps to analyze climate patterns.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="page-footer">
+        <div class="footer-content">
+            <img src="img/Flaha_logo.png" alt="Flaha Logo" class="footer-logo"
+                 onerror="this.onerror=null; this.src='https://via.placeholder.com/80x80?text=Flaha';">
+            <div class="footer-links">
+                <a href="index.html" class="footer-link">Home</a>
+                <a href="calculator.html" class="footer-link">Manual Calculator</a>
+                <a href="epw-import.html" class="footer-link">EPW Import</a>
+                <a href="epw-heatmap.html" class="footer-link">Weather Visualization</a>
+                <a href="live-weather.html" class="footer-link">Live Weather</a>
+            </div>
+            <p class="footer-credits">© 2023 Flaha Agri Tech. All rights reserved.</p>
+            <p class="footer-credits">Developed by Rafat Al Khashan | <a href="mailto:info@flaha.org">info@flaha.org</a></p>
+        </div>
+    </div>
+</body>
+
+</html>
+
+
+
+
+
+
+
+
+
+
+

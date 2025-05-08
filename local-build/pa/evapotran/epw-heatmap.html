@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Visualization - Evapotranspiration Calculator | Flaha Agri Tech</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" href="img/favicon.ico" type="image/x-icon">
+    
+    <!-- D3.js library -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+    
+    <script src="js/epw-heatmap.js" defer></script>
+</head>
+
+<body>
+    <div class="header">
+        <div class="header-overlay"></div>
+        <div class="header-top">
+            <div class="header-brand">
+                <img src="img/Flaha_logo.png" alt="Flaha Logo" class="header-logo" 
+                     onerror="this.onerror=null; this.src='https://via.placeholder.com/80x80?text=Flaha';">
+                <div class="header-title">
+                    <h1>Flaha Calc</h1>
+                    <span>Precision Agriculture Solutions</span>
+                </div>
+            </div>
+            <div class="header-actions">
+                <a href="docs/" class="header-action-btn">
+                    <i class="fas fa-book"></i> Documentation
+                </a>
+                <a href="login.html" class="header-action-btn">
+                    <i class="fas fa-user"></i> Login
+                </a>
+            </div>
+        </div>
+        <div class="nav-bar">
+            <a href="index.html" class="nav-link">
+                <i class="fas fa-home"></i> Home
+            </a>
+            <a href="calculator.html" class="nav-link">
+                <i class="fas fa-calculator"></i> Manual Calculator
+            </a>
+            <a href="epw-import.html" class="nav-link">
+                <i class="fas fa-file-import"></i> EPW Import
+            </a>
+            <a href="epw-heatmap.html" class="nav-link active">
+                <i class="fas fa-chart-area"></i> Weather Visualization
+            </a>
+            <a href="live-weather.html" class="nav-link">
+                <i class="fas fa-cloud-sun"></i> Live Weather
+            </a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="blocks" id="B1">
+            <h2>EPW Weather Data Visualization</h2>
+            <p>Upload an EPW file to visualize temperature, humidity, and other weather parameters as heatmaps.</p>
+
+            <div id="dataSourceInfo" style="display: none;" class="info-box success-box">
+                <p>Data loaded from EPW import page. Generating heatmaps...</p>
+            </div>
+
+            <div id="SBlock1A">
+                <h3>File Upload</h3>
+                <div class="form-group">
+                    <label for="epwFile">Select EPW File:</label>
+                    <input type="file" id="epwFile" accept=".epw">
+                </div>
+            </div>
+
+            <button id="processEpwBtn" disabled>Process EPW File</button>
+
+            <div id="locationInfo" class="info-box" style="display: none;">
+                <h3>Location Information</h3>
+                <p id="locationName">Location: --</p>
+                <p id="locationLat">Latitude: -- degrees</p>
+                <p id="locationLon">Longitude: -- degrees</p>
+                <p id="locationElev">Elevation: -- m</p>
+            </div>
+        </div>
+
+        <div class="blocks" id="B2">
+            <h2>Weather Data Calendar Heatmap</h2>
+            <div id="heatmapContainer" style="display: none;">
+                <div class="heatmap-header">
+                    <h3>Weather Data Visualization</h3>
+                    <!-- Removing the parameter select dropdown -->
+                </div>
+                <!-- We'll create multiple heatmap wrappers for each parameter -->
+                <div id="heatmapsGrid">
+                    <!-- Dry Bulb Temperature -->
+                    <div class="heatmap-item full-width">
+                        <h3 class="heatmap-title">Dry Bulb Temperature</h3>
+                        <div id="dryBulbTemp-wrapper" class="heatmap-wrapper"></div>
+                        <div class="legend-container" id="dryBulbTemp-legend"></div>
+                        <div class="heatmap-stats">
+                            <div class="stat-item">
+                                <span class="stat-label">Min:</span>
+                                <span class="stat-value" id="dryBulbTemp-stat-min">-</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Max:</span>
+                                <span class="stat-value" id="dryBulbTemp-stat-max">-</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Avg:</span>
+                                <span class="stat-value" id="dryBulbTemp-stat-avg">-</span>
+                            </div>
+                        </div>
+                        <div class="heatmap-info">
+                            <p>Temperature affects evapotranspiration rates. Higher temperatures generally increase water loss.</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Relative Humidity -->
+                    <div class="heatmap-item offset-right">
+                        <h3 class="heatmap-title">Relative Humidity</h3>
+                        <div id="relativeHumidity-wrapper" class="heatmap-wrapper"></div>
+                        <div class="legend-container" id="relativeHumidity-legend"></div>
+                        <div class="heatmap-stats">
+                            <div class="stat-item">
+                                <span class="stat-label">Min:</span>
+                                <span class="stat-value" id="relativeHumidity-stat-min">-</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Max:</span>
+                                <span class="stat-value" id="relativeHumidity-stat-max">-</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Avg:</span>
+                                <span class="stat-value" id="relativeHumidity-stat-avg">-</span>
+                            </div>
+                        </div>
+                        <div class="heatmap-info">
+                            <p>Humidity affects evapotranspiration rates. Higher humidity generally decreases water loss.</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Wind Speed -->
+                    <div class="heatmap-item offset-left">
+                        <h3 class="heatmap-title">Wind Speed</h3>
+                        <div id="windSpeed-wrapper" class="heatmap-wrapper"></div>
+                        <div class="legend-container" id="windSpeed-legend"></div>
+                        <div class="heatmap-stats">
+                            <div class="stat-item">
+                                <span class="stat-label">Min:</span>
+                                <span class="stat-value" id="windSpeed-stat-min">-</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Max:</span>
+                                <span class="stat-value" id="windSpeed-stat-max">-</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Avg:</span>
+                                <span class="stat-value" id="windSpeed-stat-avg">-</span>
+                            </div>
+                        </div>
+                        <div class="heatmap-info">
+                            <p>Wind speed affects evapotranspiration rates. Higher wind speeds generally increase water loss.</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Global Horizontal Radiation -->
+                    <div class="heatmap-item offset-right">
+                        <h3 class="heatmap-title">Global Horizontal Radiation</h3>
+                        <div id="globalHorizontalRadiation-wrapper" class="heatmap-wrapper"></div>
+                        <div class="legend-container" id="globalHorizontalRadiation-legend"></div>
+                        <div class="heatmap-stats">
+                            <div class="stat-item">
+                                <span class="stat-label">Min:</span>
+                                <span class="stat-value" id="globalHorizontalRadiation-stat-min">-</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Max:</span>
+                                <span class="stat-value" id="globalHorizontalRadiation-stat-max">-</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Avg:</span>
+                                <span class="stat-value" id="globalHorizontalRadiation-stat-avg">-</span>
+                            </div>
+                        </div>
+                        <div class="heatmap-info">
+                            <p>Solar radiation is a key driver of evapotranspiration. Higher radiation increases water loss.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="noDataMessage">
+                Please upload an EPW file to view the calendar heatmaps.
+            </div>
+        </div>
+
+        <div class="blocks" id="B3">
+            <h2>Visualization Guide</h2>
+            <div class="visualization-guide">
+                <h3>How to Read the Heatmaps</h3>
+                <p>Each cell represents a specific day and hour. The color intensity indicates the value of the selected parameter:</p>
+                
+                <div class="guide-item">
+                    <h4>Temperature (°C)</h4>
+                    <div class="guide-colors temp-scale"></div>
+                    <p>Blue represents cooler temperatures, while red indicates warmer temperatures.</p>
+                </div>
+                
+                <div class="guide-item">
+                    <h4>Relative Humidity (%)</h4>
+                    <div class="guide-colors humidity-scale"></div>
+                    <p>Lighter blue indicates lower humidity, while darker blue represents higher humidity.</p>
+                </div>
+                
+                <div class="guide-item">
+                    <h4>Solar Radiation (W/m²)</h4>
+                    <div class="guide-colors radiation-scale"></div>
+                    <p>Yellow to red gradient indicates increasing solar radiation intensity.</p>
+                </div>
+                
+                <h3>Interaction Tips</h3>
+                <ul>
+                    <li>Hover over any cell to see detailed information for that specific time</li>
+                    <li>Hover over the legend to see the exact value represented by each color</li>
+                    <li>The statistics below each heatmap show minimum, maximum, and average values</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <div class="page-footer">
+        <div class="footer-content">
+            <img src="img/Flaha_logo.png" alt="Flaha Logo" class="footer-logo"
+                 onerror="this.onerror=null; this.src='https://via.placeholder.com/80x80?text=Flaha';">
+            <div class="footer-links">
+                <a href="index.html" class="footer-link">Home</a>
+                <a href="calculator.html" class="footer-link">Manual Calculator</a>
+                <a href="epw-import.html" class="footer-link">EPW Import</a>
+                <a href="epw-heatmap.html" class="footer-link">Weather Visualization</a>
+                <a href="live-weather.html" class="footer-link">Live Weather</a>
+            </div>
+            <p class="footer-credits">© 2023 Flaha Agri Tech. All rights reserved.</p>
+            <p class="footer-credits">Developed by Rafat Al Khashan | <a href="mailto:info@flaha.org">info@flaha.org</a></p>
+        </div>
+    </div>
+</body>
+
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

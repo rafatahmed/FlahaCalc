@@ -1,0 +1,340 @@
+Folder PATH listing for volume Windows
+Volume serial number is 8CA4-F362
+C:.
+|   .gitignore
+|   .readthedocs.yaml
+|   CHANGELOG.md
+|   CODE_OF_CONDUCT.md
+|   CODING_GUIDELINES.md
+|   CONTRIBUTING.md
+|   explanation.md
+|   flow-chart.txt
+|   LICENSE
+|   mkdocs.yml
+|   package-lock.json
+|   package.json
+|   PERFORMANCE_OPTIMIZATION.md
+|   README.md
+|   RELEASE_CHECKLIST.md
+|   RELEASE_NOTES.md
+|   setup-deployment.sh
+|   TECHNICAL_README.md
+|   test-webpack.js
+|   tree.txt
+|   update_js_links.sh
+|   update_links.sh
+|   VERSION
+|   _Footer.md
+|   _Sidebar.md
+|   
++---.github
+|   \---workflows
+|           deploy.yml
+|           docs.yml
+|           release.yml
+|           wiki-sync.yml
+|           
++---build
+|   |   index.html
+|   |   
+|   +---css
+|   |       main.css
+|   |       
+|   +---img
+|   +---js
+|   |       main.js
+|   |       
+|   \---pa
+|       |   index.html
+|       |   
+|       +---css
+|       |       pa-styles.css
+|       |       
+|       \---js
+|               pa-scripts.js
+|               
++---docs
+|   |   deployment.md
+|   |   index.html
+|   |   index.md
+|   |   privacy.md
+|   |   README.md
+|   |   requirements.txt
+|   |   
+|   +---about
+|   |       contact.md
+|   |       license.md
+|   |       
+|   +---api
+|   |       overview.md
+|   |       README.md
+|   |       
+|   +---case-studies
+|   |       drought-response.md
+|   |       greenhouse-management.md
+|   |       index.md
+|   |       README.md
+|   |       urban-landscape.md
+|   |       vineyard-irrigation.md
+|   |       
+|   +---css
+|   |       extra.css
+|   |       
+|   +---deployment
+|   |       digitalocean-setup.md
+|   |       github-secrets.md
+|   |       monitoring-backup.md
+|   |       nginx-config.md
+|   |       pm2-setup.md
+|   |       post-deployment-optimization.md
+|   |       production-checklist.md
+|   |       production-config.md
+|   |       quick-start.md
+|   |       README.md
+|   |       security-checklist.md
+|   |       
+|   +---development
+|   |       code-guidelines.md
+|   |       contributing.md
+|   |       documentation-management.md
+|   |       project-structure.md
+|   |       README.md
+|   |       release-process.md
+|   |       workflow.md
+|   |       
+|   +---educational
+|   |       climate-data-guide.md
+|   |       evapotranspiration-basics.md
+|   |       
+|   +---faq
+|   |       general.md
+|   |       README.md
+|   |       
+|   +---getting-started
+|   |       introduction.md
+|   |       README.md
+|   |       
+|   +---img
+|   |       Flaha_logo.png
+|   |       Flaha_logo.svg
+|   |       README.md
+|   |       
+|   +---overrides
+|   |       main.html
+|   |       
+|   +---releases
+|   |       index.md
+|   |       README.md
+|   |       
+|   +---security
+|   |       README.md
+|   |       
+|   +---technical
+|   |       api-documentation.md
+|   |       architecture.md
+|   |       calculation-methods.md
+|   |       data-processing.md
+|   |       performance-optimization.md
+|   |       README.md
+|   |       visualization.md
+|   |       
+|   \---user-guide
+|           epw-import.md
+|           getting-started.md
+|           installation.md
+|           live-weather.md
+|           manual-calculator.md
+|           overview.md
+|           README.md
+|           weather-visualization.md
+|           
++---EVAPOTRAN
+|   |   calculator.html
+|   |   epw-heatmap.html
+|   |   epw-import.html
+|   |   index.html
+|   |   LICENSE.md
+|   |   live-weather.html
+|   |   login.html
+|   |   package-lock.json
+|   |   package.json
+|   |   privacy.html
+|   |   profile.html
+|   |   register.html
+|   |   terms.html
+|   |   webpack.config.js
+|   |   
+|   +---css
+|   |       style.css
+|   |       
+|   +---docs
+|   |       index.html
+|   |       troubleshooting.md
+|   |       user-guide.pdf
+|   |       
+|   +---img
+|   |       agriculture-illustration.png
+|   |       eto-equation.png
+|   |       favicon.ico
+|   |       Flaha_logo.png
+|   |       Flaha_logo.svg
+|   |       testimonial-1.jpg
+|   |       testimonial-2.jpg
+|   |       testimonial-3.jpg
+|   |       
+|   +---js
+|   |       analytics.js
+|   |       app.js
+|   |       auth-ui.js
+|   |       auth.js
+|   |       calculation-worker.js
+|   |       epw-heatmap.js
+|   |       epw-import.js
+|   |       epw-worker.js
+|   |       help.js
+|   |       indexeddb-storage.js
+|   |       jquery.easing.min.js
+|   |       jquery.min.js
+|   |       license-check.js
+|   |       live-weather-debug.js
+|   |       live-weather-fixed.js
+|   |       live-weather.js
+|   |       script.js
+|   |       
+|   +---node_modules
+|   |   |   .package-lock.json
+|   |   |   
+|           
++---public
+|   |   index.html
+|   |   
+|   +---css
+|   |       main.css
+|   |       
+|   +---img
+|   +---js
+|   |       main.js
+|   |       
+|   \---pa
+|       |   index.html
+|       |   
+|       +---css
+|       |       pa-styles.css
+|       |       
+|       \---js
+|               pa-scripts.js
+|               
+\---scripts
+    |   build.sh
+    |   deploy.sh
+    |   droplet-setup.sh
+    |   monitor.sh
+    |   pre-deploy-check.sh
+    |   README.md
+    |   
+    +---deploy
+    |   |   clean-deployment.sh
+    |   |   deploy-with-fixes.sh
+    |   |   deploy.sh
+    |   |   initialize-deployment.sh
+    |   |   local.sh
+    |   |   master-fix.sh
+    |   |   pre-deploy-check.sh
+    |   |   production-deploy.sh
+    |   |   production.sh
+    |   |   safe-deploy.sh
+    |   |   update-js-links.sh
+    |   |   update-links.sh
+    |   |   verify-analytics.sh
+    |   |   
+    |   \---pre-deploy
+    |           fix-api-key.sh
+    |           
+    +---dev
+    |       build.sh
+    |       clean.sh
+    |       fix-api-key-on-server.sh
+    |       fix-api-urls.sh
+    |       make-scripts-executable.sh
+    |       optimize.sh
+    |       pre-commit.sh
+    |       prepare-release-scripts.sh
+    |       run-server-fix.sh
+    |       setup-env.sh
+    |       start-local.sh
+    |       sync-and-consolidate.sh
+    |       sync-live-weather-fix.sh
+    |       sync-server-changes.sh
+    |       workflow.sh
+    |       
+    +---docs
+    |       build-all-docs.sh
+    |       sync-to-wiki.sh
+    |       
+    +---monitoring
+    |       check-docs.sh
+    |       setup-monitoring.sh
+    |       
+    +---release
+    |       create-release.sh
+    |       generate-release-notes.bat
+    |       generate-release-notes.sh
+    |       
+    +---security
+    |       audit.sh
+    |       server-hardening.sh
+    |       setup-env.sh
+    |       
+    \---server
+        |   alert.sh
+        |   backup.sh
+        |   check-nginx-logs.sh
+        |   check-server.sh
+        |   commit-local-changes.sh
+        |   comprehensive-fix.sh
+        |   debug-api-key.sh
+        |   direct-edit.sh
+        |   droplet-setup.sh
+        |   emergency-fix.sh
+        |   fix-after-revert.sh
+        |   fix-all.sh
+        |   fix-api-key.sh
+        |   fix-csp.sh
+        |   fix-deployment.sh
+        |   fix-evapotran-issues.sh
+        |   fix-evapotran-paths.sh
+        |   fix-evapotran.sh
+        |   fix-main-site.sh
+        |   fix-nginx-config.sh
+        |   fix-nginx-evapotran.sh
+        |   fix-permissions-webpack.sh
+        |   fix-production.sh
+        |   fix-script-js.sh
+        |   fix-security-headers.sh
+        |   fix-server-dependencies.sh
+        |   fix-server-js.sh
+        |   fix-ssl.sh
+        |   generate-docs.sh
+        |   handle-local-changes.sh
+        |   harden-security.sh
+        |   implement-site-structure.sh
+        |   monitor.sh
+        |   optimize-server.sh
+        |   post-deploy.sh
+        |   remove-meta-csp.sh
+        |   reset-nginx-config.sh
+        |   restart-server.sh
+        |   set-api-key.sh
+        |   setup-server.sh
+        |   simple-nginx-fix.sh
+        |   update-api-key.sh
+        |   update-nginx.sh
+        |   verify-all.sh
+        |   verify-api-endpoint.sh
+        |   verify-evapotran.sh
+        |   verify-site-with-https.sh
+        |   verify-urls.sh
+        |   
+        \---nginx
+                flahacalc.conf
+                

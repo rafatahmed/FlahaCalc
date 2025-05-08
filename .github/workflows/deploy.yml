@@ -30,7 +30,7 @@ jobs:
       - name: Install dependencies
         run: |
           npm install
-          cd EVAPOTRAN/server
+          cd server
           npm install
           
       - name: Run linting and tests
@@ -55,7 +55,7 @@ jobs:
       - name: Install dependencies
         run: |
           npm install
-          cd EVAPOTRAN/server
+          cd server
           npm install
           
       - name: Build application
@@ -78,8 +78,42 @@ jobs:
           key: ${{ secrets.DROPLET_SSH_KEY }}
           port: 22
           script: |
-            # Run the safe deployment script
-            bash /var/www/flahacalc/scripts/deploy/safe-deploy.sh
+            # Pull latest changes
+            cd /var/www/flahacalc
+            git pull origin main
+            
+            # Install dependencies
+            npm install
+            cd server
+            npm install
+            cd ..
+            
+            # Build application if needed
+            npm run build
+            
+            # Deploy public files
+            rsync -avz --delete ./public/ /var/www/flahacalc/
+            
+            # Deploy server files
+            rsync -avz ./server/ /var/www/flahacalc/EVAPOTRAN/server/
+            
+            # Make all scripts executable
+            find scripts -name "*.sh" -exec chmod +x {} \;
+            
+            # Update Nginx configuration
+            echo "Updating Nginx configuration..."
+            cp scripts/server/nginx/flahacalc.conf /etc/nginx/sites-available/flahacalc
+            ln -sf /etc/nginx/sites-available/flahacalc /etc/nginx/sites-enabled/
+            nginx -t && systemctl reload nginx
+            
+            # Restart server
+            cd EVAPOTRAN/server
+            pm2 restart flahacalc-server || pm2 start server.js --name flahacalc-server
+            pm2 save
+            
+            # Update HTML links for production
+            cd /var/www/flahacalc
+            bash scripts/deploy/update-links.sh
       
       - name: Verify deployment
         uses: appleboy/ssh-action@master

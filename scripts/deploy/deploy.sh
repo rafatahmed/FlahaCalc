@@ -16,8 +16,11 @@ npm run build || { echo "Build failed"; exit 1; }
 # Deploy to server
 echo "Deploying to server..."
 rsync -avz --exclude 'node_modules' --exclude '.git' \
-    --exclude 'EVAPOTRAN/server/.env' --exclude '.github' \
-    ./ $DROPLET_USERNAME@$DROPLET_HOST:/var/www/flahacalc/ || { echo "Rsync failed"; exit 1; }
+    --exclude 'server/.env' --exclude '.github' \
+    ./public/ $DROPLET_USERNAME@$DROPLET_HOST:/var/www/flahacalc/ || { echo "Rsync failed"; exit 1; }
+
+# Deploy server files separately
+rsync -avz ./server/ $DROPLET_USERNAME@$DROPLET_HOST:/var/www/flahacalc/EVAPOTRAN/server/ || { echo "Server rsync failed"; exit 1; }
 
 # SSH into server and restart
 echo "Restarting server and applying optimizations..."
@@ -39,12 +42,8 @@ npm install
 pm2 restart flahacalc-server || pm2 start server.js --name flahacalc-server
 pm2 save
 
-# Apply performance optimizations
-echo "Applying performance optimizations..."
-cd /var/www/flahacalc
-bash scripts/server/optimize-server.sh
-
-echo "Deployment and optimization completed successfully!"
+echo "Deployment completed successfully!"
 EOF_SSH
 
-echo "Deployment and optimization completed successfully!"
+echo "Deployment completed successfully!"
+
