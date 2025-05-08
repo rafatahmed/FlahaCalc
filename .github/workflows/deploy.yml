@@ -3,6 +3,7 @@ name: Deploy to DigitalOcean
 on:
   push:
     branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   deploy:
@@ -69,8 +70,8 @@ jobs:
             find scripts -name "*.sh" -exec chmod +x {} \; 2>/dev/null || true
             
             # Update Nginx configuration
-            cp scripts/server/nginx/flahacalc.conf /etc/nginx/sites-available/flahacalc 2>/dev/null || true
-            ln -sf /etc/nginx/sites-available/flahacalc /etc/nginx/sites-enabled/ 2>/dev/null || true
+            cp /etc/nginx/sites-available/flahacalc /etc/nginx/sites-available/flahacalc.bak.$(date +%Y%m%d%H%M%S)
+            cp scripts/server/nginx/flahacalc.conf /etc/nginx/sites-available/flahacalc
             nginx -t && systemctl reload nginx
             
             # Restart server
@@ -99,3 +100,56 @@ jobs:
           remote_host: 207.154.202.6
           remote_user: root
           remote_key: ${{ secrets.DROPLET_SSH_KEY }}
+          
+      - name: Verify deployment
+        uses: appleboy/ssh-action@master
+        with:
+          host: 207.154.202.6
+          username: root
+          key: ${{ secrets.DROPLET_SSH_KEY }}
+          port: 22
+          script: |
+            # Verify Nginx configuration
+            echo "Verifying Nginx configuration..."
+            if grep -q "proxy_pass http://localhost:3000/api/" /etc/nginx/sites-available/flahacalc; then
+              echo "✅ API routing configured correctly"
+            else
+              echo "❌ API routing not configured correctly"
+              exit 1
+            fi
+            
+            # Verify server is running
+            echo "Verifying server is running..."
+            if pm2 list | grep -q "flahacalc-server"; then
+              echo "✅ Server is running"
+            else
+              echo "❌ Server is not running"
+              exit 1
+            fi
+            
+            # Test API endpoint
+            echo "Testing API endpoint..."
+            if curl -s http://localhost:3000/api/test | grep -q "status"; then
+              echo "✅ API endpoint is working"
+            else
+              echo "❌ API endpoint is not working"
+              exit 1
+            fi
+            
+            echo "Verification completed successfully!"
+      
+      - name: Notify on success
+        if: success()
+        run: |
+          echo "Deployment completed successfully!"
+          curl -X POST -H 'Content-type: application/json' \
+          --data '{"text":"✅ *DEPLOYMENT SUCCESSFUL* ✅\n*Repository:* ${{ github.repository }}\n*Branch:* ${{ github.ref_name }}\n*Commit:* ${{ github.sha }}\n*Deployed by:* ${{ github.actor }}\n*Time:* $(date)"}' \
+          ${{ secrets.SLACK_WEBHOOK_URL }}
+      
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "Deployment failed!"
+          curl -X POST -H 'Content-type: application/json' \
+          --data '{"text":"🚨 *DEPLOYMENT FAILED* 🚨\n*Repository:* ${{ github.repository }}\n*Branch:* ${{ github.ref_name }}\n*Commit:* ${{ github.sha }}\n*Deployed by:* ${{ github.actor }}\n*Time:* $(date)"}' \
+          ${{ secrets.SLACK_WEBHOOK_URL }}
