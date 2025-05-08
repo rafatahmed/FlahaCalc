@@ -97,9 +97,8 @@ jobs:
             # Create fix-git-conflicts.sh if it doesn't exist
             if [ ! -f "scripts/server/fix-git-conflicts.sh" ]; then
               mkdir -p scripts/server
-              cat > scripts/server/fix-git-conflicts.sh << 'EOFSCRIPT'
-#!/bin/bash
-
+              echo '#!/bin/bash
+              
 # Exit on error
 set -e
 
@@ -147,7 +146,7 @@ echo "Restoring important customizations..."
 if [ -f "/tmp/flahacalc-backup/server.js" ]; then
     echo "Merging server.js customizations..."
     # You may need to manually merge changes here
-    # For now, we'll just keep the original file
+    # For now, we will just keep the original file
     cp /tmp/flahacalc-backup/server.js EVAPOTRAN/server/server.js
 fi
 
@@ -155,8 +154,7 @@ fi
 echo "Making scripts executable..."
 find scripts -name "*.sh" -exec chmod +x {} \;
 
-echo "Git conflicts resolved successfully!"
-EOFSCRIPT
+echo "Git conflicts resolved successfully!"' > scripts/server/fix-git-conflicts.sh
               chmod +x scripts/server/fix-git-conflicts.sh
             fi
             
