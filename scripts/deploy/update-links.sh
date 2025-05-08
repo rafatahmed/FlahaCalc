@@ -1,22 +1,39 @@
 #!/bin/bash
 
-# Directory containing HTML files
-DIR="/var/www/flahacalc/EVAPOTRAN"
+# Exit on error
+set -e
 
-# Find all HTML files
-find "$DIR" -type f -name "*.html" | while read file; do
+echo "Updating links in HTML files for production..."
+
+# Update links in HTML files
+cd /var/www/flahacalc/EVAPOTRAN
+
+# Process all HTML files
+for file in *.html; do
     echo "Processing $file"
-    
-    # Replace href="something.html" with href="something"
-    # But don't change links to external sites or anchors
-    sed -i 's/href="\([^"]*\)\.html"/href="\1"/g' "$file"
-    
-    # Also update JavaScript redirects if any
-    sed -i 's/window\.location\.href = "\([^"]*\)\.html"/window.location.href = "\1"/g' "$file"
-    sed -i 's/window\.location\.href = \x27\([^\x27]*\)\.html\x27/window.location.href = \x27\1\x27/g' "$file"
+    # Update relative links to absolute links
+    sed -i 's/href="css\//href="\/css\//g' "$file"
+    sed -i 's/src="js\//src="\/js\//g' "$file"
+    sed -i 's/src="img\//src="\/img\//g' "$file"
+    # Update API endpoint URLs
+    sed -i 's/http:\/\/localhost:3000/https:\/\/flaha.org\/api/g' "$file"
 done
 
 echo "All HTML links updated!"
 
-# Update JS links
-bash $(dirname "$0")/update-js-links.sh
+# Update links in JS files
+cd /var/www/flahacalc/EVAPOTRAN/js
+
+# Process all JS files
+for file in *.js; do
+    echo "Processing $file"
+    # Update API endpoint URLs
+    sed -i 's/http:\/\/localhost:3000/https:\/\/flaha.org\/api/g' "$file"
+    # Update relative links to absolute links
+    sed -i 's/"\.\/css\//"\/css\//g' "$file"
+    sed -i 's/"\.\/js\//"\/js\//g' "$file"
+    sed -i 's/"\.\/img\//"\/img\//g' "$file"
+done
+
+echo "All JS links updated!"
+
