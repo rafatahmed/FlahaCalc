@@ -3,9 +3,13 @@ const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
 const path = require('path');
+const NodeCache = require('node-cache');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Create a cache with 30-minute TTL
+const weatherCache = new NodeCache({ stdTTL: 1800 });
 
 // Middleware
 app.use(cors());
@@ -28,17 +32,48 @@ app.get('/api/test', (req, res) => {
 
 // Weather API endpoint
 app.get('/api/weather', async (req, res) => {
-  const { lat, lon } = req.query;
-  
-  if (!lat || !lon) {
-    return res.status(400).json({ error: 'Latitude and longitude are required' });
-  }
-  
   try {
-    const apiKey = process.env.WEATHER_API_KEY || 'demo_key';
+    const { q, lat, lon } = req.query;
+    
+    // Handle location-based query
+    if (q) {
+      const apiKey = process.env.WEATHER_API_KEY;
+      if (!apiKey) {
+        return res.status(500).json({ error: 'API key not configured' });
+      }
+      
+      const response = await axios.get(
+        `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(q)}&appid=${apiKey}&units=metric`
+      );
+      
+      return res.json(response.data);
+    }
+    
+    // Handle coordinate-based query
+    if (!lat || !lon) {
+      return res.status(400).json({ error: 'Latitude and longitude are required' });
+    }
+    
+    const apiKey = process.env.WEATHER_API_KEY;
+    if (!apiKey) {
+      return res.status(500).json({ error: 'API key not configured' });
+    }
+    
+    // Create a cache key based on coordinates
+    const cacheKey = `weather_${lat}_${lon}`;
+    
+    // Check if we have cached data
+    if (weatherCache.has(cacheKey)) {
+      console.log('Returning cached weather data');
+      return res.json(weatherCache.get(cacheKey));
+    }
+    
     const response = await axios.get(
       `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`
     );
+    
+    // Cache the response
+    weatherCache.set(cacheKey, response.data);
     
     res.json(response.data);
   } catch (error) {
