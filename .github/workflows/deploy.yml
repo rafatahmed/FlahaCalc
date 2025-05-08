@@ -17,38 +17,12 @@ on:
           - 'false'
 
 jobs:
-  test:
+  deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
         
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-          
-      - name: Install dependencies
-        run: |
-          npm install
-          cd EVAPOTRAN/server
-          npm install
-          cd ../..
-          
-      - name: Run linting and tests
-        run: |
-          npm run lint || echo "Linting issues found"
-          npm test || echo "Tests not configured"
-          
-  deploy:
-    needs: test
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
@@ -64,16 +38,7 @@ jobs:
       - name: Build application
         run: npm run build
         
-      - name: Run pre-deployment checks
-        run: bash scripts/deploy/pre-deploy-check.sh || echo "Pre-deployment checks skipped"
-        
-      - name: Get changed files
-        id: changed-files
-        run: |
-          echo "CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD | tr '\n' ' ')" >> $GITHUB_ENV
-          echo "Changed files: $(git diff --name-only HEAD~1 HEAD | tr '\n' ' ')"
-        
-      - name: Deploy to DigitalOcean
+      - name: Deploy using pipeline approach
         uses: appleboy/ssh-action@master
         with:
           host: 207.154.202.6
@@ -81,61 +46,21 @@ jobs:
           key: ${{ secrets.DROPLET_SSH_KEY }}
           port: 22
           script: |
-            # Pull latest changes
+            # Run the safe deployment script
             cd /var/www/flahacalc
-            git pull origin main
-
-            # Install dependencies
-            npm install
-            cd EVAPOTRAN/server
-            npm install
-            cd ../..
-
-            # Build application if needed
-            npm run build
-
-            # Deploy public files
-            rsync -avz --delete ./public/ /var/www/flahacalc/public/
-
-            # Deploy EVAPOTRAN files
-            rsync -avz ./EVAPOTRAN/ /var/www/flahacalc/EVAPOTRAN/
-
-            # Make all scripts executable
-            find scripts -name "*.sh" -exec chmod +x {} \;
-
-            # Update Nginx configuration
-            echo "Updating Nginx configuration..."
-            cp scripts/server/nginx/flahacalc.conf /etc/nginx/sites-available/flahacalc
-            ln -sf /etc/nginx/sites-available/flahacalc /etc/nginx/sites-enabled/
-            nginx -t && systemctl reload nginx
-
-            # Restart server
-            cd EVAPOTRAN/server
-            pm2 restart flahacalc-server || pm2 start server.js --name flahacalc-server
-            pm2 save
-
-            # Update HTML links for production
-            cd /var/www/flahacalc
-            bash scripts/deploy/update-links.sh || echo "Update links script not found or failed"
-
-      - name: Verify deployment
-        uses: appleboy/ssh-action@master
-        with:
-          host: 207.154.202.6
-          username: root
-          key: ${{ secrets.DROPLET_SSH_KEY }}
-          port: 22
-          script: |
-            cd /var/www/flahacalc
-            echo "Verifying API endpoint..."
-            curl -s http://localhost:3000/api/test || echo "API endpoint test failed"
-            echo ""
-            echo "Checking Node.js server status..."
-            pm2 status flahacalc-server || echo "PM2 status check failed"
-            echo ""
-            echo "Checking Nginx status..."
-            systemctl status nginx | grep Active || echo "Nginx status check failed"
-
+            
+            # Make sure the script exists and is executable
+            if [ ! -f "scripts/deploy/safe-deploy.sh" ]; then
+              mkdir -p scripts/deploy
+              
+              # Copy the safe-deploy script from the repository
+              curl -s https://raw.githubusercontent.com/rafatahmed/FlahaCalc/main/scripts/deploy/safe-deploy.sh > scripts/deploy/safe-deploy.sh
+              chmod +x scripts/deploy/safe-deploy.sh
+            fi
+            
+            # Run the safe deployment script
+            bash scripts/deploy/safe-deploy.sh
+            
       - name: Apply fixes if requested
         if: github.event.inputs.apply_fixes == 'true'
         uses: appleboy/ssh-action@master
@@ -159,6 +84,6 @@ jobs:
           SLACK_CHANNEL: deployments
           SLACK_COLOR: ${{ job.status }}
           SLACK_TITLE: Deployment Complete
-          SLACK_MESSAGE: "FlahaCalc has been deployed to production. Commit message: ${{ github.event.head_commit.message }}"
+          SLACK_MESSAGE: "FlahaCalc has been deployed to production using the pipeline approach."
           SLACK_FOOTER: "Deployed by: ${{ github.actor }}"
         if: env.SLACK_WEBHOOK != ''
