@@ -1,3 +1,91 @@
+/* Import color palette */
+@import url('../../../css/color-palette.css');
+
+/* Override any existing button styles to use our new palette */
+button, 
+.option-btn, 
+.calculate-button, 
+.action-buttons button, 
+.load-calc-btn, 
+.secondary-button {
+  /* Reset to use our palette styles */
+  font-family: 'Roboto', Arial, sans-serif;
+  font-weight: 500;
+  transition: all var(--transition-speed) ease;
+  border-radius: var(--border-radius);
+}
+
+/* Map specific button types to our palette classes */
+button, 
+.option-btn, 
+.calculate-button {
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+  color: var(--white);
+  box-shadow: 0 4px 10px rgba(46, 125, 50, 0.3);
+}
+
+button:hover, 
+.option-btn:hover, 
+.calculate-button:hover {
+  background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-color) 100%);
+  box-shadow: 0 6px 12px rgba(46, 125, 50, 0.4);
+  transform: translateY(-2px);
+}
+
+button:active, 
+.option-btn:active, 
+.calculate-button:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 5px rgba(46, 125, 50, 0.3);
+}
+
+/* Secondary buttons */
+.secondary-button {
+  background-color: var(--white);
+  color: var(--primary-color);
+  border: 2px solid var(--primary-color);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.secondary-button:hover {
+  background-color: var(--primary-bg);
+  color: var(--primary-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(46, 125, 50, 0.2);
+}
+
+/* CTA buttons */
+.cta-button {
+  background: linear-gradient(135deg, var(--secondary-color) 0%, var(--secondary-dark) 100%);
+  color: var(--white);
+  box-shadow: 0 4px 10px rgba(25, 118, 210, 0.3);
+}
+
+.cta-button:hover {
+  background: linear-gradient(135deg, var(--secondary-light) 0%, var(--secondary-color) 100%);
+  box-shadow: 0 6px 15px rgba(25, 118, 210, 0.4);
+}
+
+/* Action buttons in specific contexts */
+.action-buttons button {
+  background-color: var(--primary-color);
+  color: var(--white);
+}
+
+.action-buttons button:hover {
+  background-color: var(--primary-light);
+}
+
+/* Load calculator button */
+.load-calc-btn {
+  background-color: var(--primary-color);
+  color: var(--white);
+}
+
+.load-calc-btn:hover {
+  background-color: var(--primary-light);
+}
+
 /**
  * ###########################################################################################################
  * ##                                   Credits                                                             ##
@@ -703,7 +791,7 @@ select:focus {
 
 /* Enhanced Footer Styles */
 .page-footer {
-  background-color: var(--primary-dark);
+  background-color: var(--gray-800);
   color: var(--white);
   padding: 30px 20px;
   margin-top: 50px;
@@ -732,7 +820,7 @@ select:focus {
 }
 
 .footer-link {
-  color: var(--white);
+  color: var(--gray-300);
   text-decoration: none;
   padding: 5px 15px;
   margin: 5px 10px;

@@ -6,16 +6,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Flaha - Agricultural Solutions</title>
     
+    <!-- SEO improvements -->
+    <meta name="description" content="Flaha provides innovative agricultural solutions and calculators for modern farming, resource management, and crop yield optimization.">
+    <meta name="keywords" content="agriculture, farming, precision agriculture, crop management, irrigation, evapotranspiration">
+    
     <!-- Stylesheets and other head content -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Use relative paths for local development -->
     <link rel="stylesheet" href="css/main.css">
     <link rel="icon" href="img/Flaha_logo.svg" type="image/svg+xml">
     
-    <meta name="description" content="Flaha provides innovative agricultural solutions and calculators for modern farming">
+    <!-- Open Graph tags for social sharing -->
+    <meta property="og:title" content="Flaha - Agricultural Solutions">
+    <meta property="og:description" content="Innovative tools for modern farming and precision agriculture">
+    <meta property="og:image" content="https://flaha.org/img/og-image.jpg">
+    <meta property="og:url" content="https://flaha.org">
 </head>
 
 <body>
@@ -58,8 +65,11 @@
         <div class="hero-section">
             <div class="hero-content">
                 <h2>Agricultural Solutions for Modern Farming</h2>
-                <p>Flaha provides innovative tools and calculators to optimize agricultural operations, improve resource management, and increase crop yields.</p>
-                <a href="/pa/" class="cta-button">Explore Our Tools <i class="fas fa-arrow-right"></i></a>
+                <p>Flaha provides innovative tools and calculators to optimize agricultural operations, improve resource management, and increase crop yields through data-driven insights.</p>
+                <div class="cta-buttons">
+                    <a href="/pa/" class="cta-button primary">Explore Our Tools <i class="fas fa-arrow-right"></i></a>
+                    <a href="https://docs.flaha.org" class="cta-button secondary">Read Documentation <i class="fas fa-book"></i></a>
+                </div>
             </div>
             <div class="hero-image">
                 <img src="/img/agriculture-illustration.svg" alt="Agriculture Illustration">
@@ -69,35 +79,56 @@
         <div class="blocks" id="intro">
             <h2>Welcome to Flaha</h2>
             <p>Flaha develops advanced agricultural solutions to help farmers, researchers, and agricultural professionals
-                optimize their operations and make data-driven decisions.</p>
+                optimize their operations and make data-driven decisions for sustainable farming practices.</p>
             
-            <div class="features-grid">
-                <div class="feature-card">
-                    <div class="feature-icon"><i class="fas fa-leaf"></i></div>
-                    <h3>Precision Agriculture</h3>
-                    <p>Advanced tools for precision farming and resource optimization.</p>
-                    <a href="/pa/" class="feature-link">Learn More <i class="fas fa-chevron-right"></i></a>
+            <div class="features-section">
+                <h3>Our Featured Tools</h3>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon"><i class="fas fa-tint"></i></div>
+                        <h3>EVAPOTRAN Calculator</h3>
+                        <p>Calculate reference evapotranspiration (ET₀) using the FAO Penman-Monteith equation for optimal irrigation planning.</p>
+                        <a href="/pa/evapotran/" class="feature-link">Open Calculator <i class="fas fa-chevron-right"></i></a>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-icon"><i class="fas fa-chart-line"></i></div>
+                        <h3>Data Visualization</h3>
+                        <p>Visualize agricultural data to identify patterns and make better decisions for your farm operations.</p>
+                        <a href="/pa/evapotran/epw-heatmap.html" class="feature-link">View Visualizations <i class="fas fa-chevron-right"></i></a>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-icon"><i class="fas fa-cloud-sun"></i></div>
+                        <h3>Weather Integration</h3>
+                        <p>Connect to weather APIs to get real-time data for your agricultural calculations and planning.</p>
+                        <a href="/pa/evapotran/live-weather.html" class="feature-link">Try Weather Tools <i class="fas fa-chevron-right"></i></a>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-icon"><i class="fas fa-mountain"></i></div>
+                        <h3>Soil Water Balance</h3>
+                        <p>Track soil moisture content and calculate irrigation requirements based on crop water needs.</p>
+                        <a href="/pa/evapotran/soil-water.html" class="feature-link">Open Tool <i class="fas fa-chevron-right"></i></a>
+                    </div>
                 </div>
-                
-                <div class="feature-card">
-                    <div class="feature-icon"><i class="fas fa-calculator"></i></div>
-                    <h3>Agricultural Calculators</h3>
-                    <p>Specialized calculators for various agricultural applications.</p>
-                    <a href="/pa/" class="feature-link">View Calculators <i class="fas fa-chevron-right"></i></a>
-                </div>
-                
-                <div class="feature-card">
-                    <div class="feature-icon"><i class="fas fa-chart-line"></i></div>
-                    <h3>Data Visualization</h3>
-                    <p>Visualize agricultural data to identify patterns and make better decisions.</p>
-                    <a href="/pa/evapotran/" class="feature-link">View Visualizations <i class="fas fa-chevron-right"></i></a>
-                </div>
-                
-                <div class="feature-card">
-                    <div class="feature-icon"><i class="fas fa-cloud-sun"></i></div>
-                    <h3>Weather Integration</h3>
-                    <p>Connect to weather APIs to get real-time data for your calculations.</p>
-                    <a href="/pa/evapotran/" class="feature-link">Try Weather Tools <i class="fas fa-chevron-right"></i></a>
+            </div>
+            
+            <div class="testimonials-section">
+                <h3>What Users Say</h3>
+                <div class="testimonials-grid">
+                    <div class="testimonial-card">
+                        <div class="testimonial-text">
+                            "Flaha's EVAPOTRAN calculator has revolutionized our irrigation planning, saving us both water and money."
+                        </div>
+                        <div class="testimonial-author">- Agricultural Researcher, Qatar</div>
+                    </div>
+                    <div class="testimonial-card">
+                        <div class="testimonial-text">
+                            "The weather visualization tools help me make better decisions for my farm operations."
+                        </div>
+                        <div class="testimonial-author">- Farm Manager, UAE</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -117,16 +148,12 @@
             <div class="footer-social">
                 <a href="https://twitter.com/Flaha_Ag" class="social-link" target="_blank"><i class="fab fa-twitter"></i></a>
                 <a href="https://github.com/rafatahmed/FlahaCalc" class="social-link" target="_blank"><i class="fab fa-github"></i></a>
-                <a href="https://www.linkedin.com/company/flaha" class="social-link" target="_blank"><i class="fab fa-linkedin"></i></a>
             </div>
-            <div class="footer-credits">
-                <p>&copy; 2023 Flaha. All rights reserved.</p>
-            </div>
+            <p class="footer-copyright">© 2023 Flaha. All rights reserved.</p>
         </div>
     </div>
 
-    <!-- Use relative paths for local development -->
-    <script src="js/path-helper.js"></script>
+    <!-- Scripts -->
     <script src="js/main.js"></script>
 </body>
 

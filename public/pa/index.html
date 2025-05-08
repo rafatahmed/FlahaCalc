@@ -6,95 +6,198 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Precision Agriculture - Flaha</title>
 
+    <!-- SEO improvements -->
+    <meta name="description"
+        content="Flaha's Precision Agriculture division offers advanced tools for irrigation management, weather analysis, and crop optimization.">
+    <meta name="keywords"
+        content="precision agriculture, evapotranspiration, irrigation, soil water balance, weather data, climate zones">
+
     <!-- Stylesheets and other head content -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Use relative paths for local development -->
     <link rel="stylesheet" href="../css/main.css">
     <link rel="stylesheet" href="css/pa-styles.css">
     <link rel="icon" href="../img/Flaha_logo.svg" type="image/svg+xml">
+
+    <!-- Open Graph tags for social sharing -->
+    <meta property="og:title" content="Precision Agriculture - Flaha">
+    <meta property="og:description" content="Advanced tools for modern precision agriculture">
+    <meta property="og:image" content="https://flaha.org/img/og-image-pa.jpg">
+    <meta property="og:url" content="https://flaha.org/pa/">
 </head>
 
 <body>
-    <!-- Header section -->
-    <header>
-        <div class="logo">
-            <img src="../img/Flaha_logo.svg" alt="Flaha Logo">
-            <h1>Flaha</h1>
-        </div>
-        <nav>
-            <ul>
-                <li><a href="../index.html">Home</a></li>
-                <li><a href="index.html" class="active">Precision Agriculture</a></li>
-                <li><a href="../about.html">About</a></li>
-                <li><a href="../contact.html">Contact</a></li>
-            </ul>
-        </nav>
-    </header>
-
-    <!-- Main content -->
-    <main>
-        <div class="features-grid">
-            <div class="feature-card tool" data-category="water">
-                <div class="feature-icon"><i class="fas fa-tint"></i></div>
-                <h3>EVAPOTRAN Calculator</h3>
-                <p>Calculate reference evapotranspiration (ET₀) using the FAO Penman-Monteith equation.</p>
-                <a href="evapotran/index.html" class="feature-link">Open Calculator <i class="fas fa-chevron-right"></i></a>
+    <!-- Header section with proper structure -->
+    <div class="header">
+        <div class="header-overlay"></div>
+        <div class="header-top">
+            <div class="header-brand">
+                <img src="../img/Flaha_logo.svg" alt="Flaha Logo" class="header-logo">
+                <div class="header-title">
+                    <h1>Flaha</h1>
+                    <span>Precision Agriculture</span>
+                </div>
             </div>
-
-            <div class="feature-card tool" data-category="soil">
-                <div class="feature-icon"><i class="fas fa-mountain"></i></div>
-                <h3>Soil Water Balance</h3>
-                <p>Track soil moisture content and calculate irrigation requirements based on crop water needs.</p>
-                <a href="evapotran/soil-water.html" class="feature-link">Open Tool <i class="fas fa-chevron-right"></i></a>
-            </div>
-
-            <div class="feature-card tool" data-category="climate">
-                <div class="feature-icon"><i class="fas fa-cloud-sun"></i></div>
-                <h3>Weather Data Visualization</h3>
-                <p>Visualize climate data and analyze weather patterns for agricultural planning.</p>
-                <a href="evapotran/epw-heatmap.html" class="feature-link">View Visualizations <i
-                        class="fas fa-chevron-right"></i></a>
-            </div>
-
-            <div class="feature-card tool" data-category="water">
-                <div class="feature-icon"><i class="fas fa-seedling"></i></div>
-                <h3>Crop Coefficient Calculator</h3>
-                <p>Calculate crop-specific water requirements using crop coefficients (Kc).</p>
-                <a href="evapotran/crop-coefficient.html" class="feature-link">Open Calculator <i
-                        class="fas fa-chevron-right"></i></a>
-            </div>
-
-            <div class="feature-card tool" data-category="soil">
-                <div class="feature-icon"><i class="fas fa-flask"></i></div>
-                <h3>Soil Properties Database</h3>
-                <p>Access a database of soil hydraulic properties for different soil types.</p>
-                <a href="evapotran/soil-properties.html" class="feature-link">Open Database <i
-                        class="fas fa-chevron-right"></i></a>
-            </div>
-
-            <div class="feature-card tool" data-category="climate">
-                <div class="feature-icon"><i class="fas fa-map-marked-alt"></i></div>
-                <h3>Climate Zone Mapper</h3>
-                <p>Identify agricultural climate zones and growing seasons for your location.</p>
-                <a href="evapotran/climate-zones.html" class="feature-link">Open Mapper <i
-                        class="fas fa-chevron-right"></i></a>
+            <div class="header-actions">
+                <a href="https://docs.flaha.org" class="header-action-btn" target="_blank">
+                    <i class="fas fa-book"></i> Documentation
+                </a>
             </div>
         </div>
-    </main>
+        <div class="nav-bar">
+            <a href="../index.html" class="nav-link">
+                <i class="fas fa-home"></i> Home
+            </a>
+            <a href="index.html" class="nav-link active">
+                <i class="fas fa-leaf"></i> Precision Agriculture
+            </a>
+            <a href="../about.html" class="nav-link">
+                <i class="fas fa-info-circle"></i> About
+            </a>
+            <a href="../contact.html" class="nav-link">
+                <i class="fas fa-envelope"></i> Contact
+            </a>
+        </div>
+    </div>
 
-    <!-- Footer -->
-    <footer>
-        <p>&copy; 2023 Flaha. All rights reserved.</p>
-    </footer>
-    
-    <!-- Use relative paths for local development -->
-    <script src="../js/path-helper.js"></script>
+    <!-- Main container with proper width -->
+    <div class="container">
+        <!-- Hero section -->
+        <section class="pa-hero">
+            <div class="hero-content">
+                <h2>Precision Agriculture Solutions</h2>
+                <p>Advanced tools and calculators for optimizing agricultural operations through data-driven insights
+                    and scientific methodologies.</p>
+                <a href="evapotran/index.html" class="cta-button">Explore EVAPOTRAN <i
+                        class="fas fa-arrow-right"></i></a>
+            </div>
+            <div class="hero-image">
+                <img src="img/precision-agriculture.svg" alt="Precision Agriculture Illustration">
+            </div>
+        </section>
+
+        <!-- Tool categories -->
+        <section class="tool-categories">
+            <h3>Browse Tools by Category</h3>
+            <div class="category-filters">
+                <button class="category-filter active" data-category="all">All Tools</button>
+                <button class="category-filter" data-category="water">Water Management</button>
+                <button class="category-filter" data-category="soil">Soil Analysis</button>
+                <button class="category-filter" data-category="climate">Climate Data</button>
+            </div>
+        </section>
+
+        <!-- Main content -->
+        <main>
+            <div class="features-grid">
+                <div class="feature-card tool" data-category="water">
+                    <div class="feature-icon"><i class="fas fa-tint"></i></div>
+                    <h3>EVAPOTRAN</h3>
+                    <p>Calculate reference evapotranspiration (ET₀) using the FAO Penman-Monteith equation for optimal
+                        irrigation planning.</p>
+                    <a href="evapotran/index.html" class="feature-link">Open Calculator <i
+                            class="fas fa-chevron-right"></i></a>
+                </div>
+
+                <div class="feature-card tool" data-category="soil">
+                    <div class="feature-icon"><i class="fas fa-mountain"></i></div>
+                    <h3>Soil Water Balance</h3>
+                    <p>Track soil moisture content and calculate irrigation requirements based on crop water needs and
+                        soil characteristics.</p>
+                    <div class="coming-soon-badge">Coming Soon</div>
+                    <a href="#" class="feature-link disabled">Open Tool <i class="fas fa-chevron-right"></i></a>
+                </div>
+
+                <div class="feature-card tool" data-category="climate">
+                    <div class="feature-icon"><i class="fas fa-cloud-sun"></i></div>
+                    <h3>climate Data Visu</h3>
+                    <p>Visualize climate data and analyze weather patterns for agricultural planning and
+                        decision-making.</p>
+                    <a href="evapotran/epw-heatmap.html" class="feature-link">View Visualizations <i
+                            class="fas fa-chevron-right"></i></a>
+                </div>
+
+                <div class="feature-card tool" data-category="water">
+                    <div class="feature-icon"><i class="fas fa-cloud-rain"></i></div>
+                    <h3>Live Weather Integ</h3>
+                    <p>Access real-time weather data for your location to make immediate agricultural decisions.</p>
+                    <a href="evapotran/live-weather.html" class="feature-link">Check Weather <i
+                            class="fas fa-chevron-right"></i></a>
+                </div>
+
+                <div class="feature-card tool" data-category="climate">
+                    <div class="feature-icon"><i class="fas fa-map-marked-alt"></i></div>
+                    <h3>Climate Zone Mapper</h3>
+                    <p>Identify agricultural climate zones and growing seasons for your location to optimize crop
+                        selection.</p>
+                    <div class="coming-soon-badge">Coming Soon</div>
+                    <a href="#" class="feature-link disabled">Open Mapper <i class="fas fa-chevron-right"></i></a>
+                </div>
+
+                <div class="feature-card tool" data-category="soil">
+                    <div class="feature-icon"><i class="fas fa-seedling"></i></div>
+                    <h3>Crop Water Requirements</h3>
+                    <p>Calculate specific crop water needs based on growth stage, climate conditions, and soil type.</p>
+                    <div class="coming-soon-badge">Coming Soon</div>
+                    <a href="#" class="feature-link disabled">Calculate Needs <i class="fas fa-chevron-right"></i></a>
+                </div>
+            </div>
+        </main>
+
+        <!-- Latest updates section -->
+        <section class="latest-updates">
+            <h3>Latest Updates</h3>
+            <div class="updates-list">
+                <div class="update-item">
+                    <span class="update-date">June 15, 2023</span>
+                    <h4>Live Weather Integration Added</h4>
+                    <p>We've added 5-day weather forecast integration to help with short-term agricultural planning.</p>
+                </div>
+                <div class="update-item">
+                    <span class="update-date">May 22, 2023</span>
+                    <h4>EVAPOTRAN</h4>
+                    <p>Calculate reference evapotranspiration (ET₀) using the FAO Penman-Monteith equation.</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Footer with proper structure -->
+    <div class="page-footer">
+        <div class="footer-content">
+            <div class="footer-brand">
+                <img src="../img/Flaha_logo.svg" alt="Flaha Logo" class="footer-logo">
+                <h3>Flaha Precision Agriculture</h3>
+            </div>
+            <div class="footer-links">
+                <div class="footer-links-column">
+                    <h4>Tools</h4>
+                    <a href="evapotran/index.html" class="footer-link">EVAPOTRAN Calculator</a>
+                    <a href="evapotran/soil-water.html" class="footer-link">Soil Water Balance</a>
+                    <a href="evapotran/epw-heatmap.html" class="footer-link">Weather Visualization</a>
+                </div>
+                <div class="footer-links-column">
+                    <h4>Resources</h4>
+                    <a href="https://docs.flaha.org" class="footer-link">Documentation</a>
+                    <a href="../about.html" class="footer-link">About Us</a>
+                    <a href="../contact.html" class="footer-link">Contact</a>
+                </div>
+            </div>
+            <div class="footer-social">
+                <a href="https://twitter.com/Flaha_Ag" class="social-link" target="_blank"><i
+                        class="fab fa-twitter"></i></a>
+                <a href="https://github.com/rafatahmed/FlahaCalc" class="social-link" target="_blank"><i
+                        class="fab fa-github"></i></a>
+            </div>
+            <p class="footer-copyright">&copy; 2023 Flaha. All rights reserved.</p>
+        </div>
+    </div>
+
+    <!-- Scripts -->
     <script src="../js/main.js"></script>
     <script src="js/pa-scripts.js"></script>
 </body>
 
 </html>
-

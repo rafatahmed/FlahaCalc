@@ -47,6 +47,27 @@ app.get('/api/weather', async (req, res) => {
   }
 });
 
+// Forecast API endpoint
+app.get('/api/forecast', async (req, res) => {
+  try {
+    const { lat, lon } = req.query;
+    
+    if (!lat || !lon) {
+      return res.status(400).json({ error: 'Missing required parameters (lat, lon)' });
+    }
+
+    const url = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&units=metric&appid=${process.env.WEATHER_API_KEY}`;
+    const response = await axios.get(url);
+    res.json(response.data);
+  } catch (error) {
+    console.error('Forecast API error:', error.message);
+    res.status(error.response?.status || 500).json({
+      error: error.message,
+      details: error.response?.data || 'Unknown error'
+    });
+  }
+});
+
 // Start server
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
