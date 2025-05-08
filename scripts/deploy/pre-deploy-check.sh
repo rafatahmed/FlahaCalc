@@ -5,28 +5,42 @@ set -e
 
 echo "Running pre-deployment checks..."
 
-# Check for hardcoded localhost URLs (excluding the environment-aware code)
-echo "Checking for hardcoded localhost URLs..."
-grep -r "localhost:3000" --include="*.js" --include="*.html" --exclude="*live-weather.js" ./EVAPOTRAN || echo "No hardcoded localhost URLs found."
-
-# Check if server.js exists
-echo "Checking for server.js..."
-if [ ! -f "./EVAPOTRAN/server/server.js" ]; then
-  echo "ERROR: server.js not found in EVAPOTRAN/server directory."
+# Check if required files exist
+if [ ! -f "EVAPOTRAN/src/index.js" ]; then
+  echo "Error: EVAPOTRAN/src/index.js not found"
   exit 1
 fi
 
-# Check if package.json exists in server directory
-echo "Checking for server package.json..."
-if [ ! -f "./EVAPOTRAN/server/package.json" ]; then
-  echo "ERROR: package.json not found in EVAPOTRAN/server directory."
+if [ ! -f "EVAPOTRAN/webpack.config.js" ]; then
+  echo "Error: EVAPOTRAN/webpack.config.js not found"
   exit 1
 fi
 
-# Check if .env file exists in server directory (for local testing)
-echo "Checking for server .env file..."
-if [ ! -f "./EVAPOTRAN/server/.env" ]; then
-  echo "WARNING: .env file not found in EVAPOTRAN/server directory. Make sure to set up environment variables on the server."
+# Check if required dependencies are installed
+if ! npm list webpack > /dev/null 2>&1; then
+  echo "Error: webpack not installed"
+  exit 1
 fi
 
-echo "All pre-deployment checks passed!"
+if ! npm list webpack-cli > /dev/null 2>&1; then
+  echo "Error: webpack-cli not installed"
+  exit 1
+fi
+
+if ! npm list css-minimizer-webpack-plugin > /dev/null 2>&1; then
+  echo "Error: css-minimizer-webpack-plugin not installed"
+  exit 1
+fi
+
+# Check if build script works
+echo "Testing build process..."
+npm run build
+
+# Check if build output exists
+if [ ! -d "EVAPOTRAN/dist" ]; then
+  echo "Error: Build failed, EVAPOTRAN/dist directory not found"
+  exit 1
+fi
+
+echo "Pre-deployment checks passed!"
+exit 0

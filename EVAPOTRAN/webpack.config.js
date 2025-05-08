@@ -1,65 +1,69 @@
 const path = require('path');
-const TerserPlugin = require('terser-webpack-plugin');
-const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
+const TerserPlugin = require('terser-webpack-plugin');
+
+const isProduction = process.env.NODE_ENV === 'production';
 
 module.exports = {
-  entry: './EVAPOTRAN/js/script.js',
+  mode: isProduction ? 'production' : 'development',
+  entry: './EVAPOTRAN/src/index.js',
   output: {
-    filename: 'bundle.js',
-    path: path.resolve(__dirname, 'EVAPOTRAN/dist'),
+    path: path.resolve(__dirname, 'dist'),
+    filename: 'bundle.[contenthash].js',
+    clean: true,
   },
-  mode: 'production',
   module: {
     rules: [
       {
-        test: /\.js$/,
-        exclude: /node_modules/,
-        use: {
-          loader: 'babel-loader',
-          options: {
-            presets: ['@babel/preset-env']
-          }
+        test: /\.css$/,
+        use: [
+          isProduction ? MiniCssExtractPlugin.loader : 'style-loader',
+          'css-loader',
+        ],
+      },
+      {
+        test: /\.(png|svg|jpg|jpeg|gif)$/i,
+        type: 'asset/resource',
+        generator: {
+          filename: 'images/[hash][ext][query]'
         }
       },
       {
-        test: /\.css$/,
-        use: [MiniCssExtractPlugin.loader, 'css-loader']
-      }
-    ]
+        test: /\.(woff|woff2|eot|ttf|otf)$/i,
+        type: 'asset/resource',
+        generator: {
+          filename: 'fonts/[hash][ext][query]'
+        }
+      },
+    ],
   },
   plugins: [
-    new MiniCssExtractPlugin({
-      filename: 'styles.min.css',
+    new HtmlWebpackPlugin({
+      template: './EVAPOTRAN/src/index.html',
+      filename: 'index.html',
     }),
+    ...(isProduction ? [new MiniCssExtractPlugin({
+      filename: 'styles.[contenthash].css',
+    })] : []),
   ],
   optimization: {
-    minimize: true,
     minimizer: [
-      new TerserPlugin({
-        terserOptions: {
-          format: {
-            comments: false,
-          },
-          compress: {
-            drop_console: true,
-          },
-        },
-        extractComments: false,
-      }),
       new CssMinimizerPlugin(),
+      new TerserPlugin(),
     ],
-    splitChunks: {
-      chunks: 'all',
-      cacheGroups: {
-        vendor: {
-          test: /[\\/]node_modules[\\/]/,
-          name: 'vendors',
-          chunks: 'all'
-        }
-      }
-    }
-  }
+    minimize: isProduction,
+  },
+  devtool: isProduction ? false : 'source-map',
+  devServer: {
+    static: {
+      directory: path.join(__dirname, 'dist'),
+    },
+    compress: true,
+    port: 9000,
+    hot: true,
+  },
 };
 
 

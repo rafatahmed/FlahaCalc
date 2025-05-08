@@ -30,10 +30,12 @@ jobs:
       - name: Install dependencies
         run: |
           npm install
+          npm install css-minimizer-webpack-plugin terser-webpack-plugin mini-css-extract-plugin html-webpack-plugin webpack-merge css-loader style-loader
           # Check if EVAPOTRAN/server directory exists before trying to cd into it
           if [ -d "EVAPOTRAN/server" ]; then
             cd EVAPOTRAN/server
             npm install
+            cd ../..
           fi
           
       - name: Run linting and tests
@@ -58,6 +60,7 @@ jobs:
       - name: Install dependencies
         run: |
           npm install
+          npm install css-minimizer-webpack-plugin terser-webpack-plugin mini-css-extract-plugin html-webpack-plugin webpack-merge css-loader style-loader
           # Check if EVAPOTRAN/server directory exists before trying to cd into it
           if [ -d "EVAPOTRAN/server" ]; then
             cd EVAPOTRAN/server
@@ -91,6 +94,7 @@ jobs:
             
             # Install dependencies
             npm install
+            npm install css-minimizer-webpack-plugin terser-webpack-plugin mini-css-extract-plugin html-webpack-plugin webpack-merge css-loader style-loader
             
             # Check if EVAPOTRAN/server directory exists before trying to cd into it
             if [ -d "EVAPOTRAN/server" ]; then

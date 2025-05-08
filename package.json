@@ -26,7 +26,9 @@
     "dev": "npm run setup:dev && npm run start",
     "setup:dev": "bash scripts/dev/setup-local-links.sh",
     "start": "bash scripts/dev/start-local-server.sh",
+    "start:express": "bash scripts/dev/start-express-server.sh",
     "build:local": "bash scripts/dev/build-local.sh",
+    "dev:express": "npm run start:express",
     "deploy:manual": "git push origin main && echo 'Deployment triggered. Check GitHub Actions.'",
     "server:status": "ssh root@207.154.202.6 'cd /var/www/flahacalc && pm2 status flahacalc-server'",
     "server:logs": "ssh root@207.154.202.6 'cd /var/www/flahacalc && pm2 logs flahacalc-server'",
@@ -36,7 +38,15 @@
   "devDependencies": {
     "webpack": "^5.75.0",
     "webpack-cli": "^5.0.1",
-    "javascript-obfuscator": "^4.0.0"
+    "javascript-obfuscator": "^4.0.0",
+    "css-minimizer-webpack-plugin": "^4.2.2",
+    "terser-webpack-plugin": "^5.3.6",
+    "css-loader": "^6.7.3",
+    "style-loader": "^3.3.1",
+    "mini-css-extract-plugin": "^2.7.2",
+    "html-webpack-plugin": "^5.5.0",
+    "webpack-merge": "^5.8.0",
+    "express": "^4.18.2"
   },
   "keywords": [
     "evapotranspiration",
