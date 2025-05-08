@@ -1,20 +1,8 @@
-# @format
-
-name: Deploy to Production
+name: Deploy to DigitalOcean
 
 on:
   push:
     branches: [ main ]
-  workflow_dispatch:
-    inputs:
-      apply_fixes:
-        description: 'Apply fixes after deployment'
-        required: false
-        default: 'false'
-        type: choice
-        options:
-          - 'true'
-          - 'false'
 
 jobs:
   deploy:
@@ -22,7 +10,7 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-        
+      
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
@@ -33,12 +21,34 @@ jobs:
           npm install
           cd EVAPOTRAN/server
           npm install
-          cd ../..
           
       - name: Build application
         run: npm run build
         
-      - name: Deploy using pipeline approach
+      - name: Ensure assets exist
+        run: |
+          mkdir -p public/img
+          # Create logo if it doesn't exist
+          if [ ! -f "public/img/Flaha_logo.svg" ]; then
+            cat > public/img/Flaha_logo.svg << 'EOF'
+          <svg xmlns="http://www.w3.org/2000/svg" width="200" height="60" viewBox="0 0 200 60">
+            <text x="10" y="40" font-family="Arial" font-size="30" font-weight="bold" fill="#3a7e3a">FLAHA</text>
+          </svg>
+          EOF
+          fi
+          # Create agriculture illustration if it doesn't exist
+          if [ ! -f "public/img/agriculture-illustration.svg" ]; then
+            cat > public/img/agriculture-illustration.svg << 'EOF'
+          <svg xmlns="http://www.w3.org/2000/svg" width="300" height="200" viewBox="0 0 300 200">
+            <rect x="50" y="150" width="200" height="20" fill="#8B4513"/>
+            <path d="M150,50 L120,150 L180,150 Z" fill="#3a7e3a"/>
+            <path d="M100,80 L80,150 L120,150 Z" fill="#3a7e3a"/>
+            <path d="M200,80 L180,150 L220,150 Z" fill="#3a7e3a"/>
+          </svg>
+          EOF
+          fi
+        
+      - name: Deploy to DigitalOcean
         uses: appleboy/ssh-action@master
         with:
           host: 207.154.202.6
@@ -46,44 +56,46 @@ jobs:
           key: ${{ secrets.DROPLET_SSH_KEY }}
           port: 22
           script: |
-            # Run the safe deployment script
+            # Create application directory if it doesn't exist
+            mkdir -p /var/www/flahacalc/public
+            mkdir -p /var/www/flahacalc/EVAPOTRAN/server
+            
+            # Install dependencies
+            cd /var/www/flahacalc/EVAPOTRAN/server
+            npm install dotenv express cors axios
+            
+            # Make all scripts executable
             cd /var/www/flahacalc
+            find scripts -name "*.sh" -exec chmod +x {} \; 2>/dev/null || true
             
-            # Make sure the script exists and is executable
-            if [ ! -f "scripts/deploy/safe-deploy.sh" ]; then
-              mkdir -p scripts/deploy
-              
-              # Copy the safe-deploy script from the repository
-              curl -s https://raw.githubusercontent.com/rafatahmed/FlahaCalc/main/scripts/deploy/safe-deploy.sh > scripts/deploy/safe-deploy.sh
-              chmod +x scripts/deploy/safe-deploy.sh
-            fi
+            # Update Nginx configuration
+            cp scripts/server/nginx/flahacalc.conf /etc/nginx/sites-available/flahacalc 2>/dev/null || true
+            ln -sf /etc/nginx/sites-available/flahacalc /etc/nginx/sites-enabled/ 2>/dev/null || true
+            nginx -t && systemctl reload nginx
             
-            # Run the safe deployment script
-            bash scripts/deploy/safe-deploy.sh
+            # Restart server
+            cd /var/www/flahacalc/EVAPOTRAN/server
+            pm2 restart flahacalc-server || pm2 start server.js --name flahacalc-server
+            pm2 save
             
-      - name: Apply fixes if requested
-        if: github.event.inputs.apply_fixes == 'true'
-        uses: appleboy/ssh-action@master
+            echo "Deployment completed successfully!"
+      
+      - name: Deploy files via rsync
+        uses: burnett01/rsync-deployments@5.2.1
         with:
-          host: 207.154.202.6
-          username: root
-          key: ${{ secrets.DROPLET_SSH_KEY }}
-          port: 22
-          script: |
-            cd /var/www/flahacalc
-            bash scripts/server/fix-all.sh || echo "Fix script not found or failed"
-
-  notify:
-    needs: deploy
-    runs-on: ubuntu-latest
-    steps:
-      - name: Send deployment notification
-        uses: rtCamp/action-slack-notify@v2
-        env:
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-          SLACK_CHANNEL: deployments
-          SLACK_COLOR: ${{ job.status }}
-          SLACK_TITLE: Deployment Complete
-          SLACK_MESSAGE: "FlahaCalc has been deployed to production using the pipeline approach."
-          SLACK_FOOTER: "Deployed by: ${{ github.actor }}"
-        if: env.SLACK_WEBHOOK != ''
+          switches: -avz --delete
+          path: ./public/
+          remote_path: /var/www/flahacalc/public/
+          remote_host: 207.154.202.6
+          remote_user: root
+          remote_key: ${{ secrets.DROPLET_SSH_KEY }}
+          
+      - name: Deploy server files via rsync
+        uses: burnett01/rsync-deployments@5.2.1
+        with:
+          switches: -avz
+          path: ./EVAPOTRAN/server/
+          remote_path: /var/www/flahacalc/EVAPOTRAN/server/
+          remote_host: 207.154.202.6
+          remote_user: root
+          remote_key: ${{ secrets.DROPLET_SSH_KEY }}

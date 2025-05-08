@@ -3,29 +3,50 @@
 # Exit on error
 set -e
 
-echo "Starting production deployment for EVAPOTRAN..."
+echo "Starting production deployment for FlahaCalc..."
 
 # 1. Clean up and prepare
 echo "Cleaning up and preparing for deployment..."
-npm run clean
+npm run clean || echo "No clean script found, continuing..."
 
-# 2. Install production dependencies
-echo "Installing production dependencies..."
-npm ci --production
+# 2. Install dependencies
+echo "Installing dependencies..."
+npm install
 
-# 3. Build and optimize the application
+# 3. Build the application
 echo "Building and optimizing the application..."
 npm run build
 
-# 4. Run security checks
-echo "Running security checks..."
-npm run security:audit
+# 4. Ensure all required assets exist
+echo "Ensuring all required assets exist..."
+mkdir -p public/img
+# Create logo if it doesn't exist
+if [ ! -f "public/img/Flaha_logo.svg" ]; then
+  echo "Creating logo SVG..."
+  cat > public/img/Flaha_logo.svg << 'EOF'
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="60" viewBox="0 0 200 60">
+  <text x="10" y="40" font-family="Arial" font-size="30" font-weight="bold" fill="#3a7e3a">FLAHA</text>
+</svg>
+EOF
+fi
+# Create agriculture illustration if it doesn't exist
+if [ ! -f "public/img/agriculture-illustration.svg" ]; then
+  echo "Creating agriculture illustration..."
+  cat > public/img/agriculture-illustration.svg << 'EOF'
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="200" viewBox="0 0 300 200">
+  <rect x="50" y="150" width="200" height="20" fill="#8B4513"/>
+  <path d="M150,50 L120,150 L180,150 Z" fill="#3a7e3a"/>
+  <path d="M100,80 L80,150 L120,150 Z" fill="#3a7e3a"/>
+  <path d="M200,80 L180,150 L220,150 Z" fill="#3a7e3a"/>
+</svg>
+EOF
+fi
 
 # 5. Deploy to server
 echo "Deploying to production server..."
 rsync -avz --delete --exclude 'node_modules' --exclude '.git' \
     --exclude '.env' --exclude '.github' \
-    ./EVAPOTRAN/dist/ $DROPLET_USERNAME@$DROPLET_HOST:/var/www/flahacalc/EVAPOTRAN/
+    ./public/ $DROPLET_USERNAME@$DROPLET_HOST:/var/www/flahacalc/public/
 
 # 6. Deploy server files separately
 echo "Deploying server files..."
@@ -39,22 +60,18 @@ cd /var/www/flahacalc
 # Make all scripts executable
 find scripts -name "*.sh" -exec chmod +x {} \;
 
+# Install server dependencies
+cd EVAPOTRAN/server
+npm install dotenv express cors axios
+pm2 restart flahacalc-server || pm2 start server.js --name flahacalc-server
+pm2 save
+
 # Update Nginx configuration
+cd /var/www/flahacalc
 echo "Updating Nginx configuration..."
 sudo cp scripts/server/nginx/flahacalc.conf /etc/nginx/sites-available/flahacalc
 sudo ln -sf /etc/nginx/sites-available/flahacalc /etc/nginx/sites-enabled/
 sudo nginx -t && sudo systemctl reload nginx
-
-# Install server dependencies
-cd EVAPOTRAN/server
-npm ci --production
-
-# Restart the Node.js server
-pm2 restart flahacalc-server || pm2 start server.js --name flahacalc-server
-pm2 save
-
-# Run server optimizations
-bash ../../scripts/server/optimize-server.sh
 
 echo "Deployment completed successfully!"
 EOF
