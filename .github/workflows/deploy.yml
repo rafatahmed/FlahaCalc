@@ -397,6 +397,7 @@ EOF_NGINX
             
             # Create fix-all.sh if it doesn't exist
             if [ ! -f "scripts/server/fix-all.sh" ]; then
+              mkdir -p scripts/server
               cat > scripts/server/fix-all.sh << 'EOF'
 #!/bin/bash
 
