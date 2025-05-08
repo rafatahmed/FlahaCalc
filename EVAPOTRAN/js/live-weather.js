@@ -28,21 +28,42 @@ let loadingIndicator;
 let forecastContainer;
 let processedWeatherData = null;
 
+// Add a fallback option for when the server is not available
+function showFallbackOptions() {
+	const fallbackEl = document.createElement("div");
+	fallbackEl.className = "fallback-options";
+	fallbackEl.innerHTML = `
+		<h3>Alternative Options</h3>
+		<p>Since the weather server is currently unavailable, you can:</p>
+		<ol>
+			<li>Enter weather data manually using the form below</li>
+			<li>Try again later when the server might be available</li>
+			<li>Check the <a href="server/TROUBLESHOOTING.md" target="_blank">troubleshooting guide</a> if you're running locally</li>
+		</ol>
+		<button id="show-manual-entry" class="btn btn-primary">Show Manual Entry Form</button>
+	`;
+	
+	document.querySelector(".weather-container").appendChild(fallbackEl);
+	
+	// Add event listener for the manual entry button
+	document.getElementById("show-manual-entry").addEventListener("click", function() {
+		// Show the manual entry form
+		document.getElementById("manual-entry").style.display = "block";
+		// Hide the fallback options
+		fallbackEl.style.display = "none";
+	});
+}
+
 // Initialize the application when the DOM is loaded
 document.addEventListener("DOMContentLoaded", async function () {
 	// Initialize DOM elements
-	locationInput = document.getElementById("locationInput");
-	fetchWeatherBtn = document.getElementById("fetchWeatherBtn");
-	weatherResults = document.getElementById("weatherResults");
-	useWeatherDataBtn = document.getElementById("useWeatherDataBtn");
-	loadingIndicator = document.getElementById("loadingIndicator");
-	forecastContainer = document.getElementById("forecastContainer");
-	
-	// Hide loading indicator initially
-	if (loadingIndicator) {
-		loadingIndicator.style.display = "none";
-	}
-	
+	locationInput = document.getElementById("location");
+	fetchWeatherBtn = document.getElementById("fetch-weather");
+	weatherResults = document.getElementById("weather-results");
+	useWeatherDataBtn = document.getElementById("use-weather-data");
+	loadingIndicator = document.getElementById("loading");
+	forecastContainer = document.getElementById("forecast-container");
+
 	// Test server connection
 	const serverAvailable = await testServerConnection();
 	if (!serverAvailable) {
@@ -50,11 +71,14 @@ document.addEventListener("DOMContentLoaded", async function () {
 		const warningEl = document.createElement("div");
 		warningEl.className = "server-warning";
 		warningEl.innerHTML = `
-            <p class="warning">⚠️ Weather server connection failed. Make sure the server is running at ${API_BASE_URL}.</p>
-            <p>If you're running locally, check the server setup instructions in the README file.</p>
-            <p>If you're using the production site, please contact the administrator.</p>
-        `;
+			<p class="warning">⚠️ Weather server connection failed. Make sure the server is running at ${API_BASE_URL}.</p>
+			<p>If you're running locally, check the server setup instructions in the README file.</p>
+			<p>If you're using the production site, please contact the administrator.</p>
+		`;
 		document.querySelector(".container").prepend(warningEl);
+		
+		// Show fallback options
+		showFallbackOptions();
 	}
 
 	// Add event listeners
@@ -69,23 +93,46 @@ document.addEventListener("DOMContentLoaded", async function () {
 	initGeolocation();
 });
 
-// Test server connection
+// Test server connection with better error handling
 async function testServerConnection() {
 	try {
+		console.log("Testing server connection to:", `${API_BASE_URL}/test`);
 		const response = await fetch(`${API_BASE_URL}/test`, {
 			method: "GET",
 			mode: "cors",
-			cache: "no-cache",
+			headers: {
+				"Content-Type": "application/json",
+			},
 		});
 
-		if (response.ok) {
-			const data = await response.json();
-			console.log("Server connection test successful:", data);
-			return true;
+		if (!response.ok) {
+			console.error(`Server connection test failed: ${response.status}`);
+			
+			// Add more detailed error information
+			let errorMessage = "Unknown error";
+			try {
+				const errorData = await response.json();
+				errorMessage = errorData.error || errorData.message || "Unknown error";
+			} catch (e) {
+				// If we can't parse JSON, use status text
+				errorMessage = response.statusText;
+			}
+			
+			console.error(`Error details: ${errorMessage}`);
+			
+			// Provide specific guidance based on error code
+			if (response.status === 502) {
+				console.warn("502 Bad Gateway error suggests the server proxy is not properly configured.");
+			} else if (response.status === 404) {
+				console.warn("404 Not Found error suggests the API endpoint doesn't exist on the server.");
+			}
+			
+			return false;
 		}
 
-		console.error("Server connection test failed:", response.status);
-		return false;
+		const data = await response.json();
+		console.log("Server connection test successful:", data);
+		return true;
 	} catch (error) {
 		console.error("Server connection test error:", error);
 		return false;
@@ -408,7 +455,7 @@ function useWeatherData() {
 	}
 }
 
-// Fetch weather data by coordinates
+// Fetch weather data by coordinates with improved error handling
 async function fetchWeatherByCoordinates(lat, lon) {
 	try {
 		// Show loading indicator
@@ -416,6 +463,8 @@ async function fetchWeatherByCoordinates(lat, lon) {
 			loadingIndicator.style.display = "block";
 		}
 
+		console.log(`Fetching weather data from: ${API_BASE_URL}/weather?lat=${lat}&lon=${lon}`);
+		
 		// Fetch data from our proxy server
 		const response = await fetch(
 			`${API_BASE_URL}/weather?lat=${lat}&lon=${lon}`,
@@ -429,10 +478,19 @@ async function fetchWeatherByCoordinates(lat, lon) {
 		);
 
 		if (!response.ok) {
-			throw new Error(`Weather API error: ${response.status}`);
+			let errorMessage = "Unknown error";
+			try {
+				const errorData = await response.json();
+				errorMessage = errorData.error || errorData.message || `Status code: ${response.status}`;
+			} catch (e) {
+				errorMessage = `Weather API error: ${response.status}`;
+			}
+			
+			throw new Error(errorMessage);
 		}
 
 		const data = await response.json();
+		console.log("Weather data received:", data);
 
 		// Process and display the weather data
 		processWeatherData(data);
