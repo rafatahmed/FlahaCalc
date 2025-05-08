@@ -455,7 +455,7 @@ function useWeatherData() {
 	}
 }
 
-// Fetch weather data by coordinates with improved error handling
+// Improved error handling for weather API
 async function fetchWeatherByCoordinates(lat, lon) {
 	try {
 		// Show loading indicator
@@ -474,6 +474,8 @@ async function fetchWeatherByCoordinates(lat, lon) {
 				headers: {
 					"Content-Type": "application/json",
 				},
+				// Add timeout to prevent long waiting
+				signal: AbortSignal.timeout(10000) // 10 second timeout
 			}
 		);
 
@@ -486,6 +488,30 @@ async function fetchWeatherByCoordinates(lat, lon) {
 				errorMessage = `Weather API error: ${response.status}`;
 			}
 			
+			// Show a more user-friendly error message
+			const weatherContainer = document.querySelector(".weather-container");
+			if (weatherContainer) {
+				const errorEl = document.createElement("div");
+				errorEl.className = "error-message";
+				errorEl.innerHTML = `
+					<p>⚠️ ${errorMessage}</p>
+					<p>Please try again later or enter data manually.</p>
+					<button id="show-manual-entry" class="btn btn-primary">Enter Data Manually</button>
+				`;
+				weatherContainer.appendChild(errorEl);
+				
+				// Add event listener for the manual entry button
+				document.getElementById("show-manual-entry").addEventListener("click", function() {
+					// Show the manual entry form
+					const manualEntry = document.getElementById("manual-entry");
+					if (manualEntry) {
+						manualEntry.style.display = "block";
+					}
+					// Hide the error message
+					errorEl.style.display = "none";
+				});
+			}
+			
 			throw new Error(errorMessage);
 		}
 
@@ -495,36 +521,26 @@ async function fetchWeatherByCoordinates(lat, lon) {
 		// Process and display the weather data
 		processWeatherData(data);
 		
-		// Fetch forecast data
-		fetchForecastByCoordinates(lat, lon);
-
-		// Show results and use data button
-		if (weatherResults) {
-			weatherResults.style.display = "block";
-		}
-		const outputSection = document.getElementById("output");
-		if (outputSection) {
-			outputSection.style.display = "block";
-		}
-		
-		// Add event listener to the "Use This Data" button
-		const useDataBtn = document.getElementById("useWeatherDataBtn");
-		if (useDataBtn) {
-			// Remove any existing event listeners
-			const newUseDataBtn = useDataBtn.cloneNode(true);
-			useDataBtn.parentNode.replaceChild(newUseDataBtn, useDataBtn);
-			
-			// Add the event listener to the new button
-			newUseDataBtn.addEventListener("click", useWeatherData);
-		}
-	} catch (error) {
-		console.error("Error fetching weather data:", error);
-		alert(`Failed to fetch weather data: ${error.message}`);
-	} finally {
 		// Hide loading indicator
 		if (loadingIndicator) {
 			loadingIndicator.style.display = "none";
 		}
+		
+		// Show results and use data button
+		if (weatherResults) {
+			weatherResults.style.display = "block";
+		}
+		
+		return data;
+	} catch (error) {
+		console.error("Error fetching weather data:", error);
+		
+		// Hide loading indicator
+		if (loadingIndicator) {
+			loadingIndicator.style.display = "none";
+		}
+		
+		throw error;
 	}
 }
 

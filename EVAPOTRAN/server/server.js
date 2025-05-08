@@ -3,13 +3,36 @@ const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
 const path = require('path');
-const NodeCache = require('node-cache');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Create a cache with 30-minute TTL
-const weatherCache = new NodeCache({ stdTTL: 1800 });
+// Create a simple in-memory cache if node-cache is not available
+let weatherCache;
+try {
+  const NodeCache = require('node-cache');
+  weatherCache = new NodeCache({ stdTTL: 1800 });
+  console.log("Using node-cache for caching");
+} catch (error) {
+  console.warn("node-cache not available, using simple in-memory cache");
+  // Simple in-memory cache implementation
+  weatherCache = {
+    data: {},
+    has: function(key) {
+      return this.data.hasOwnProperty(key) && 
+             (this.data[key].expiry > Date.now());
+    },
+    get: function(key) {
+      return this.data[key].value;
+    },
+    set: function(key, value) {
+      this.data[key] = {
+        value: value,
+        expiry: Date.now() + (1800 * 1000) // 30 minutes TTL
+      };
+    }
+  };
+}
 
 // Middleware
 app.use(cors());
