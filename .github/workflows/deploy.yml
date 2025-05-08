@@ -97,7 +97,7 @@ jobs:
             # Create fix-git-conflicts.sh if it doesn't exist
             if [ ! -f "scripts/server/fix-git-conflicts.sh" ]; then
               mkdir -p scripts/server
-              cat > scripts/server/fix-git-conflicts.sh << 'EOF'
+              cat > scripts/server/fix-git-conflicts.sh << 'EOFSCRIPT'
 #!/bin/bash
 
 # Exit on error
@@ -156,7 +156,7 @@ echo "Making scripts executable..."
 find scripts -name "*.sh" -exec chmod +x {} \;
 
 echo "Git conflicts resolved successfully!"
-EOF
+EOFSCRIPT
               chmod +x scripts/server/fix-git-conflicts.sh
             fi
             
