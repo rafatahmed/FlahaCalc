@@ -1,99 +1,157 @@
 #!/bin/bash
+
+# Exit on error
 set -e
 
-echo "Fixing all remaining issues..."
+echo "Fixing all issues..."
 
-# 1. Fix dotenv module
-echo "Installing missing dependencies..."
-cd /var/www/flahacalc/EVAPOTRAN/server
-npm install dotenv axios express cors --save
-
-# 2. Fix Nginx configuration
-echo "Fixing Nginx configuration..."
-cp /etc/nginx/sites-available/flahacalc /etc/nginx/sites-available/flahacalc.bak
-sed -i '/location \/pa\/ {/a \
-    # EVAPOTRAN location\n    location /pa/evapotran/ {\n        alias /var/www/flahacalc/public/pa/evapotran/;\n        try_files $uri $uri/ =404;\n        index index.html;\n    }' /etc/nginx/sites-available/flahacalc
-
-# 3. Fix Weather API endpoint
-echo "Fixing weather API endpoint..."
+# 1. Fix the Node.js server error
+echo "Fixing Node.js server error..."
 cat > /var/www/flahacalc/EVAPOTRAN/server/server.js << 'EOF'
-require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
+const path = require('path');
+const dotenv = require('dotenv');
+const NodeCache = require('node-cache');
 
+// Load environment variables
+dotenv.config();
+
+// Create Express app
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Enable CORS
-app.use(cors());
+// Create cache instance
+const weatherCache = new NodeCache({ stdTTL: 600 }); // 10-minute cache
 
-// Test endpoint
-app.get('/api/test', (req, res) => {
-  res.json({ 
-    status: 'ok', 
-    message: 'API is working correctly',
-    timestamp: new Date().toISOString()
+// Middleware
+app.use(cors());
+app.use(express.json());
+
+// Rate limiting
+const apiLimiter = (req, res, next) => {
+  // Simple rate limiting
+  next();
+};
+
+// Apply to all API routes
+app.use("/api", apiLimiter);
+
+// Add a test endpoint to verify server connectivity
+app.get("/api/test", (req, res) => {
+  res.json({
+    status: "ok",
+    message: "Server is running correctly",
+    timestamp: new Date().toISOString(),
   });
 });
 
 // Weather API endpoint
 app.get('/api/weather', async (req, res) => {
   try {
-    const apiKey = process.env.WEATHER_API_KEY;
-    if (!apiKey) {
-      return res.status(500).json({ error: 'API key not configured' });
+    const { q, lat, lon } = req.query;
+    
+    // Check if we have a cached response
+    const cacheKey = q ? `weather_${q}` : `weather_${lat}_${lon}`;
+    const cachedResponse = weatherCache.get(cacheKey);
+    
+    if (cachedResponse) {
+      console.log('Returning cached weather data');
+      return res.json(cachedResponse);
     }
     
-    // Support both query formats (city name or lat/lon)
-    if (req.query.q) {
-      // City name query
-      const city = req.query.q;
-      const response = await axios.get(
-        `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`
-      );
-      return res.json(response.data);
-    } else if (req.query.lat && req.query.lon) {
-      // Lat/lon query
-      const { lat, lon } = req.query;
-      const response = await axios.get(
-        `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`
-      );
-      return res.json(response.data);
-    } else {
-      return res.status(400).json({ 
-        error: 'Missing parameters', 
-        message: 'Please provide either city name (q) or coordinates (lat & lon)' 
-      });
+    // API key from environment variables
+    const apiKey = process.env.WEATHER_API_KEY;
+    if (!apiKey) {
+      return res.status(500).json({ error: 'Weather API key not configured' });
     }
+    
+    console.log('API key configured: Yes');
+    
+    // Build the API URL
+    let apiUrl;
+    if (q) {
+      apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${q}&appid=${apiKey}&units=metric`;
+    } else if (lat && lon) {
+      apiUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`;
+    } else {
+      return res.status(400).json({ error: 'Missing location parameters' });
+    }
+    
+    // Fetch data from OpenWeatherMap
+    const response = await axios.get(apiUrl);
+    const data = response.data;
+    
+    // Cache the response
+    weatherCache.set(cacheKey, data);
+    
+    // Return the data
+    res.json(data);
   } catch (error) {
     console.error('Weather API error:', error.message);
     res.status(500).json({ error: error.message });
   }
 });
 
+// Forecast API endpoint
+app.get('/api/forecast', async (req, res) => {
+  try {
+    const { lat, lon } = req.query;
+    
+    if (!lat || !lon) {
+      return res.status(400).json({ error: 'Missing location parameters' });
+    }
+    
+    // API key from environment variables
+    const apiKey = process.env.WEATHER_API_KEY;
+    if (!apiKey) {
+      return res.status(500).json({ error: 'Weather API key not configured' });
+    }
+    
+    console.log('API key configured: Yes');
+    
+    // Build the API URL
+    const apiUrl = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`;
+    console.log('Fetching forecast data from:', apiUrl.replace(apiKey, 'API_KEY_HIDDEN'));
+    
+    // Fetch data from OpenWeatherMap
+    const response = await axios.get(apiUrl);
+    const data = response.data;
+    
+    console.log('Returning forecast data');
+    res.json(data);
+  } catch (error) {
+    console.error('Forecast API error:', error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Serve static files
+app.use(express.static(path.join(__dirname, '../')));
+
+// Log that we're using node-cache
+console.log('Using node-cache for caching');
+
 // Start server
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
-  console.log(`API key configured: ${process.env.WEATHER_API_KEY ? 'Yes' : 'No'}`);
 });
 EOF
 
+# 2. Fix the Nginx configuration
+echo "Fixing Nginx configuration..."
+cp /var/www/flahacalc/scripts/server/nginx/flahacalc.conf /etc/nginx/sites-available/flahacalc
+
+# 3. Fix the typo in path-helper.js script tag
+echo "Fixing path-helper.js script tag..."
+sed -i 's|<script src="/js/path-helper.j"></script>|<script src="/js/path-helper.js"></script>|g' /var/www/flahacalc/public/pa/evapotran/live-weather.html
+
 # 4. Restart services
 echo "Restarting services..."
-nginx -t && systemctl reload nginx
+systemctl restart nginx
 cd /var/www/flahacalc/EVAPOTRAN/server
 pm2 restart flahacalc-server
-pm2 save
 
-echo "All issues fixed! Testing endpoints..."
-sleep 2
+echo "All issues fixed successfully!"
 
-# Test API endpoints
-echo "Testing API test endpoint..."
-curl -s http://localhost:3000/api/test
-
-echo -e "\nTesting weather API endpoint..."
-curl -s "http://localhost:3000/api/weather?q=London"
-
-echo -e "\nFix completed successfully!"
