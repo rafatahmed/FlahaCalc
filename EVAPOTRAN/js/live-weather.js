@@ -57,12 +57,21 @@ function showFallbackOptions() {
 // Initialize the application when the DOM is loaded
 document.addEventListener("DOMContentLoaded", async function () {
 	// Initialize DOM elements
-	locationInput = document.getElementById("location");
-	fetchWeatherBtn = document.getElementById("fetch-weather");
-	weatherResults = document.getElementById("weather-results");
-	useWeatherDataBtn = document.getElementById("use-weather-data");
-	loadingIndicator = document.getElementById("loading");
-	forecastContainer = document.getElementById("forecast-container");
+	locationInput = document.getElementById("locationInput");
+	fetchWeatherBtn = document.getElementById("fetchWeatherBtn");
+	weatherResults = document.getElementById("weatherResults");
+	useWeatherDataBtn = document.getElementById("useWeatherDataBtn");
+	loadingIndicator = document.getElementById("loadingIndicator");
+	forecastContainer = document.getElementById("forecastContainer");
+	
+	console.log("DOM elements initialized:", {
+		locationInput: !!locationInput,
+		fetchWeatherBtn: !!fetchWeatherBtn,
+		weatherResults: !!weatherResults,
+		useWeatherDataBtn: !!useWeatherDataBtn,
+		loadingIndicator: !!loadingIndicator,
+		forecastContainer: !!forecastContainer
+	});
 
 	// Test server connection
 	const serverAvailable = await testServerConnection();
@@ -85,10 +94,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 	if (fetchWeatherBtn) {
 		fetchWeatherBtn.addEventListener("click", fetchWeatherData);
 	}
-
-	// Load location history
-	loadLocationHistory();
-
+	
 	// Initialize geolocation
 	initGeolocation();
 });
@@ -185,6 +191,9 @@ function initGeolocation() {
 // Process weather data from API response
 function processWeatherData(data) {
 	console.log("processWeatherData called with:", data);
+	
+	// Hide loading indicator
+	toggleLoadingIndicator(false);
 	
 	if (!data || !data.main) {
 		console.error("Invalid weather data received:", data);
@@ -692,28 +701,12 @@ function cacheWeatherData(key, data) {
 // Fetch forecast data by coordinates
 async function fetchForecastByCoordinates(lat, lon) {
   try {
-    // Make sure forecastContainer exists
+    // Get the correct forecast container
+    forecastContainer = document.getElementById('forecastContainer');
+    
     if (!forecastContainer) {
-      console.log('Forecast container not found, creating it');
-      forecastContainer = document.createElement('div');
-      forecastContainer.id = 'forecastContainer';
-      forecastContainer.className = 'forecast-section';
-      forecastContainer.innerHTML = `
-        <h3>Weather Forecast</h3>
-        <div class="forecast-items"></div>
-      `;
-      
-      // Find a good place to insert it
-      const weatherResults = document.getElementById('weatherResults');
-      if (weatherResults && weatherResults.parentNode) {
-        weatherResults.parentNode.insertBefore(forecastContainer, weatherResults.nextSibling);
-      } else {
-        // If weatherResults doesn't exist, append to the main container
-        const container = document.querySelector('.container');
-        if (container) {
-          container.appendChild(forecastContainer);
-        }
-      }
+      console.error('Forecast container not found');
+      return;
     }
     
     console.log(`Fetching forecast data from: ${API_BASE_URL}/forecast?lat=${lat}&lon=${lon}`);
@@ -803,5 +796,12 @@ function displayForecast(data) {
     });
   } catch (error) {
     console.error('Error displaying forecast:', error);
+  }
+}
+
+// Helper function to show/hide loading indicator
+function toggleLoadingIndicator(show) {
+  if (loadingIndicator) {
+    loadingIndicator.style.display = show ? "block" : "none";
   }
 }

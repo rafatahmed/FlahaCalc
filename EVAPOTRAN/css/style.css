@@ -1667,6 +1667,12 @@ input:invalid, select:invalid {
   animation: spin 1s linear infinite;
 }
 
+.loading-spinner p {
+  margin-top: 10px;
+  color: #333;
+  font-weight: bold;
+}
+
 /* Server warning */
 .server-warning {
     background-color: #fff3cd;
