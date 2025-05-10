@@ -1,3 +1,15 @@
+#!/bin/bash
+
+# Exit on error
+set -e
+
+echo "Fixing server.js syntax error..."
+
+# Create a backup of the original file
+cp /var/www/flahacalc/EVAPOTRAN/server/server.js /var/www/flahacalc/EVAPOTRAN/server/server.js.bak.$(date +%Y%m%d%H%M%S)
+
+# Fix the duplicate cacheKey declaration
+cat > /var/www/flahacalc/EVAPOTRAN/server/server.js << 'EOF'
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -17,6 +29,9 @@ app.use(cors({
   credentials: true
 }));
 app.use(express.json());
+
+// IMPORTANT: The API routes need to match what the client is expecting
+// The client is making requests to /api/test and /api/weather
 
 // Test endpoint
 app.get('/api/test', (req, res) => {
@@ -127,3 +142,16 @@ app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
   console.log(`API key configured: ${process.env.WEATHER_API_KEY ? 'Yes' : 'No'}`);
 });
+EOF
+
+# Restart the server
+echo "Restarting the server..."
+cd /var/www/flahacalc/EVAPOTRAN/server
+pm2 restart flahacalc-server || pm2 start server.js --name flahacalc-server
+pm2 save
+
+echo "Server.js syntax error fixed successfully!"
+echo "Testing API endpoint..."
+sleep 2
+curl -s http://localhost:3000/api/test
+echo ""

@@ -26,7 +26,7 @@ EOF
 # Ensure server.js is loading dotenv
 if ! grep -q "require('dotenv').config()" /var/www/flahacalc/EVAPOTRAN/server/server.js; then
     echo "Adding dotenv configuration to server.js..."
-    sed -i '1s/^/const dotenv = require("dotenv");\nrequire("dotenv").config();\n\n/' /var/www/flahacalc/EVAPOTRAN/server/server.js
+    sed -i '1s/^/require("dotenv").config();\n\n/' /var/www/flahacalc/EVAPOTRAN/server/server.js
 fi
 
 # Install dotenv if not already installed
@@ -56,4 +56,5 @@ else
     echo "Response: $RESPONSE"
     echo "Please test the weather functionality manually."
 fi
+
 

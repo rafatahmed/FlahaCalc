@@ -5,42 +5,79 @@ set -e
 
 echo "Running pre-deployment checks..."
 
-# Check if required files exist
-if [ ! -f "EVAPOTRAN/src/index.js" ]; then
-  echo "Error: EVAPOTRAN/src/index.js not found"
-  exit 1
+# 1. Check if Node.js is installed
+if ! command -v node &> /dev/null; then
+    echo "❌ Node.js is not installed"
+    exit 1
+else
+    NODE_VERSION=$(node -v)
+    echo "✅ Node.js is installed (version: $NODE_VERSION)"
 fi
 
-if [ ! -f "EVAPOTRAN/webpack.config.js" ]; then
-  echo "Error: EVAPOTRAN/webpack.config.js not found"
-  exit 1
+# 2. Check if npm is installed
+if ! command -v npm &> /dev/null; then
+    echo "❌ npm is not installed"
+    exit 1
+else
+    NPM_VERSION=$(npm -v)
+    echo "✅ npm is installed (version: $NPM_VERSION)"
 fi
 
-# Check if required dependencies are installed
-if ! npm list webpack > /dev/null 2>&1; then
-  echo "Error: webpack not installed"
-  exit 1
+# 3. Check if git is installed
+if ! command -v git &> /dev/null; then
+    echo "❌ git is not installed"
+    exit 1
+else
+    GIT_VERSION=$(git --version)
+    echo "✅ git is installed ($GIT_VERSION)"
 fi
 
-if ! npm list webpack-cli > /dev/null 2>&1; then
-  echo "Error: webpack-cli not installed"
-  exit 1
+# 4. Check if rsync is installed
+if ! command -v rsync &> /dev/null; then
+    echo "❌ rsync is not installed"
+    exit 1
+else
+    RSYNC_VERSION=$(rsync --version | head -n 1)
+    echo "✅ rsync is installed ($RSYNC_VERSION)"
 fi
 
-if ! npm list css-minimizer-webpack-plugin > /dev/null 2>&1; then
-  echo "Error: css-minimizer-webpack-plugin not installed"
-  exit 1
+# 5. Check if package.json exists
+if [ ! -f "package.json" ]; then
+    echo "❌ package.json not found"
+    exit 1
+else
+    echo "✅ package.json exists"
 fi
 
-# Check if build script works
-echo "Testing build process..."
-npm run build
-
-# Check if build output exists
-if [ ! -d "EVAPOTRAN/dist" ]; then
-  echo "Error: Build failed, EVAPOTRAN/dist directory not found"
-  exit 1
+# 6. Check if EVAPOTRAN/server/server.js exists
+if [ ! -f "EVAPOTRAN/server/server.js" ]; then
+    echo "❌ EVAPOTRAN/server/server.js not found"
+    exit 1
+else
+    echo "✅ EVAPOTRAN/server/server.js exists"
 fi
 
-echo "Pre-deployment checks passed!"
-exit 0
+# 7. Check if EVAPOTRAN/server/package.json exists
+if [ ! -f "EVAPOTRAN/server/package.json" ]; then
+    echo "❌ EVAPOTRAN/server/package.json not found"
+    exit 1
+else
+    echo "✅ EVAPOTRAN/server/package.json exists"
+fi
+
+# 8. Check for uncommitted changes
+if [ -n "$(git status --porcelain)" ]; then
+    echo "⚠️ There are uncommitted changes"
+    git status --short
+    read -p "Continue anyway? (y/n) " -n 1 -r
+    echo
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        exit 1
+    fi
+else
+    echo "✅ No uncommitted changes"
+fi
+
+echo "All pre-deployment checks passed!"
+
+

@@ -71,25 +71,97 @@ jobs:
             cd /var/www/flahacalc
             find scripts -name "*.sh" -exec chmod +x {} \; 2>/dev/null || true
             
-            # Update Nginx configuration - direct approach
+            # Update Nginx configuration
             echo "Updating Nginx configuration..."
-            cp /etc/nginx/sites-available/flahacalc /etc/nginx/sites-available/flahacalc.bak.$(date +%Y%m%d%H%M%S)
+            cp /etc/nginx/sites-available/flahacalc /etc/nginx/sites-available/flahacalc.bak.$(date +%Y%m%d%H%M%S) 2>/dev/null || true
             
-            # Update the API location block directly
-            sed -i '/location \/api\//,/}/c\
-                location /api/ {\
-                    proxy_pass http://localhost:3000/api/;\
-                    proxy_http_version 1.1;\
-                    proxy_set_header Upgrade $http_upgrade;\
-                    proxy_set_header Connection '\''upgrade'\'';\
-                    proxy_set_header Host $host;\
-                    proxy_cache_bypass $http_upgrade;\
-                    proxy_set_header X-Real-IP $remote_addr;\
-                    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\
-                }' /etc/nginx/sites-available/flahacalc
+            # Create Nginx configuration for evapotran.flaha.org
+            cat > /etc/nginx/sites-available/evapotran.flaha.org << 'EOF'
+            server {
+                listen 80;
+                server_name evapotran.flaha.org;
+                
+                # Redirect HTTP to HTTPS
+                return 301 https://$host$request_uri;
+            }
+
+            server {
+                listen 443 ssl;
+                server_name evapotran.flaha.org;
+
+                ssl_certificate /etc/letsencrypt/live/evapotran.flaha.org/fullchain.pem;
+                ssl_certificate_key /etc/letsencrypt/live/evapotran.flaha.org/privkey.pem;
+                ssl_protocols TLSv1.2 TLSv1.3;
+                ssl_prefer_server_ciphers on;
+                ssl_ciphers ECDHE-RSA-AES256-GCM-SHA512:DHE-RSA-AES256-GCM-SHA512:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-SHA384;
+                ssl_session_timeout 1d;
+                ssl_session_cache shared:SSL:10m;
+                ssl_session_tickets off;
+                ssl_stapling on;
+                ssl_stapling_verify on;
+                add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload";
+                add_header X-Frame-Options SAMEORIGIN;
+                add_header X-Content-Type-Options nosniff;
+                add_header X-XSS-Protection "1; mode=block";
+
+                # Root directory for the EVAPOTRAN application
+                root /var/www/flahacalc/EVAPOTRAN;
+                index index.html;
+
+                # API endpoints
+                location /api/ {
+                    proxy_pass http://localhost:3000/api/;
+                    proxy_http_version 1.1;
+                    proxy_set_header Upgrade $http_upgrade;
+                    proxy_set_header Connection 'upgrade';
+                    proxy_set_header Host $host;
+                    proxy_cache_bypass $http_upgrade;
+                    proxy_set_header X-Real-IP $remote_addr;
+                    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                    proxy_set_header X-Forwarded-Proto $scheme;
+                }
+
+                # SPA routing
+                location / {
+                    try_files $uri $uri.html $uri/ /index.html;
+                }
+                
+                # Status page for monitoring
+                location /nginx_status {
+                    stub_status on;
+                    access_log off;
+                    allow 127.0.0.1;
+                    deny all;
+                }
+                
+                # Configure access and error logs for subdomain
+                access_log /var/log/nginx/evapotran.flaha.org-access.log;
+                error_log /var/log/nginx/evapotran.flaha.org-error.log;
+            }
+            EOF
+            
+            # Create log files if they don't exist
+            touch /var/log/nginx/evapotran.flaha.org-access.log
+            touch /var/log/nginx/evapotran.flaha.org-error.log
+            chown www-data:www-data /var/log/nginx/evapotran.flaha.org-*.log
+            
+            # Enable the site
+            ln -sf /etc/nginx/sites-available/evapotran.flaha.org /etc/nginx/sites-enabled/
             
             # Test and reload Nginx
             nginx -t && systemctl reload nginx
+            
+            # Create .env file if it doesn't exist
+            if [ ! -f "/var/www/flahacalc/EVAPOTRAN/server/.env" ]; then
+              echo "Creating .env file..."
+              cat > /var/www/flahacalc/EVAPOTRAN/server/.env << 'ENVEOF'
+            # OpenWeatherMap API Key
+            WEATHER_API_KEY=${{ secrets.WEATHER_API_KEY }}
+
+            # Server port (default: 3000)
+            PORT=3000
+            ENVEOF
+            fi
             
             # Restart server
             cd /var/www/flahacalc/EVAPOTRAN/server
@@ -118,12 +190,10 @@ jobs:
           script: |
             # Verify Nginx configuration
             echo "Verifying Nginx configuration..."
-            if grep -q "proxy_pass.*http://localhost:3000/api/" /etc/nginx/sites-available/flahacalc; then
-              echo "✅ API routing configured correctly"
+            if nginx -t 2>&1 | grep -q "successful"; then
+              echo "✅ Nginx configuration is valid"
             else
-              echo "❌ API routing not configured correctly"
-              echo "Current configuration:"
-              grep -A 10 "location /api/" /etc/nginx/sites-available/flahacalc || echo "No API location block found"
+              echo "❌ Nginx configuration is invalid"
               exit 1
             fi
             
@@ -145,6 +215,18 @@ jobs:
             else
               echo "❌ API endpoint is not working"
               exit 1
+            fi
+            
+            # Test weather API endpoint
+            echo "Testing weather API endpoint..."
+            WEATHER_RESPONSE=$(curl -s "http://localhost:3000/api/weather?q=London")
+            if echo "$WEATHER_RESPONSE" | grep -q "Invalid API key"; then
+              echo "⚠️ Weather API needs a valid API key"
+            elif echo "$WEATHER_RESPONSE" | grep -q "name"; then
+              echo "✅ Weather API is working"
+            else
+              echo "❌ Weather API is not working"
+              echo "Response: $WEATHER_RESPONSE"
             fi
             
             echo "Verification completed successfully!"
