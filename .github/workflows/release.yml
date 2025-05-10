@@ -18,15 +18,19 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '18'
+          cache: 'npm'
           
       - name: Install dependencies
         run: |
-          npm install
-          cd server
-          npm install
+          npm ci
+          cd EVAPOTRAN/server
+          npm ci
           
       - name: Build application
         run: npm run build
+        
+      - name: Run optimizations
+        run: npm run optimize
         
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
@@ -40,8 +44,8 @@ jobs:
       - name: Deploy to production
         uses: appleboy/ssh-action@master
         with:
-          host: 207.154.202.6
-          username: root
+          host: ${{ secrets.DROPLET_HOST || '207.154.202.6' }}
+          username: ${{ secrets.DROPLET_USERNAME || 'root' }}
           key: ${{ secrets.DROPLET_SSH_KEY }}
           port: 22
           script: |
@@ -51,19 +55,14 @@ jobs:
             git checkout $(git describe --tags $(git rev-list --tags --max-count=1))
             
             # Install dependencies
-            npm install
-            cd server
-            npm install
-            cd ..
+            npm ci
+            cd EVAPOTRAN/server
+            npm ci
+            cd ../..
             
-            # Build application
+            # Build and optimize
             npm run build
-            
-            # Deploy public files
-            rsync -avz --delete ./public/ /var/www/flahacalc/
-            
-            # Deploy server files
-            rsync -avz ./server/ /var/www/flahacalc/EVAPOTRAN/server/
+            npm run optimize
             
             # Make all scripts executable
             find scripts -name "*.sh" -exec chmod +x {} \;
@@ -81,6 +80,10 @@ jobs:
             cd /var/www/flahacalc
             bash scripts/deploy/update-links.sh
             
+            # Run post-deployment optimizations
+            bash scripts/server/optimize-server.sh
+            
             echo "Release $(git describe --tags) deployed successfully!"
+
 
 
