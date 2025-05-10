@@ -62,25 +62,40 @@ jobs:
             # Create application directory if it doesn't exist
             mkdir -p /var/www/flahacalc/public
             mkdir -p /var/www/flahacalc/EVAPOTRAN/server
-
+            
             # Install dependencies
             cd /var/www/flahacalc/EVAPOTRAN/server
             npm install dotenv express cors axios
-
+            
             # Make all scripts executable
             cd /var/www/flahacalc
             find scripts -name "*.sh" -exec chmod +x {} \; 2>/dev/null || true
-
-            # Update Nginx configuration
+            
+            # Update Nginx configuration - direct approach
+            echo "Updating Nginx configuration..."
             cp /etc/nginx/sites-available/flahacalc /etc/nginx/sites-available/flahacalc.bak.$(date +%Y%m%d%H%M%S)
-            cp scripts/server/nginx/flahacalc.conf /etc/nginx/sites-available/flahacalc
+            
+            # Update the API location block directly
+            sed -i '/location \/api\//,/}/c\
+                location /api/ {\
+                    proxy_pass http://localhost:3000/api/;\
+                    proxy_http_version 1.1;\
+                    proxy_set_header Upgrade $http_upgrade;\
+                    proxy_set_header Connection '\''upgrade'\'';\
+                    proxy_set_header Host $host;\
+                    proxy_cache_bypass $http_upgrade;\
+                    proxy_set_header X-Real-IP $remote_addr;\
+                    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\
+                }' /etc/nginx/sites-available/flahacalc
+            
+            # Test and reload Nginx
             nginx -t && systemctl reload nginx
-
+            
             # Restart server
             cd /var/www/flahacalc/EVAPOTRAN/server
             pm2 restart flahacalc-server || pm2 start server.js --name flahacalc-server
             pm2 save
-
+            
             echo "Deployment completed successfully!"
 
       - name: Deploy files via rsync
@@ -113,13 +128,15 @@ jobs:
           script: |
             # Verify Nginx configuration
             echo "Verifying Nginx configuration..."
-            if grep -q "proxy_pass http://localhost:3000/api/" /etc/nginx/sites-available/flahacalc; then
+            if grep -q "proxy_pass.*http://localhost:3000/api/" /etc/nginx/sites-available/flahacalc; then
               echo "✅ API routing configured correctly"
             else
               echo "❌ API routing not configured correctly"
+              echo "Current configuration:"
+              grep -A 10 "location /api/" /etc/nginx/sites-available/flahacalc || echo "No API location block found"
               exit 1
             fi
-
+            
             # Verify server is running
             echo "Verifying server is running..."
             if pm2 list | grep -q "flahacalc-server"; then
@@ -128,16 +145,18 @@ jobs:
               echo "❌ Server is not running"
               exit 1
             fi
-
+            
             # Test API endpoint
             echo "Testing API endpoint..."
-            if curl -s http://localhost:3000/api/test | grep -q "status"; then
+            RESPONSE=$(curl -s http://localhost:3000/api/test)
+            echo "API response: $RESPONSE"
+            if echo "$RESPONSE" | grep -q "status"; then
               echo "✅ API endpoint is working"
             else
               echo "❌ API endpoint is not working"
               exit 1
             fi
-
+            
             echo "Verification completed successfully!"
 
       - name: Notify on success
