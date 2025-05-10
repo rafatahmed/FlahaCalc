@@ -106,31 +106,34 @@ fi
 # Check SSL certificate
 echo ""
 echo "===== SSL Certificate Status ====="
-DOMAIN="flaha.org"
-if [ -f "/etc/letsencrypt/live/$DOMAIN/fullchain.pem" ]; then
-    EXPIRY_DATE=$(openssl x509 -enddate -noout -in "/etc/letsencrypt/live/$DOMAIN/fullchain.pem" | cut -d= -f2)
-    EXPIRY_EPOCH=$(date -d "$EXPIRY_DATE" +%s)
-    CURRENT_EPOCH=$(date +%s)
-    DAYS_LEFT=$(( ($EXPIRY_EPOCH - $CURRENT_EPOCH) / 86400 ))
-    echo "SSL certificate expires in $DAYS_LEFT days"
-    
-    if [ "$DAYS_LEFT" -lt 7 ]; then
-        log_issue "CRITICAL" "SSL certificate expires in $DAYS_LEFT days"
-    elif [ "$DAYS_LEFT" -lt 14 ]; then
-        log_issue "WARNING" "SSL certificate expires in $DAYS_LEFT days"
-    fi
-    
-    # Check SSL cipher strength
-    if openssl ciphers -v 'LOW:MEDIUM' &>/dev/null; then
-        WEAK_CIPHER=$(openssl ciphers -v 'LOW:MEDIUM' 2>/dev/null | wc -l)
-        if [ "$WEAK_CIPHER" -gt 0 ]; then
-            log_issue "WARNING" "Weak SSL ciphers are enabled"
-        fi
-    fi
-else
-    echo "SSL certificate not found"
-    log_issue "CRITICAL" "SSL certificate not found"
-fi
+DOMAINS=("flaha.org" "evapotran.flaha.org")
+for DOMAIN in "${DOMAINS[@]}"; do
+  echo "Checking SSL for $DOMAIN:"
+  if [ -f "/etc/letsencrypt/live/$DOMAIN/fullchain.pem" ]; then
+      EXPIRY_DATE=$(openssl x509 -enddate -noout -in "/etc/letsencrypt/live/$DOMAIN/fullchain.pem" | cut -d= -f2)
+      EXPIRY_EPOCH=$(date -d "$EXPIRY_DATE" +%s)
+      CURRENT_EPOCH=$(date +%s)
+      DAYS_LEFT=$(( ($EXPIRY_EPOCH - $CURRENT_EPOCH) / 86400 ))
+      echo "SSL certificate expires in $DAYS_LEFT days"
+      
+      if [ "$DAYS_LEFT" -lt 7 ]; then
+          log_issue "CRITICAL" "SSL certificate for $DOMAIN expires in $DAYS_LEFT days"
+      elif [ "$DAYS_LEFT" -lt 14 ]; then
+          log_issue "WARNING" "SSL certificate for $DOMAIN expires in $DAYS_LEFT days"
+      fi
+      
+      # Check SSL cipher strength
+      if openssl ciphers -v 'LOW:MEDIUM' &>/dev/null; then
+          WEAK_CIPHER=$(openssl ciphers -v 'LOW:MEDIUM' 2>/dev/null | wc -l)
+          if [ "$WEAK_CIPHER" -gt 0 ]; then
+              log_issue "WARNING" "Weak SSL ciphers are enabled for $DOMAIN"
+          fi
+      fi
+  else
+      echo "SSL certificate not found for $DOMAIN"
+      log_issue "CRITICAL" "SSL certificate not found for $DOMAIN"
+  fi
+done
 
 # Check API endpoints
 echo ""
@@ -140,6 +143,14 @@ API_RESPONSE=$(curl -s --connect-timeout 3 -m 5 http://localhost:3000/api/test)
 echo "$API_RESPONSE"
 if [[ "$API_RESPONSE" != *"status"*"ok"* ]]; then
     log_issue "CRITICAL" "API test endpoint is not working"
+fi
+
+# Test API through subdomain
+echo "Testing API test endpoint through subdomain:"
+SUBDOMAIN_API_RESPONSE=$(curl -s --connect-timeout 3 -m 5 https://evapotran.flaha.org/api/test)
+echo "$SUBDOMAIN_API_RESPONSE"
+if [[ "$SUBDOMAIN_API_RESPONSE" != *"status"*"ok"* ]]; then
+    log_issue "CRITICAL" "API test endpoint through subdomain is not working"
 fi
 
 echo ""
@@ -156,12 +167,35 @@ else
     log_issue "CRITICAL" "Weather API is not working"
 fi
 
+# Test weather API through subdomain
+echo "Testing weather API endpoint through subdomain:"
+SUBDOMAIN_WEATHER_RESPONSE=$(curl -s --connect-timeout 3 -m 5 https://evapotran.flaha.org/api/weather?q=London)
+if [[ "$SUBDOMAIN_WEATHER_RESPONSE" == *"Invalid API key"* ]]; then
+    echo "⚠️ Weather API through subdomain needs a valid API key"
+    log_issue "WARNING" "Weather API through subdomain needs a valid API key"
+elif [[ "$SUBDOMAIN_WEATHER_RESPONSE" == *"name"*"London"* ]]; then
+    echo "✅ Weather API through subdomain is working"
+else
+    echo "❌ Weather API through subdomain is not working"
+    echo "Response: $SUBDOMAIN_WEATHER_RESPONSE"
+    log_issue "CRITICAL" "Weather API through subdomain is not working"
+fi
+
 # Check API response time
 API_RESPONSE_TIME=$(curl -s --connect-timeout 3 -w "%{time_total}" -o /dev/null http://localhost:3000/api/test 2>/dev/null)
 if [ ! -z "$API_RESPONSE_TIME" ]; then
   echo "API response time: ${API_RESPONSE_TIME}s"
   if (( $(echo "$API_RESPONSE_TIME > 1.0" | bc -l 2>/dev/null) )); then
     log_issue "WARNING" "Slow API response time: ${API_RESPONSE_TIME}s"
+  fi
+fi
+
+# Check API response time through subdomain
+SUBDOMAIN_API_RESPONSE_TIME=$(curl -s --connect-timeout 3 -w "%{time_total}" -o /dev/null https://evapotran.flaha.org/api/test 2>/dev/null)
+if [ ! -z "$SUBDOMAIN_API_RESPONSE_TIME" ]; then
+  echo "API response time through subdomain: ${SUBDOMAIN_API_RESPONSE_TIME}s"
+  if (( $(echo "$SUBDOMAIN_API_RESPONSE_TIME > 1.0" | bc -l 2>/dev/null) )); then
+    log_issue "WARNING" "Slow API response time through subdomain: ${SUBDOMAIN_API_RESPONSE_TIME}s"
   fi
 fi
 
@@ -172,8 +206,11 @@ URLS=(
   "http://localhost/"
   "http://localhost/pa/"
   "http://localhost/pa/evapotran/"
-  "https://$DOMAIN/"
-  "https://$DOMAIN/pa/evapotran/"
+  "https://flaha.org/"
+  "https://flaha.org/pa/evapotran/"
+  "https://evapotran.flaha.org/"
+  "https://evapotran.flaha.org/calculator.html"
+  "https://evapotran.flaha.org/live-weather.html"
 )
 
 for url in "${URLS[@]}"; do
@@ -187,11 +224,31 @@ for url in "${URLS[@]}"; do
   fi
   
   # Check response time for important URLs
-  if [[ "$url" == *"$DOMAIN"* ]]; then
+  if [[ "$url" == *"flaha.org"* ]]; then
     RESP_TIME=$(curl -s --connect-timeout 3 -m 10 -w "%{time_total}" -o /dev/null "$url" 2>/dev/null)
     if [ ! -z "$RESP_TIME" ] && (( $(echo "$RESP_TIME > 2.0" | bc -l 2>/dev/null) )); then
       log_issue "WARNING" "Slow response time for $url: ${RESP_TIME}s"
     fi
+  fi
+done
+
+# Check JavaScript resources
+echo ""
+echo "===== JavaScript Resources ====="
+JS_FILES=(
+  "https://evapotran.flaha.org/js/script.js"
+  "https://evapotran.flaha.org/js/live-weather.js"
+  "https://evapotran.flaha.org/js/calculation-worker.js"
+)
+
+for js_url in "${JS_FILES[@]}"; do
+  echo "Testing $js_url..."
+  JS_HTTP_CODE=$(curl -s --connect-timeout 3 -m 10 -o /dev/null -w "%{http_code}" "$js_url" 2>/dev/null)
+  if [ "$JS_HTTP_CODE" = "200" ]; then
+    echo "✅ Status: $JS_HTTP_CODE (OK)"
+  else
+    echo "❌ Status: $JS_HTTP_CODE (Error)"
+    log_issue "CRITICAL" "JavaScript resource $js_url returned HTTP $JS_HTTP_CODE"
   fi
 done
 
@@ -228,6 +285,27 @@ else
     log_issue "CRITICAL" "Nginx configuration file is missing"
 fi
 
+# Check subdomain configuration
+if [ -f "/etc/nginx/sites-enabled/evapotran.flaha.org" ]; then
+    echo "✅ Subdomain Nginx configuration file exists"
+    if grep -q "server_name evapotran.flaha.org" "/etc/nginx/sites-enabled/evapotran.flaha.org"; then
+        echo "✅ Subdomain server_name is configured"
+    else
+        echo "❌ Subdomain server_name is missing"
+        log_issue "CRITICAL" "Subdomain server_name is missing in Nginx config"
+    fi
+    
+    if grep -q "location /api/" "/etc/nginx/sites-enabled/evapotran.flaha.org"; then
+        echo "✅ Subdomain API proxy is configured"
+    else
+        echo "❌ Subdomain API proxy is missing"
+        log_issue "CRITICAL" "Subdomain API proxy is missing in Nginx config"
+    fi
+else
+    echo "❌ Subdomain Nginx configuration file is missing"
+    log_issue "CRITICAL" "Subdomain Nginx configuration file is missing"
+fi
+
 # Check logs
 echo ""
 echo "===== Recent Nginx Access Logs ====="
@@ -236,6 +314,16 @@ if [ -f "/var/log/nginx/access.log" ]; then
 else
     echo "Access log file not found"
     log_issue "WARNING" "Nginx access log file not found"
+fi
+
+# Check subdomain access logs
+if [ -f "/var/log/nginx/evapotran.flaha.org-access.log" ]; then
+    echo ""
+    echo "===== Recent Subdomain Access Logs ====="
+    tail -n 20 /var/log/nginx/evapotran.flaha.org-access.log
+else
+    echo "Subdomain access log file not found"
+    log_issue "WARNING" "Subdomain access log file not found"
 fi
 
 echo ""
@@ -251,6 +339,22 @@ if [ -f "/var/log/nginx/error.log" ]; then
 else
     echo "Error log file not found"
     log_issue "WARNING" "Nginx error log file not found"
+fi
+
+# Check subdomain error logs
+if [ -f "/var/log/nginx/evapotran.flaha.org-error.log" ]; then
+    echo ""
+    echo "===== Recent Subdomain Error Logs ====="
+    tail -n 20 /var/log/nginx/evapotran.flaha.org-error.log
+    
+    # Count errors
+    SUBDOMAIN_ERROR_COUNT=$(grep -c "error" /var/log/nginx/evapotran.flaha.org-error.log)
+    if [ "$SUBDOMAIN_ERROR_COUNT" -gt 100 ]; then
+        log_issue "WARNING" "High number of subdomain Nginx errors: ${SUBDOMAIN_ERROR_COUNT}"
+    fi
+else
+    echo "Subdomain error log file not found"
+    log_issue "WARNING" "Subdomain error log file not found"
 fi
 
 echo ""
@@ -276,6 +380,20 @@ else
     echo "Access log file not found"
 fi
 
+# Check subdomain 404 errors
+if [ -f "/var/log/nginx/evapotran.flaha.org-access.log" ]; then
+    echo ""
+    echo "404 errors in the last 100 subdomain requests:"
+    SUBDOMAIN_HTTP_404_COUNT=$(grep -c "\" 404 " /var/log/nginx/evapotran.flaha.org-access.log)
+    grep "\" 404 " /var/log/nginx/evapotran.flaha.org-access.log | tail -n 10
+    
+    if [ "$SUBDOMAIN_HTTP_404_COUNT" -gt 20 ]; then
+        log_issue "WARNING" "High number of subdomain 404 errors: ${SUBDOMAIN_HTTP_404_COUNT}"
+    fi
+else
+    echo "Subdomain access log file not found"
+fi
+
 echo ""
 echo "500 errors in the last 100 requests:"
 if [ -f "/var/log/nginx/access.log" ]; then
@@ -289,6 +407,20 @@ else
     echo "Access log file not found"
 fi
 
+# Check subdomain 500 errors
+if [ -f "/var/log/nginx/evapotran.flaha.org-access.log" ]; then
+    echo ""
+    echo "500 errors in the last 100 subdomain requests:"
+    SUBDOMAIN_HTTP_500_COUNT=$(grep -c "\" 500 " /var/log/nginx/evapotran.flaha.org-access.log)
+    grep "\" 500 " /var/log/nginx/evapotran.flaha.org-access.log | tail -n 10
+    
+    if [ "$SUBDOMAIN_HTTP_500_COUNT" -gt 0 ]; then
+        log_issue "CRITICAL" "Found $SUBDOMAIN_HTTP_500_COUNT HTTP 500 errors in subdomain"
+    fi
+else
+    echo "Subdomain access log file not found"
+fi
+
 # Check for slow requests if custom log format is used
 if [ -f "/var/log/nginx/access.log" ]; then
     SLOW_REQUESTS=$(grep -c "request time: [1-9][0-9]*\.[0-9]*" /var/log/nginx/access.log 2>/dev/null || echo "0")
@@ -297,14 +429,33 @@ if [ -f "/var/log/nginx/access.log" ]; then
     fi
 fi
 
+# Check for slow subdomain requests
+if [ -f "/var/log/nginx/evapotran.flaha.org-access.log" ]; then
+    SUBDOMAIN_SLOW_REQUESTS=$(grep -c "request time: [1-9][0-9]*\.[0-9]*" /var/log/nginx/evapotran.flaha.org-access.log 2>/dev/null || echo "0")
+    if [ "$SUBDOMAIN_SLOW_REQUESTS" -gt 10 ]; then
+        log_issue "WARNING" "High number of slow subdomain requests: ${SUBDOMAIN_SLOW_REQUESTS}"
+    fi
+fi
+
 echo ""
 echo "===== Server Response Time ====="
-RESP_TIME=$(curl -s --connect-timeout 3 -m 10 -w "\nDNS: %{time_namelookup}s\nConnect: %{time_connect}s\nTTFB: %{time_starttransfer}s\nTotal: %{time_total}s\n" -o /dev/null https://$DOMAIN/ 2>/dev/null)
+RESP_TIME=$(curl -s --connect-timeout 3 -m 10 -w "\nDNS: %{time_namelookup}s\nConnect: %{time_connect}s\nTTFB: %{time_starttransfer}s\nTotal: %{time_total}s\n" -o /dev/null https://flaha.org/ 2>/dev/null)
 echo "$RESP_TIME"
 
 TOTAL_TIME=$(echo "$RESP_TIME" | grep "Total:" | awk '{print $2}' | sed 's/s//')
 if [ ! -z "$TOTAL_TIME" ] && (( $(echo "$TOTAL_TIME > 2.0" | bc -l 2>/dev/null) )); then
     log_issue "WARNING" "Slow server response time: ${TOTAL_TIME}s"
+fi
+
+# Check subdomain response time
+echo ""
+echo "===== Subdomain Response Time ====="
+SUBDOMAIN_RESP_TIME=$(curl -s --connect-timeout 3 -m 10 -w "\nDNS: %{time_namelookup}s\nConnect: %{time_connect}s\nTTFB: %{time_starttransfer}s\nTotal: %{time_total}s\n" -o /dev/null https://evapotran.flaha.org/ 2>/dev/null)
+echo "$SUBDOMAIN_RESP_TIME"
+
+SUBDOMAIN_TOTAL_TIME=$(echo "$SUBDOMAIN_RESP_TIME" | grep "Total:" | awk '{print $2}' | sed 's/s//')
+if [ ! -z "$SUBDOMAIN_TOTAL_TIME" ] && (( $(echo "$SUBDOMAIN_TOTAL_TIME > 2.0" | bc -l 2>/dev/null) )); then
+    log_issue "WARNING" "Slow subdomain response time: ${SUBDOMAIN_TOTAL_TIME}s"
 fi
 
 # Check for security issues
@@ -358,4 +509,5 @@ echo "Warning issues: $WARNING_COUNT"
 if [ "$CRITICAL_COUNT" -gt 0 ] || [ "$WARNING_COUNT" -gt 0 ]; then
     echo "Review the log file for details: $LOG_FILE"
 fi
+
 

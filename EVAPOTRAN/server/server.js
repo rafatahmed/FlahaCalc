@@ -71,12 +71,7 @@ app.get('/api/weather', async (req, res) => {
       return res.status(500).json({ error: 'API key not configured' });
     }
     
-    // Check if we have cached data
-    if (weatherCache.has(cacheKey)) {
-      console.log('Returning cached weather data');
-      return res.json(weatherCache.get(cacheKey));
-    }
-    
+    // Make the API request
     const response = await axios.get(
       `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`
     );
