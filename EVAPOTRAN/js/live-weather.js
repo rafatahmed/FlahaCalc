@@ -468,9 +468,7 @@ function useWeatherData() {
 async function fetchWeatherByCoordinates(lat, lon) {
 	try {
 		// Show loading indicator
-		if (loadingIndicator) {
-			loadingIndicator.style.display = "block";
-		}
+		toggleLoadingIndicator(true);
 
 		console.log(`Fetching weather data from: ${API_BASE_URL}/weather?lat=${lat}&lon=${lon}`);
 		
@@ -500,13 +498,25 @@ async function fetchWeatherByCoordinates(lat, lon) {
 		if (data.coord) {
 			fetchForecastByCoordinates(data.coord.lat, data.coord.lon);
 		}
+		
+		// Show results and use data button
+		if (weatherResults) {
+			weatherResults.style.display = "block";
+		}
+		
+		const outputSection = document.getElementById("output");
+		if (outputSection) {
+			outputSection.style.display = "block";
+		}
+		
+		// Set up the "Use This Data" button
+		setupUseWeatherDataButton();
+		
 	} catch (error) {
 		console.error("Error fetching weather data:", error);
 		
 		// Hide loading indicator
-		if (loadingIndicator) {
-			loadingIndicator.style.display = "none";
-		}
+		toggleLoadingIndicator(false);
 		
 		// Show error message
 		if (weatherResults) {
@@ -520,6 +530,29 @@ async function fetchWeatherByCoordinates(lat, lon) {
 				</div>
 			`;
 		}
+	} finally {
+		// Make sure loading indicator is hidden
+		toggleLoadingIndicator(false);
+	}
+}
+
+// Helper function to set up the "Use This Data" button
+function setupUseWeatherDataButton() {
+	const useDataBtn = document.getElementById("useWeatherDataBtn");
+	if (useDataBtn) {
+		console.log("Setting up Use Weather Data button");
+		
+		// Remove any existing event listeners by cloning the button
+		const newUseDataBtn = useDataBtn.cloneNode(true);
+		useDataBtn.parentNode.replaceChild(newUseDataBtn, useDataBtn);
+		
+		// Add the event listener to the new button
+		newUseDataBtn.addEventListener("click", function() {
+			console.log("Use Weather Data button clicked");
+			useWeatherData();
+		});
+	} else {
+		console.error("Use Weather Data button not found");
 	}
 }
 
@@ -533,9 +566,7 @@ async function fetchWeatherData() {
 	}
 	
 	// Show loading indicator
-	if (loadingIndicator) {
-		loadingIndicator.style.display = "block";
-	}
+	toggleLoadingIndicator(true);
 	
 	try {
 		// Fetch data from our proxy server
@@ -574,24 +605,15 @@ async function fetchWeatherData() {
 			outputSection.style.display = "block";
 		}
 		
-		// Add event listener to the "Use This Data" button
-		const useDataBtn = document.getElementById("useWeatherDataBtn");
-		if (useDataBtn) {
-			// Remove any existing event listeners
-			const newUseDataBtn = useDataBtn.cloneNode(true);
-			useDataBtn.parentNode.replaceChild(newUseDataBtn, useDataBtn);
-			
-			// Add the event listener to the new button
-			newUseDataBtn.addEventListener("click", useWeatherData);
-		}
+		// Set up the "Use This Data" button
+		setupUseWeatherDataButton();
+		
 	} catch (error) {
 		console.error("Error fetching weather data:", error);
 		alert(`Failed to fetch weather data: ${error.message}`);
 	} finally {
 		// Hide loading indicator
-		if (loadingIndicator) {
-			loadingIndicator.style.display = "none";
-		}
+		toggleLoadingIndicator(false);
 	}
 }
 
