@@ -692,9 +692,28 @@ function cacheWeatherData(key, data) {
 // Fetch forecast data by coordinates
 async function fetchForecastByCoordinates(lat, lon) {
   try {
+    // Make sure forecastContainer exists
     if (!forecastContainer) {
-      console.error('Forecast container element not found');
-      return;
+      console.log('Forecast container not found, creating it');
+      forecastContainer = document.createElement('div');
+      forecastContainer.id = 'forecastContainer';
+      forecastContainer.className = 'forecast-section';
+      forecastContainer.innerHTML = `
+        <h3>Weather Forecast</h3>
+        <div class="forecast-items"></div>
+      `;
+      
+      // Find a good place to insert it
+      const weatherResults = document.getElementById('weatherResults');
+      if (weatherResults && weatherResults.parentNode) {
+        weatherResults.parentNode.insertBefore(forecastContainer, weatherResults.nextSibling);
+      } else {
+        // If weatherResults doesn't exist, append to the main container
+        const container = document.querySelector('.container');
+        if (container) {
+          container.appendChild(forecastContainer);
+        }
+      }
     }
     
     console.log(`Fetching forecast data from: ${API_BASE_URL}/forecast?lat=${lat}&lon=${lon}`);
