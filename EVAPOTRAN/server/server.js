@@ -12,7 +12,10 @@ const PORT = process.env.PORT || 3000;
 console.log('Using node-cache for caching');
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: ['http://localhost:3000', 'https://flaha.org', 'https://www.flaha.org', 'https://evapotran.flaha.org'],
+  credentials: true
+}));
 app.use(express.json());
 
 // IMPORTANT: The API routes need to match what the client is expecting

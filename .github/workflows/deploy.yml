@@ -98,22 +98,12 @@ jobs:
             
             echo "Deployment completed successfully!"
 
-      - name: Deploy files via rsync
+      - name: Deploy EVAPOTRAN files via rsync
         uses: burnett01/rsync-deployments@5.2.1
         with:
           switches: -avz --delete
-          path: ./public/
-          remote_path: /var/www/flahacalc/public/
-          remote_host: 207.154.202.6
-          remote_user: root
-          remote_key: ${{ secrets.DROPLET_SSH_KEY }}
-
-      - name: Deploy server files via rsync
-        uses: burnett01/rsync-deployments@5.2.1
-        with:
-          switches: -avz
-          path: ./EVAPOTRAN/server/
-          remote_path: /var/www/flahacalc/EVAPOTRAN/server/
+          path: ./EVAPOTRAN/
+          remote_path: /var/www/flahacalc/EVAPOTRAN/
           remote_host: 207.154.202.6
           remote_user: root
           remote_key: ${{ secrets.DROPLET_SSH_KEY }}
