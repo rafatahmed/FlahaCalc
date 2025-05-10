@@ -719,97 +719,100 @@ function cacheWeatherData(key, data) {
 	console.log(`Cached weather data for ${key}`);
 }
 
-// Add new function to fetch forecast data
+// Fetch forecast data by coordinates
 async function fetchForecastByCoordinates(lat, lon) {
-	try {
-		// Fetch forecast data from our proxy server
-		const response = await fetch(
-			`${API_BASE_URL}/forecast?lat=${lat}&lon=${lon}`,
-			{
-				method: 'GET',
-				mode: 'cors',
-				headers: {
-					'Content-Type': 'application/json'
-				}
-			}
-		);
-
-		if (!response.ok) {
-			throw new Error(`Forecast API error: ${response.status}`);
-		}
-
-		const data = await response.json();
-		
-		// Display the forecast data
-		displayForecast(data);
-	} catch (error) {
-		console.error("Error fetching forecast data:", error);
-		// Don't show alert for forecast errors to avoid multiple alerts
-		
-		// Clear forecast container
-		if (forecastContainer) {
-			forecastContainer.innerHTML = `<p class="error-message">Forecast data unavailable: ${error.message}</p>`;
-		}
-	}
+  try {
+    if (!forecastContainer) {
+      console.error('Forecast container element not found');
+      return;
+    }
+    
+    console.log(`Fetching forecast data from: ${API_BASE_URL}/forecast?lat=${lat}&lon=${lon}`);
+    
+    const response = await fetch(
+      `${API_BASE_URL}/forecast?lat=${lat}&lon=${lon}`,
+      {
+        method: "GET",
+        mode: "cors",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        signal: AbortSignal.timeout(10000) // 10 second timeout
+      }
+    );
+    
+    if (!response.ok) {
+      throw new Error(`Forecast API error: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    displayForecast(data);
+  } catch (error) {
+    console.error('Error fetching forecast:', error);
+    // Don't show an alert for forecast errors, as it's not critical
+  }
 }
 
-// Add new function to display forecast data
+// Display forecast data
 function displayForecast(data) {
-	if (!forecastContainer || !data || !data.list) return;
-	
-	// Clear previous forecast
-	forecastContainer.innerHTML = '';
-	
-	// Group forecast by day
-	const dailyForecasts = {};
-	
-	// Process forecast data
-	data.list.forEach(item => {
-		const date = new Date(item.dt * 1000);
-		const day = date.toLocaleDateString();
-		
-		// Only keep one forecast per day (noon if possible)
-		if (!dailyForecasts[day] || Math.abs(date.getHours() - 12) < Math.abs(new Date(dailyForecasts[day].dt * 1000).getHours() - 12)) {
-			dailyForecasts[day] = item;
-		}
-	});
-	
-	// Create forecast items (limit to 5 days)
-	Object.values(dailyForecasts).slice(0, 5).forEach(forecast => {
-		const date = new Date(forecast.dt * 1000);
-		const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
-		const monthDay = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-		
-		const forecastItem = document.createElement('div');
-		forecastItem.className = 'forecast-item';
-		forecastItem.innerHTML = `
-			<div class="forecast-date">${dayName}, ${monthDay}</div>
-			<div class="forecast-icon">
-				${forecast.weather && forecast.weather[0] && forecast.weather[0].icon ? 
-				  `<img src="https://openweathermap.org/img/wn/${forecast.weather[0].icon}.png" alt="${forecast.weather[0].description}">` : 
-				  ''}
-			</div>
-			<div class="forecast-temp">${forecast.main.temp.toFixed(1)}°C</div>
-			<div class="forecast-description">${forecast.weather[0].description}</div>
-			<div class="forecast-detail">
-				<span>Humidity:</span>
-				<span>${forecast.main.humidity}%</span>
-			</div>
-			<div class="forecast-detail">
-				<span>Wind:</span>
-				<span>${forecast.wind.speed} m/s</span>
-			</div>
-		`;
-		
-		forecastContainer.appendChild(forecastItem);
-	});
-	
-	// Show the forecast container
-	forecastContainer.style.display = 'flex';
-	
-	// Show the forecast section
-	const forecastSection = document.getElementById('B3');
-	if (forecastSection) {
-		forecastSection.style.display = 'block';
-	}
+  if (!forecastContainer) {
+    console.error('Forecast container element not found');
+    return;
+  }
+  
+  if (!data || !data.list || data.list.length === 0) {
+    console.error('Invalid forecast data:', data);
+    return;
+  }
+  
+  try {
+    // Show forecast container
+    forecastContainer.style.display = 'block';
+    
+    // Get forecast items container
+    const forecastItems = forecastContainer.querySelector('.forecast-items');
+    if (!forecastItems) {
+      console.error('Forecast items container not found');
+      return;
+    }
+    
+    // Clear previous forecast
+    forecastItems.innerHTML = '';
+    
+    // Process forecast data - get one forecast per day
+    const dailyForecasts = {};
+    
+    // Group forecasts by day
+    data.list.forEach(item => {
+      const date = new Date(item.dt * 1000);
+      const day = date.toLocaleDateString();
+      
+      // Only keep the forecast for midday (closest to 12:00)
+      if (!dailyForecasts[day] || 
+          Math.abs(date.getHours() - 12) < Math.abs(new Date(dailyForecasts[day].dt * 1000).getHours() - 12)) {
+        dailyForecasts[day] = item;
+      }
+    });
+    
+    // Create forecast items (limit to 5 days)
+    Object.values(dailyForecasts).slice(0, 5).forEach(item => {
+      const date = new Date(item.dt * 1000);
+      const temp = item.main.temp;
+      const description = item.weather[0].description;
+      const icon = item.weather[0].icon;
+      
+      const forecastItem = document.createElement('div');
+      forecastItem.className = 'forecast-item';
+      forecastItem.innerHTML = `
+        <p><strong>${date.toLocaleDateString()}</strong></p>
+        <img src="https://openweathermap.org/img/wn/${icon}.png" alt="${description}">
+        <p>${temp.toFixed(1)}°C</p>
+        <p>${description}</p>
+      `;
+      
+      forecastItems.appendChild(forecastItem);
+    });
+  } catch (error) {
+    console.error('Error displaying forecast:', error);
+  }
 }

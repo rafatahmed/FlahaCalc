@@ -35,7 +35,7 @@ app.get('/api/weather', async (req, res) => {
     
     // Check if we have a cached response
     if (q) {
-      cacheKey = `weather_${q}`;
+      cacheKey = `weather_q_${q}`;
     } else if (lat && lon) {
       cacheKey = `weather_${lat}_${lon}`;
     } else {
