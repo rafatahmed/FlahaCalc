@@ -1,6 +1,6 @@
 {
   "name": "evapotran",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "Professional Evapotranspiration Calculator for Agricultural Applications",
   "main": "index.html",
   "scripts": {
@@ -33,7 +33,10 @@
     "server:status": "ssh root@207.154.202.6 'cd /var/www/flahacalc && pm2 status flahacalc-server'",
     "server:logs": "ssh root@207.154.202.6 'cd /var/www/flahacalc && pm2 logs flahacalc-server'",
     "server:restart": "ssh root@207.154.202.6 'cd /var/www/flahacalc/EVAPOTRAN/server && pm2 restart flahacalc-server'",
-    "server:fix": "ssh root@207.154.202.6 'cd /var/www/flahacalc && bash scripts/server/fix-all.sh'"
+    "server:fix": "ssh root@207.154.202.6 'cd /var/www/flahacalc && bash scripts/server/fix-all.sh'",
+    "release:notes": "bash scripts/release/generate-release-notes.sh",
+    "release:create": "bash scripts/release/create-release.sh",
+    "release:prepare": "bash scripts/dev/prepare-release-scripts.sh"
   },
   "devDependencies": {
     "webpack": "^5.75.0",
