@@ -1,10 +1,6 @@
-/**
- * Path Helper Script
- * Ensures all resource paths are correct regardless of deployment location
- */
-
-document.addEventListener('DOMContentLoaded', function() {
-    // Detect if we're in a development environment
+// Path helper script to fix URLs and paths
+(function() {
+    // Determine environment
     const isDev = window.location.hostname === 'localhost' || 
                  window.location.hostname === '127.0.0.1';
     
@@ -21,37 +17,48 @@ document.addEventListener('DOMContentLoaded', function() {
             basePath = '/pa';
         }
         
-        // Fix navigation links
+        // Fix navigation links - remove .html extension
         document.querySelectorAll('a').forEach(link => {
             const href = link.getAttribute('href');
             
             // Skip external links, absolute paths, and hash links
-            if (!href || href.startsWith('http') || href.startsWith('/') || href.startsWith('#')) {
+            if (!href || href.startsWith('http') || href.startsWith('#')) {
                 return;
             }
             
             // Fix relative links
-            link.setAttribute('href', `${basePath}/${href}`);
+            if (!href.startsWith('/')) {
+                // Remove .html extension for clean URLs
+                const cleanHref = href.replace('.html', '');
+                link.setAttribute('href', `${basePath}/${cleanHref}`);
+            } else {
+                // For absolute paths, just remove .html
+                const cleanHref = href.replace('.html', '');
+                link.setAttribute('href', cleanHref);
+            }
         });
         
-        // Fix image sources
+        // Fix resource paths (CSS, JS, images)
+        document.querySelectorAll('link[rel="stylesheet"]').forEach(link => {
+            const href = link.getAttribute('href');
+            if (href && !href.startsWith('http') && !href.startsWith('/')) {
+                link.setAttribute('href', `${basePath}/${href}`);
+            }
+        });
+        
+        document.querySelectorAll('script').forEach(script => {
+            const src = script.getAttribute('src');
+            if (src && !src.startsWith('http') && !src.startsWith('/')) {
+                script.setAttribute('src', `${basePath}/${src}`);
+            }
+        });
+        
         document.querySelectorAll('img').forEach(img => {
             const src = img.getAttribute('src');
-            
-            // Skip absolute paths
-            if (!src || src.startsWith('http') || src.startsWith('/')) {
-                return;
+            if (src && !src.startsWith('http') && !src.startsWith('/')) {
+                img.setAttribute('src', `${basePath}/${src}`);
             }
-            
-            // Fix relative image paths
-            img.setAttribute('src', `${basePath}/${src}`);
         });
     }
-    
-    // Log path information in development mode
-    if (isDev) {
-        console.log('Path Helper: Running in development mode with relative paths');
-    } else {
-        console.log('Path Helper: Running in production mode with absolute paths');
-    }
-});
+})();
+
