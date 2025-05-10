@@ -3,32 +3,36 @@
 # Exit on error
 set -e
 
-echo "Fixing server.js to use real OpenWeatherMap API..."
+echo "Fixing server.js file..."
 
-# Create a completely new server.js file
+# Create a backup of the original file
+cp /var/www/flahacalc/EVAPOTRAN/server/server.js /var/www/flahacalc/EVAPOTRAN/server/server.js.bak
+
+# Fix the duplicate cacheKey declaration
 cat > /var/www/flahacalc/EVAPOTRAN/server/server.js << 'EOF'
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
-const dotenv = require('dotenv');
-const path = require('path');
-
-// Load environment variables
-dotenv.config();
+const NodeCache = require('node-cache');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const WEATHER_API_KEY = process.env.WEATHER_API_KEY;
+
+// Initialize cache
+const cache = new NodeCache({ stdTTL: 600 }); // Cache for 10 minutes
+console.log("Using node-cache for caching");
 
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, '../')));
 
 // Test endpoint
 app.get('/api/test', (req, res) => {
   res.json({ 
     status: 'ok', 
-    message: 'Server is running correctly',
+    message: 'API is working correctly',
     timestamp: new Date().toISOString()
   });
 });
@@ -36,30 +40,94 @@ app.get('/api/test', (req, res) => {
 // Weather API endpoint
 app.get('/api/weather', async (req, res) => {
   try {
-    const location = req.query.q;
-    if (!location) {
-      return res.status(400).json({ error: 'Location parameter (q) is required' });
-    }
+    // Get query parameters
+    const { lat, lon, q } = req.query;
     
-    const apiKey = process.env.WEATHER_API_KEY;
-    if (!apiKey) {
-      return res.status(500).json({ error: 'Weather API key is not configured' });
-    }
-    
-    try {
-      const response = await axios.get(
-        `https://api.openweathermap.org/data/2.5/weather?q=${location}&appid=${apiKey}&units=metric`
-      );
-      res.json(response.data);
-    } catch (apiError) {
-      console.error('OpenWeatherMap API error:', apiError.message);
-      if (apiError.response && apiError.response.data) {
-        return res.status(apiError.response.status).json(apiError.response.data);
+    // Check if we have coordinates or city name
+    if (!lat || !lon) {
+      if (!q) {
+        return res.status(400).json({ error: 'Missing required parameters. Please provide lat and lon, or q (city name)' });
       }
-      res.status(500).json({ error: apiError.message });
+      
+      // City name query
+      const cacheKey = `weather_city_${q}`;
+      
+      // Check cache first
+      const cachedData = cache.get(cacheKey);
+      if (cachedData) {
+        console.log(`Returning cached data for city: ${q}`);
+        return res.json(cachedData);
+      }
+      
+      // Fetch from OpenWeatherMap API
+      console.log(`Fetching weather data for city: ${q}`);
+      const response = await axios.get(
+        `https://api.openweathermap.org/data/2.5/weather?q=${q}&appid=${WEATHER_API_KEY}&units=metric`
+      );
+      
+      // Cache the response
+      cache.set(cacheKey, response.data);
+      
+      return res.json(response.data);
     }
+    
+    // Coordinates query
+    const weatherCacheKey = `weather_${lat}_${lon}`;
+    
+    // Check cache first
+    const cachedWeatherData = cache.get(weatherCacheKey);
+    if (cachedWeatherData) {
+      console.log(`Returning cached weather data for coordinates: ${lat}, ${lon}`);
+      return res.json(cachedWeatherData);
+    }
+    
+    // Fetch from OpenWeatherMap API
+    console.log(`Fetching weather data from: https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=API_KEY_HIDDEN&units=metric`);
+    const weatherResponse = await axios.get(
+      `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${WEATHER_API_KEY}&units=metric`
+    );
+    
+    // Cache the response
+    cache.set(weatherCacheKey, weatherResponse.data);
+    
+    return res.json(weatherResponse.data);
   } catch (error) {
     console.error('Weather API error:', error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Forecast API endpoint
+app.get('/api/forecast', async (req, res) => {
+  try {
+    const { lat, lon } = req.query;
+    
+    if (!lat || !lon) {
+      return res.status(400).json({ error: 'Missing required parameters: lat, lon' });
+    }
+    
+    const forecastCacheKey = `forecast_${lat}_${lon}`;
+    
+    // Check cache first
+    const cachedForecastData = cache.get(forecastCacheKey);
+    if (cachedForecastData) {
+      console.log(`Returning cached forecast data for: ${lat}, ${lon}`);
+      return res.json(cachedForecastData);
+    }
+    
+    // Fetch from OpenWeatherMap API
+    console.log(`Fetching forecast data from: https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=API_KEY_HIDDEN&units=metric`);
+    const forecastResponse = await axios.get(
+      `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${WEATHER_API_KEY}&units=metric`
+    );
+    
+    // Cache the response
+    cache.set(forecastCacheKey, forecastResponse.data);
+    
+    console.log("Returning forecast data");
+    return res.json(forecastResponse.data);
+  } catch (error) {
+    console.error('Forecast API error:', error.message);
     res.status(500).json({ error: error.message });
   }
 });
@@ -71,14 +139,15 @@ app.listen(PORT, () => {
 });
 EOF
 
-# Make sure axios is installed
+# Make sure all dependencies are installed
 echo "Installing required dependencies..."
 cd /var/www/flahacalc/EVAPOTRAN/server
-npm install express cors axios dotenv --save
+npm install express cors axios dotenv node-cache --save
 
 # Restart the server
 echo "Restarting Node.js server..."
-pm2 restart flahacalc-server
+pm2 restart flahacalc-server || pm2 start server.js --name flahacalc-server
 pm2 save
 
 echo "Server.js has been fixed and restarted."
+

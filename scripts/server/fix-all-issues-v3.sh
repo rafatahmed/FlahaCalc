@@ -3,25 +3,15 @@
 # Exit on error
 set -e
 
-echo "Fixing SSL configuration..."
+echo "Fixing all remaining issues..."
 
-# Check if SSL certificates exist
-if [ ! -f "/etc/letsencrypt/live/flaha.org/fullchain.pem" ] || [ ! -f "/etc/letsencrypt/live/flaha.org/privkey.pem" ]; then
-    echo "SSL certificates not found. Obtaining new certificates..."
-    
-    # Install certbot if not already installed
-    if ! command -v certbot &> /dev/null; then
-        apt-get update
-        apt-get install -y certbot python3-certbot-nginx
-    fi
-    
-    # Obtain SSL certificate
-    certbot --nginx -d flaha.org -d www.flaha.org --non-interactive --agree-tos --email admin@flaha.org
-else
-    echo "SSL certificates already exist."
-fi
+# 1. Fix the Node.js server
+bash /var/www/flahacalc/scripts/server/fix-server-js.sh
 
-# Update Nginx configuration
+# 2. Fix image paths and create missing images in the correct locations
+bash /var/www/flahacalc/scripts/server/fix-images-v2.sh
+
+# 3. Fix Nginx configuration for status page
 cat > /etc/nginx/sites-available/flahacalc << 'EOF'
 server {
     listen 80;
@@ -107,17 +97,11 @@ server {
 }
 EOF
 
-# Create a symbolic link if it doesn't exist
-if [ ! -L "/etc/nginx/sites-enabled/flahacalc" ]; then
-    ln -sf /etc/nginx/sites-available/flahacalc /etc/nginx/sites-enabled/
-fi
-
-# Test Nginx configuration
-nginx -t
-
-# Restart Nginx
+# 4. Restart services
+echo "Restarting services..."
 systemctl restart nginx
+cd /var/www/flahacalc/EVAPOTRAN/server
+pm2 restart flahacalc-server || pm2 start server.js --name flahacalc-server
+pm2 save
 
-echo "SSL configuration fixed successfully!"
-
-
+echo "All issues fixed successfully!"
