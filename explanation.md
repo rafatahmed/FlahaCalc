@@ -1,6 +1,0 @@
-- **Built-in**: Already included in all modern browsers (Chrome, Firefox, Safari, Edge)
-- **Transactional**: Database operations happen in transactions, ensuring data integrity
-- **Asynchronous**: Operations don't block the main thread, keeping your UI responsive
-- **Large storage capacity**: Much larger than localStorage (typically 50MB+ vs 5MB)
-- **Structured storage**: Stores JavaScript objects, not just strings
-- **Indexed**: Allows efficient searching and sorting of data
