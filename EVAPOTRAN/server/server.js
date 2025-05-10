@@ -37,7 +37,7 @@ app.get('/api/weather', async (req, res) => {
     if (q) {
       cacheKey = `weather_q_${q}`;
     } else if (lat && lon) {
-      cacheKey = `weather_${lat}_${lon}`;
+      cacheKey = `weather_coord_${lat}_${lon}`;
     } else {
       return res.status(400).json({ error: 'Either city name (q) or coordinates (lat & lon) are required' });
     }

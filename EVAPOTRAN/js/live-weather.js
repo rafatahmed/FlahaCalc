@@ -480,58 +480,17 @@ async function fetchWeatherByCoordinates(lat, lon) {
 		);
 
 		if (!response.ok) {
-			let errorMessage = "Unknown error";
-			try {
-				const errorData = await response.json();
-				errorMessage = errorData.error || errorData.message || `Status code: ${response.status}`;
-			} catch (e) {
-				errorMessage = `Weather API error: ${response.status}`;
-			}
-			
-			// Show a more user-friendly error message
-			const weatherContainer = document.querySelector(".weather-container");
-			if (weatherContainer) {
-				const errorEl = document.createElement("div");
-				errorEl.className = "error-message";
-				errorEl.innerHTML = `
-					<p>⚠️ ${errorMessage}</p>
-					<p>Please try again later or enter data manually.</p>
-					<button id="show-manual-entry" class="btn btn-primary">Enter Data Manually</button>
-				`;
-				weatherContainer.appendChild(errorEl);
-				
-				// Add event listener for the manual entry button
-				document.getElementById("show-manual-entry").addEventListener("click", function() {
-					// Show the manual entry form
-					const manualEntry = document.getElementById("manual-entry");
-					if (manualEntry) {
-						manualEntry.style.display = "block";
-					}
-					// Hide the error message
-					errorEl.style.display = "none";
-				});
-			}
-			
-			throw new Error(errorMessage);
+			const errorData = await response.json();
+			throw new Error(errorData.error || `API error: ${response.status}`);
 		}
 
 		const data = await response.json();
-		console.log("Weather data received:", data);
-
-		// Process and display the weather data
 		processWeatherData(data);
 		
-		// Hide loading indicator
-		if (loadingIndicator) {
-			loadingIndicator.style.display = "none";
+		// Fetch forecast data if coordinates are available
+		if (data.coord) {
+			fetchForecastByCoordinates(data.coord.lat, data.coord.lon);
 		}
-		
-		// Show results and use data button
-		if (weatherResults) {
-			weatherResults.style.display = "block";
-		}
-		
-		return data;
 	} catch (error) {
 		console.error("Error fetching weather data:", error);
 		
@@ -540,7 +499,18 @@ async function fetchWeatherByCoordinates(lat, lon) {
 			loadingIndicator.style.display = "none";
 		}
 		
-		throw error;
+		// Show error message
+		if (weatherResults) {
+			weatherResults.style.display = "block";
+			weatherResults.innerHTML = `
+				<div class="error-message">
+					<h3>⚠️ Error fetching weather data</h3>
+					<p>${error.message}</p>
+					<p>If you're seeing "API key not configured", please contact the administrator.</p>
+					<p>You can still enter weather data manually on the <a href="calculator.html">calculator page</a>.</p>
+				</div>
+			`;
+		}
 	}
 }
 
