@@ -3,36 +3,13 @@ const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
 const path = require('path');
+const NodeCache = require('node-cache');
+const weatherCache = new NodeCache({ stdTTL: 600 }); // 10-minute cache
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Create a simple in-memory cache if node-cache is not available
-let weatherCache;
-try {
-  const NodeCache = require('node-cache');
-  weatherCache = new NodeCache({ stdTTL: 1800 });
-  console.log("Using node-cache for caching");
-} catch (error) {
-  console.warn("node-cache not available, using simple in-memory cache");
-  // Simple in-memory cache implementation
-  weatherCache = {
-    data: {},
-    has: function(key) {
-      return this.data.hasOwnProperty(key) && 
-             (this.data[key].expiry > Date.now());
-    },
-    get: function(key) {
-      return this.data[key].value;
-    },
-    set: function(key, value) {
-      this.data[key] = {
-        value: value,
-        expiry: Date.now() + (1800 * 1000) // 30 minutes TTL
-      };
-    }
-  };
-}
+console.log('Using node-cache for caching');
 
 // Middleware
 app.use(cors());
@@ -55,6 +32,15 @@ app.get('/api/weather', async (req, res) => {
   try {
     const { q, lat, lon } = req.query;
     
+    // Check if we have a cached response
+    const cacheKey = q ? `weather_${q}` : `weather_${lat}_${lon}`;
+    const cachedResponse = weatherCache.get(cacheKey);
+    
+    if (cachedResponse) {
+      console.log('Returning cached weather data');
+      return res.json(cachedResponse);
+    }
+    
     // Handle location-based query
     if (q) {
       const apiKey = process.env.WEATHER_API_KEY;
@@ -65,6 +51,9 @@ app.get('/api/weather', async (req, res) => {
       const response = await axios.get(
         `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(q)}&appid=${apiKey}&units=metric`
       );
+      
+      // Store response in cache before returning
+      weatherCache.set(cacheKey, response.data);
       
       return res.json(response.data);
     }
