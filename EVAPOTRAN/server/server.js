@@ -68,9 +68,6 @@ app.get('/api/weather', async (req, res) => {
       return res.status(500).json({ error: 'API key not configured' });
     }
     
-    // Create a cache key based on coordinates
-    const cacheKey = `weather_${lat}_${lon}`;
-    
     // Check if we have cached data
     if (weatherCache.has(cacheKey)) {
       console.log('Returning cached weather data');
